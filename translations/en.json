@@ -1,0 +1,16 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "A configuration already exists"
+    },
+    "step": {
+      "user": {
+        "title": "THL Covid stats",
+        "description": "Language selection",
+        "data": {
+          "language": "Language"
+        }
+      }
+    }
+  }
+}

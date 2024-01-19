@@ -1,0 +1,16 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Konfiguraatio on jo olemassa"
+    },
+    "step": {
+      "user": {
+        "title": "THL Covid tilastot",
+        "description": "Kielivalinta",
+        "data": {
+          "language": "Kieli"
+        }
+      }
+    }
+  }
+}
