@@ -62,7 +62,7 @@ class CovidSensor(CoordinatorEntity, SensorEntity):
             if previous_value is not None:
                 entry[ATTR_AMOUNT_TWO_WEEKS_AGO] = int(previous_value["value"])
                 entry[ATTR_CHANGE_IN_NUMBERS] = int(current_value["value"]) - int(previous_value["value"])
-                entry[ATTR_CHANGE_PERCENTAGE] = "{:.0f}".format((int(current_value["value"]) - int(previous_value["value"])) / int(previous_value[
+                entry[ATTR_CHANGE_PERCENTAGE] = 0 if int(previous_value["value"]) == 0 else "{:.0f}".format((int(current_value["value"]) - int(previous_value["value"])) / int(previous_value[
                     "value"]) * 100)
             data.append(entry)
 
