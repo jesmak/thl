@@ -5,8 +5,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import DOMAIN, CONF_LANGUAGE
-from .session import CovidSession
+from custom_components.thl_covid.const import DOMAIN, CONF_LANGUAGE
+from custom_components.thl_covid.session import CovidSession
 
 _LOGGER = logging.getLogger(__name__)
 
