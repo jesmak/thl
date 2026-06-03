@@ -38,6 +38,8 @@ class CovidSession:
                 data = json.loads(
                     response.text.lstrip().rstrip().removeprefix("thl.pivot.loadDimensions(").removesuffix(");"))
                 week_sid = self.get_week_id(data, year, week)
+                if week_sid is None:
+                    raise CovidException(f"No data available for year {year} week {week}")
                 area_sids = self.get_area_ids(data)
 
                 area_sid = next((key for key in area_sids.keys() if area_sids[key] == STR_ALL_AREAS[self._lang]), None)
@@ -59,29 +61,40 @@ class CovidSession:
         except RequestException as exception:
             raise CovidException(f"Communication error {exception}") from exception
 
-    def get_week_id(self, data: Any, year: int, week: int) -> str:
-        time_data = next((entry["children"] for entry in data if entry["id"] == "dateweek20200101"), None)
-        weeks = next((entry["children"] for entry in time_data if entry["label"] == STR_ALL_TIMES[self._lang]), None)
+    def get_week_id(self, data: Any, year: int, week: int) -> str | None:
+        time_data = next((entry["children"] for entry in data if entry["id"] == "yearweek"), None)
+        if time_data is None:
+            return None
+        all_weeks_node = next((entry for entry in time_data if entry["label"] == STR_ALL_TIMES[self._lang]), None)
+        if all_weeks_node is None:
+            return None
         time = STR_TIME[self._lang].replace("{week}", str(week).zfill(2)).replace("{year}", str(year))
-        result = next((entry for entry in weeks if entry["label"] == time), None)
-        return str(result["sid"]) if result is not None else None
+        for year_node in all_weeks_node["children"]:
+            result = next((entry for entry in year_node.get("children", []) if entry["label"] == time), None)
+            if result is not None:
+                return str(result["sid"])
+        return None
 
     def get_area_ids(self, data: Any) -> dict[str, str]:
-        area_data = next((entry["children"] for entry in data if entry["id"] == "hcdmunicipality2020"), None)
+        area_data = next((entry["children"] for entry in data if entry["id"] == "hva"), None)
+        if area_data is None:
+            raise CovidException("Could not find hva dimension in data")
         all_areas = next((entry for entry in area_data if entry["label"] == STR_ALL_AREAS[self._lang]), None)
+        if all_areas is None:
+            raise CovidException("Could not find all-areas entry in dimension data")
         result = {all_areas["sid"]: all_areas["label"]}
         for area in all_areas["children"]:
             result[area["sid"]] = area["label"]
         return result
 
     @staticmethod
-    def get_values(data: Any, week_sid: str, area_sids: {str, str}) -> list:
+    def get_values(data: Any, week_sid: str, area_sids: dict[str, str]) -> list:
         result = []
-        week_index = data["dataset"]["dimension"]["dateweek20200101"]["category"]["index"][str(week_sid)]
+        week_index = data["dataset"]["dimension"]["yearweek"]["category"]["index"][str(week_sid)]
         columns = data["dataset"]["dimension"]["size"][1]
         for area_key in area_sids.keys():
-            name = data["dataset"]["dimension"]["hcdmunicipality2020"]["category"]["label"][str(area_key)]
-            index = data["dataset"]["dimension"]["hcdmunicipality2020"]["category"]["index"][str(area_key)]
+            name = data["dataset"]["dimension"]["hva"]["category"]["label"][str(area_key)]
+            index = data["dataset"]["dimension"]["hva"]["category"]["index"][str(area_key)]
             value = data["dataset"]["value"][str((index * columns) + week_index)]
             result.append({"name": name, "value": value, "sid": area_key})
         return result

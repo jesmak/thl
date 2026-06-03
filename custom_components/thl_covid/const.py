@@ -1,37 +1,39 @@
 DOMAIN = "thl_covid"
-API_DIMENSIONS_URL = "https://sampo.thl.fi/pivot/prod/{lang}/epirapo/covid19case/fact_epirapo_covid19case.dimensions.json"
-API_DATA_URL = "https://sampo.thl.fi/pivot/prod/{lang}/epirapo/covid19case/fact_epirapo_covid19case.json?row=hcdmunicipality2020-{area_sid}&column=dateweek20200101-{week_sid}"
+API_DIMENSIONS_URL = "https://sampo.thl.fi/pivot/prod/{lang}/ttr/casesweek/fact_ttr_casesweek.dimensions.json"
+API_DATA_URL = "https://sampo.thl.fi/pivot/prod/{lang}/ttr/casesweek/fact_ttr_casesweek.json?row=hva-{area_sid}&column=yearweek-{week_sid}&filter=nidrreportgroup-877943"
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.5249.62 Safari/537.36"
 
 LANGUAGES = ["en", "fi"]
 
-STR_ALL_AREAS = {"fi": "Kaikki Alueet", "en": "All areas"}
-STR_ALL_TIMES = {"fi": "Kaikki ajat", "en": "All times"}
+STR_ALL_AREAS = {"fi": "Kaikki hyvinvointialueet", "en": "All areas"}
+STR_ALL_TIMES = {"fi": "Kaikki viikot", "en": "All times"}
 STR_TIME = {"fi": "Vuosi {year} Viikko {week}", "en": "Year {year} Week {week}"}
 
 CONF_LANGUAGE = "language"
 
 AREA_IDS = {
-    445131: "ahvenanmaa",
-    445197: "varsinais-suomen_shp",
-    445170: "satakunnan_shp",
-    445206: "kanta-hameen_shp",
-    445282: "pirkanmaan_shp",
-    445014: "paijat-hameen_shp",
-    445178: "kymenlaakson_shp",
-    445043: "etela-karjalan_shp",
-    445155: "etela-savon_shp",
-    445175: "ita-savon_shp",
-    445293: "pohjois-karjalan_shp",
-    445223: "pohjois-savon_shp",
-    445285: "keski-suomen_shp",
-    445225: "etela-pohjanmaan_shp",
-    445079: "vaasan_shp",
-    445230: "keski-pohjanmaan_shp",
-    444996: "pohjois-pohjanmaan_shp",
-    445101: "kainuun_shp",
-    445190: "lansi-pohjan_shp",
-    445224: "lapin_shp",
-    445193: "helsingin_ja_uudenmaan_shp",
-    445222: "finland"
+    841988: "finland",
+    837181: "ita-uudenmaan_hyvinvointialue",
+    837147: "keski-uudenmaan_hyvinvointialue",
+    839479: "lansi-uudenmaan_hyvinvointialue",
+    838611: "vantaan_ja_keravan_hyvinvointialue",
+    838879: "varsinais-suomen_hyvinvointialue",
+    838312: "satakunnan_hyvinvointialue",
+    840691: "kanta-hameen_hyvinvointialue",
+    838364: "pirkanmaan_hyvinvointialue",
+    836484: "paijat-hameen_hyvinvointialue",
+    838636: "kymenlaakson_hyvinvointialue",
+    837587: "etela-karjalan_hyvinvointialue",
+    838539: "etela-savon_hyvinvointialue",
+    841279: "pohjois-savon_hyvinvointialue",
+    836414: "pohjois-karjalan_hyvinvointialue",
+    836460: "keski-suomen_hyvinvointialue",
+    841691: "etela-pohjanmaan_hyvinvointialue",
+    836916: "pohjanmaan_hyvinvointialue",
+    838714: "keski-pohjanmaan_hyvinvointialue",
+    836191: "pohjois-pohjanmaan_hyvinvointialue",
+    840852: "kainuun_hyvinvointialue",
+    838893: "lapin_hyvinvointialue",
+    839511: "helsingin_kaupunki",
+    840333: "ahvenanmaa"
 }
