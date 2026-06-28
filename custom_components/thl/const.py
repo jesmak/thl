@@ -1,6 +1,6 @@
-DOMAIN = "thl_covid"
+DOMAIN = "thl"
 API_DIMENSIONS_URL = "https://sampo.thl.fi/pivot/prod/{lang}/ttr/casesweek/fact_ttr_casesweek.dimensions.json"
-API_DATA_URL = "https://sampo.thl.fi/pivot/prod/{lang}/ttr/casesweek/fact_ttr_casesweek.json?row=hva-{area_sid}&column=yearweek-{week_sid}&filter=nidrreportgroup-877943"
+API_DATA_URL = "https://sampo.thl.fi/pivot/prod/{lang}/ttr/casesweek/fact_ttr_casesweek.json?row=hva-{area_sid}&column=yearweek-{week_sid}&filter=nidrreportgroup-{disease_id}"
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.5249.62 Safari/537.36"
 
 LANGUAGES = ["en", "fi"]
@@ -10,6 +10,11 @@ STR_ALL_TIMES = {"fi": "Kaikki viikot", "en": "All times"}
 STR_TIME = {"fi": "Vuosi {year} Viikko {week}", "en": "Year {year} Week {week}"}
 
 CONF_LANGUAGE = "language"
+CONF_DISEASE_ID = "disease_id"
+CONF_DISEASE_NAME = "disease_name"
+
+ATTR_DISEASE_ID = "disease_id"
+ATTR_DISEASE_NAME = "disease_name"
 
 AREA_IDS = {
     841988: "finland",

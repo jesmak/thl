@@ -1,12 +1,27 @@
 {
   "config": {
     "abort": {
-      "already_configured": "A configuration already exists"
+      "already_configured": "A configuration for this disease already exists",
+      "cannot_connect": "Could not connect to THL API"
     },
     "step": {
       "user": {
-        "title": "THL Covid stats",
-        "description": "Language selection",
+        "title": "THL statistics",
+        "description": "Select the language for disease names and data",
+        "data": {
+          "language": "Language"
+        }
+      },
+      "disease": {
+        "title": "THL statistics",
+        "description": "Select the disease to track",
+        "data": {
+          "disease_id": "Disease"
+        }
+      },
+      "reconfigure": {
+        "title": "THL statistics - Reconfigure",
+        "description": "Change the language for disease names and data",
         "data": {
           "language": "Language"
         }

@@ -1,5 +1,5 @@
 {
-  "name": "THL Covid statistics",
+  "name": "THL disease statistics",
   "render_readme": true,
   "iot_class": "cloud_polling"
 }
