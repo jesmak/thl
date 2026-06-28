@@ -10,7 +10,11 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class ThlException(Exception):
-    """Base exception for FMI Waterlevel"""
+    """Base exception for the THL integration"""
+
+
+class ThlNoDataException(ThlException):
+    """Raised when THL has not published data for the requested week yet"""
 
 
 class ThlSession:
@@ -71,7 +75,7 @@ class ThlSession:
                     response.text.lstrip().rstrip().removeprefix("thl.pivot.loadDimensions(").removesuffix(");"))
                 week_sid = self.get_week_id(data, year, week)
                 if week_sid is None:
-                    raise ThlException(f"No data available for year {year} week {week}")
+                    raise ThlNoDataException(f"No data available for year {year} week {week}")
                 area_sids = self.get_area_ids(data)
 
                 area_sid = next((key for key in area_sids.keys() if area_sids[key] == STR_ALL_AREAS[self._lang]), None)
@@ -126,11 +130,25 @@ class ThlSession:
     @staticmethod
     def get_values(data: Any, week_sid: str, area_sids: dict[str, str]) -> list:
         result = []
+        values = data["dataset"]["value"]
         week_index = data["dataset"]["dimension"]["yearweek"]["category"]["index"][str(week_sid)]
         columns = data["dataset"]["dimension"]["size"][1]
         for area_key in area_sids.keys():
             name = data["dataset"]["dimension"]["hva"]["category"]["label"][str(area_key)]
             index = data["dataset"]["dimension"]["hva"]["category"]["index"][str(area_key)]
-            value = data["dataset"]["value"][str((index * columns) + week_index)]
+            value = ThlSession.get_value(values, (index * columns) + week_index)
             result.append({"name": name, "value": value, "sid": area_key})
         return result
+
+    @staticmethod
+    def get_value(values: Any, position: int) -> int:
+        # THL returns the JSON-stat "value" field as a sparse object, omitting
+        # cells that have no reported cases (and it can also be a plain array).
+        # Treat any missing or null cell as zero.
+        if isinstance(values, dict):
+            value = values.get(str(position))
+        elif 0 <= position < len(values):
+            value = values[position]
+        else:
+            value = None
+        return 0 if value is None else int(value)

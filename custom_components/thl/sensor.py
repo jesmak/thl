@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime, date
 
 from homeassistant.components.sensor import SensorStateClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
@@ -43,8 +42,8 @@ class ThlSensor(CoordinatorEntity, SensorEntity):
         self.disease_id = disease_id
         self.disease_name = disease_name
 
-        if len(coordinator.data) > 0:
-            _LOGGER.debug(f"Coordinator data sizes: current={len(coordinator.data[0])}, previous={len(coordinator.data[1])}")
+        if coordinator.data:
+            _LOGGER.debug(f"Coordinator data sizes: current={len(coordinator.data['current'])}, previous={len(coordinator.data['previous'])}")
         else:
             _LOGGER.debug("Coordinator data is empty")
 
@@ -59,10 +58,10 @@ class ThlSensor(CoordinatorEntity, SensorEntity):
     def update_attributes(self):
         data = []
 
-        for current_value in self.coordinator.data[0]:
+        for current_value in self.coordinator.data["current"]:
             entry = {ATTR_NAME: current_value["name"], ATTR_AMOUNT_LAST_WEEK: int(current_value["value"]), ATTR_AREA_ID: AREA_IDS[current_value["sid"]]}
             previous_value = next(
-                (entry for entry in self.coordinator.data[1] if entry["name"] == current_value["name"]), None)
+                (entry for entry in self.coordinator.data["previous"] if entry["name"] == current_value["name"]), None)
             if previous_value is not None:
                 entry[ATTR_AMOUNT_TWO_WEEKS_AGO] = int(previous_value["value"])
                 entry[ATTR_CHANGE_IN_NUMBERS] = int(current_value["value"]) - int(previous_value["value"])
@@ -70,16 +69,12 @@ class ThlSensor(CoordinatorEntity, SensorEntity):
                     "value"]) * 100)
             data.append(entry)
 
-        current_week = datetime.now().date().isocalendar().week
-        current_year = datetime.now().date().isocalendar().year
-        week = current_week - 1 if current_week > 1 else date(current_year - 1, 12, 28).isocalendar().week
-
-        self._attr_extra_state_attributes[ATTR_LAST_WEEK] = week
+        self._attr_extra_state_attributes[ATTR_LAST_WEEK] = self.coordinator.data["week"]
         self._attr_extra_state_attributes[ATTR_VALUES] = data
         self._attr_extra_state_attributes[ATTR_DISEASE_ID] = self.disease_id
         self._attr_extra_state_attributes[ATTR_DISEASE_NAME] = self.disease_name
 
     @property
     def native_value(self):
-        value = next((entry for entry in self.coordinator.data[0] if entry["name"] == STR_ALL_AREAS[self.lang]), None)
+        value = next((entry for entry in self.coordinator.data["current"] if entry["name"] == STR_ALL_AREAS[self.lang]), None)
         return int(value["value"]) if value is not None else None
