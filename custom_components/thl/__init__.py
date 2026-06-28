@@ -3,12 +3,26 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from custom_components.thl.const import DOMAIN, CONF_LANGUAGE, CONF_DISEASE_ID
-from custom_components.thl.session import ThlSession
+from custom_components.thl.session import ThlSession, ThlNoDataException
 
 _LOGGER = logging.getLogger(__name__)
+
+# How many weeks back to look for published data before giving up. THL publishes
+# weekly data with a lag, so the most recently completed week is often not
+# available yet right after a week change.
+MAX_WEEK_FALLBACK = 4
+
+
+def previous_iso_week(year: int, week: int) -> tuple[int, int]:
+    """Return the (year, week) immediately preceding the given ISO week."""
+    if week > 1:
+        return year, week - 1
+    # Dec 28 always falls in the last ISO week of its year (52 or 53).
+    last_week = date(year - 1, 12, 28).isocalendar().week
+    return year - 1, last_week
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -18,18 +32,32 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         api = ThlSession(entry.data[CONF_LANGUAGE])
         disease_id = entry.data[CONF_DISEASE_ID]
 
-        current_year = datetime.now().date().isocalendar().year
-        current_week = datetime.now().date().isocalendar().week
+        today = datetime.now().date().isocalendar()
+        # Start from the most recently completed week and step back until THL has
+        # published data, so a week change doesn't break the integration before
+        # the new week's data is available.
+        year, week = previous_iso_week(today.year, today.week)
 
-        week = current_week - 1 if current_week > 1 else date(current_year - 1, 12, 28).isocalendar().week
-        year = current_year if week > 1 else current_year - 1
-        data_this_week = await hass.async_add_executor_job(api.get_data, year, week, disease_id)
+        data_this_week = None
+        for _ in range(MAX_WEEK_FALLBACK):
+            try:
+                data_this_week = await hass.async_add_executor_job(api.get_data, year, week, disease_id)
+                break
+            except ThlNoDataException:
+                _LOGGER.warning(f"No THL data for year {year} week {week} yet, trying the previous week")
+                year, week = previous_iso_week(year, week)
 
-        previous_week = week - 1 if week > 1 else date(year - 1, 12, 28).isocalendar().week
-        previous_week_year = year if week > 1 else year - 1
-        data_previous_week = await hass.async_add_executor_job(api.get_data, previous_week_year, previous_week, disease_id)
+        if data_this_week is None:
+            raise UpdateFailed(f"No THL data available within the last {MAX_WEEK_FALLBACK} weeks")
 
-        return [data_this_week, data_previous_week]
+        previous_year, previous_week = previous_iso_week(year, week)
+        try:
+            data_previous_week = await hass.async_add_executor_job(api.get_data, previous_year, previous_week, disease_id)
+        except ThlNoDataException:
+            _LOGGER.warning(f"No THL data for year {previous_year} week {previous_week}, change figures unavailable")
+            data_previous_week = []
+
+        return {"year": year, "week": week, "current": data_this_week, "previous": data_previous_week}
 
     coord = DataUpdateCoordinator(
         hass,
