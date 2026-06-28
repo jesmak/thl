@@ -9,11 +9,11 @@ from .const import USER_AGENT, API_DIMENSIONS_URL, API_DATA_URL, STR_ALL_AREAS, 
 _LOGGER = logging.getLogger(__name__)
 
 
-class CovidException(Exception):
+class ThlException(Exception):
     """Base exception for FMI Waterlevel"""
 
 
-class CovidSession:
+class ThlSession:
     _timeout: int
     _language: str
 
@@ -21,9 +21,41 @@ class CovidSession:
         self._timeout = timeout
         self._lang = lang
 
-    def get_data(self, year: int, week: int) -> list:
+    def get_diseases(self) -> dict[str, str]:
         try:
-            print(API_DIMENSIONS_URL.replace("{lang}", self._lang))
+            response = requests.get(
+                url=API_DIMENSIONS_URL.replace("{lang}", self._lang),
+                headers={"User-Agent": USER_AGENT},
+                timeout=self._timeout,
+            )
+
+            if response.status_code != 200:
+                raise ThlException(f"{response.status_code} is not valid")
+
+            data = json.loads(
+                response.text.lstrip().rstrip().removeprefix("thl.pivot.loadDimensions(").removesuffix(");"))
+
+            disease_dim = next((entry for entry in data if entry["id"] == "nidrreportgroup"), None)
+            if disease_dim is None:
+                raise ThlException("Could not find nidrreportgroup dimension in data")
+
+            result = {}
+            for entry in disease_dim.get("children", []):
+                if "children" in entry:
+                    for child in entry["children"]:
+                        result[str(child["sid"])] = child["label"]
+                else:
+                    result[str(entry["sid"])] = entry["label"]
+
+            return dict(sorted(result.items(), key=lambda x: x[1]))
+
+        except ConnectTimeout as exception:
+            raise ThlException("Timeout error") from exception
+        except RequestException as exception:
+            raise ThlException(f"Communication error {exception}") from exception
+
+    def get_data(self, year: int, week: int, disease_id: str) -> list:
+        try:
             response = requests.get(
                 url=API_DIMENSIONS_URL.replace("{lang}", self._lang),
                 headers={
@@ -33,17 +65,21 @@ class CovidSession:
             )
 
             if response.status_code != 200:
-                raise CovidException(f"{response.status_code} is not valid")
+                raise ThlException(f"{response.status_code} is not valid")
             else:
                 data = json.loads(
                     response.text.lstrip().rstrip().removeprefix("thl.pivot.loadDimensions(").removesuffix(");"))
                 week_sid = self.get_week_id(data, year, week)
                 if week_sid is None:
-                    raise CovidException(f"No data available for year {year} week {week}")
+                    raise ThlException(f"No data available for year {year} week {week}")
                 area_sids = self.get_area_ids(data)
 
                 area_sid = next((key for key in area_sids.keys() if area_sids[key] == STR_ALL_AREAS[self._lang]), None)
-                url = API_DATA_URL.replace("{week_sid}", week_sid).replace("{area_sid}", str(area_sid)).replace("{lang}", self._lang)
+                url = (API_DATA_URL
+                       .replace("{week_sid}", week_sid)
+                       .replace("{area_sid}", str(area_sid))
+                       .replace("{lang}", self._lang)
+                       .replace("{disease_id}", disease_id))
 
                 response = requests.get(
                     url=url,
@@ -56,10 +92,10 @@ class CovidSession:
                 return self.get_values(response.json(), week_sid, area_sids)
 
         except ConnectTimeout as exception:
-            raise CovidException("Timeout error") from exception
+            raise ThlException("Timeout error") from exception
 
         except RequestException as exception:
-            raise CovidException(f"Communication error {exception}") from exception
+            raise ThlException(f"Communication error {exception}") from exception
 
     def get_week_id(self, data: Any, year: int, week: int) -> str | None:
         time_data = next((entry["children"] for entry in data if entry["id"] == "yearweek"), None)
@@ -78,10 +114,10 @@ class CovidSession:
     def get_area_ids(self, data: Any) -> dict[str, str]:
         area_data = next((entry["children"] for entry in data if entry["id"] == "hva"), None)
         if area_data is None:
-            raise CovidException("Could not find hva dimension in data")
+            raise ThlException("Could not find hva dimension in data")
         all_areas = next((entry for entry in area_data if entry["label"] == STR_ALL_AREAS[self._lang]), None)
         if all_areas is None:
-            raise CovidException("Could not find all-areas entry in dimension data")
+            raise ThlException("Could not find all-areas entry in dimension data")
         result = {all_areas["sid"]: all_areas["label"]}
         for area in all_areas["children"]:
             result[area["sid"]] = area["label"]

@@ -1,12 +1,27 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Konfiguraatio on jo olemassa"
+      "already_configured": "Tämän taudin konfiguraatio on jo olemassa",
+      "cannot_connect": "THL:n rajapintaan ei saatu yhteyttä"
     },
     "step": {
       "user": {
-        "title": "THL Covid tilastot",
-        "description": "Kielivalinta",
+        "title": "THL-tilastot",
+        "description": "Valitse kieli tautien nimille ja tiedoille",
+        "data": {
+          "language": "Kieli"
+        }
+      },
+      "disease": {
+        "title": "THL tilastot",
+        "description": "Valitse seurattava tauti",
+        "data": {
+          "disease_id": "Tauti"
+        }
+      },
+      "reconfigure": {
+        "title": "THL tilastot - Uudelleenmäärittely",
+        "description": "Vaihda kieli tautien nimille ja tiedoille",
         "data": {
           "language": "Kieli"
         }

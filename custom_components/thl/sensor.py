@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, CoordinatorEntity
 
-from .const import DOMAIN, STR_ALL_AREAS, CONF_LANGUAGE, AREA_IDS
+from .const import DOMAIN, STR_ALL_AREAS, CONF_LANGUAGE, CONF_DISEASE_ID, CONF_DISEASE_NAME, AREA_IDS, ATTR_DISEASE_ID, ATTR_DISEASE_NAME
 
 _LOGGER = logging.getLogger(__name__)
 ATTRIBUTION = "Data provided by Finnish Institute for Health and Welfare (THL)"
@@ -25,19 +25,23 @@ ATTR_AREA_ID = "area_id"
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     coord = hass.data[DOMAIN][entry.entry_id]
     lang = entry.data.get(CONF_LANGUAGE)
-    sensor = CovidSensor(coord, lang)
+    disease_id = entry.data.get(CONF_DISEASE_ID)
+    disease_name = entry.data.get(CONF_DISEASE_NAME)
+    sensor = ThlSensor(coord, lang, disease_id, disease_name)
     async_add_entities([sensor], update_before_add=True)
 
 
-class CovidSensor(CoordinatorEntity, SensorEntity):
-    def __init__(self, coordinator: DataUpdateCoordinator, lang: str):
+class ThlSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: DataUpdateCoordinator, lang: str, disease_id: str, disease_name: str):
         super().__init__(coordinator)
         self._attr_attribution = ATTRIBUTION
         self._attr_icon = "mdi:virus"
         self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_name = "THL Covid stats"
-        self._attr_unique_id = "thl_covid"
+        self._attr_name = f"THL {disease_name}"
+        self._attr_unique_id = f"thl_{disease_id}"
         self.lang = lang
+        self.disease_id = disease_id
+        self.disease_name = disease_name
 
         if len(coordinator.data) > 0:
             _LOGGER.debug(f"Coordinator data sizes: current={len(coordinator.data[0])}, previous={len(coordinator.data[1])}")
@@ -72,6 +76,8 @@ class CovidSensor(CoordinatorEntity, SensorEntity):
 
         self._attr_extra_state_attributes[ATTR_LAST_WEEK] = week
         self._attr_extra_state_attributes[ATTR_VALUES] = data
+        self._attr_extra_state_attributes[ATTR_DISEASE_ID] = self.disease_id
+        self._attr_extra_state_attributes[ATTR_DISEASE_NAME] = self.disease_name
 
     @property
     def native_value(self):
