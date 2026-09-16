@@ -1,30 +1,73 @@
 {
   "config": {
-    "abort": {
-      "already_configured": "Tämän taudin konfiguraatio on jo olemassa",
-      "cannot_connect": "THL:n rajapintaan ei saatu yhteyttä"
-    },
     "step": {
       "user": {
-        "title": "THL-tilastot",
-        "description": "Valitse kieli tautien nimille ja tiedoille",
+        "title": "THL-tautitilastot",
+        "description": "Tartuntatautien viikoittaiset tapausmäärät THL:n avoimesta datasta.",
         "data": {
           "language": "Kieli"
+        },
+        "data_description": {
+          "language": "Kieli, jolla tautien ja alueiden nimet sekä tiedot näytetään."
         }
       },
       "disease": {
-        "title": "THL tilastot",
-        "description": "Valitse seurattava tauti",
+        "title": "Ensimmäinen tauti",
+        "description": "Lisää tauteja voi lisätä myöhemmin.",
         "data": {
           "disease_id": "Tauti"
+        },
+        "data_description": {
+          "disease_id": "Taudille luodaan yksi sensori."
         }
       },
       "reconfigure": {
-        "title": "THL tilastot - Uudelleenmäärittely",
-        "description": "Vaihda kieli tautien nimille ja tiedoille",
+        "title": "THL-tautitilastot",
+        "description": "Tautien ja alueiden nimien kieli. Jokainen seurattava tauti nimetään uudelleen.",
         "data": {
           "language": "Kieli"
+        },
+        "data_description": {
+          "language": "Kieli, jolla tautien ja alueiden nimet sekä tiedot näytetään."
         }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "THL-tautitilastot on jo lisätty; lisää uudet taudit siihen.",
+      "cannot_connect": "THL:ään ei saatu yhteyttä. Yritä hetken kuluttua uudelleen.",
+      "reconfigure_successful": "Kieli tallennettu."
+    }
+  },
+  "config_subentries": {
+    "disease": {
+      "initiate_flow": {
+        "user": "Lisää tauti"
+      },
+      "entry_type": "Tauti",
+      "step": {
+        "user": {
+          "title": "Tauti",
+          "description": "Taudit, joista THL raportoi viikoittain. Jo seurattavat on jätetty pois.",
+          "data": {
+            "disease_id": "Tauti"
+          },
+          "data_description": {
+            "disease_id": "Taudille luodaan yksi sensori."
+          }
+        }
+      },
+      "abort": {
+        "already_configured": "Tämä tauti on jo lisätty.",
+        "all_configured": "Kaikki THL:n raportoimat taudit on jo lisätty.",
+        "cannot_connect": "THL:ään ei saatu yhteyttä. Yritä hetken kuluttua uudelleen."
+      }
+    }
+  },
+  "selector": {
+    "language": {
+      "options": {
+        "fi": "Suomi",
+        "en": "English"
       }
     }
   }

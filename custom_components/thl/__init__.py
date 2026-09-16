@@ -1,83 +1,67 @@
-from datetime import datetime, timedelta, date
-import logging
+"""THL disease statistics: the weekly case numbers of a disease, by wellbeing services county.
+
+One config entry holds the language, and every disease being followed is a
+config subentry with its own coordinator and sensor.
+"""
+
+from __future__ import annotations
+
+import asyncio
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.typing import ConfigType
 
-from custom_components.thl.const import DOMAIN, CONF_LANGUAGE, CONF_DISEASE_ID
-from custom_components.thl.session import ThlSession, ThlNoDataException
+from .api import DimensionsCache
+from .const import DOMAIN, SUBENTRY_DISEASE
+from .coordinator import ThlConfigEntry, ThlCoordinator, ThlRuntimeData
+from .migration import VERSION, async_migrate_to_subentries
 
-_LOGGER = logging.getLogger(__name__)
+PLATFORMS = [Platform.SENSOR]
 
-# How many weeks back to look for published data before giving up. THL publishes
-# weekly data with a lag, so the most recently completed week is often not
-# available yet right after a week change.
-MAX_WEEK_FALLBACK = 4
-
-
-def previous_iso_week(year: int, week: int) -> tuple[int, int]:
-    """Return the (year, week) immediately preceding the given ISO week."""
-    if week > 1:
-        return year, week - 1
-    # Dec 28 always falls in the last ISO week of its year (52 or 53).
-    last_week = date(year - 1, 12, 28).isocalendar().week
-    return year - 1, last_week
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    hass.data.setdefault(DOMAIN, {})
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    # Runs before any entry is set up, so the old one-entry-per-disease entries
+    # are merged before Home Assistant would try to set them up one by one.
+    await async_migrate_to_subentries(hass)
+    return True
 
-    async def async_update_data():
-        api = ThlSession(entry.data[CONF_LANGUAGE])
-        disease_id = entry.data[CONF_DISEASE_ID]
 
-        today = datetime.now().date().isocalendar()
-        # Start from the most recently completed week and step back until THL has
-        # published data, so a week change doesn't break the integration before
-        # the new week's data is available.
-        year, week = previous_iso_week(today.year, today.week)
+async def async_setup_entry(hass: HomeAssistant, entry: ThlConfigEntry) -> bool:
+    # Every disease shares one copy of THL's dimensions file.
+    cache = DimensionsCache()
+    coordinators = {
+        subentry.subentry_id: ThlCoordinator(hass, entry, subentry, cache)
+        for subentry in entry.subentries.values()
+        if subentry.subentry_type == SUBENTRY_DISEASE
+    }
+    entry.runtime_data = ThlRuntimeData(cache, coordinators)
 
-        data_this_week = None
-        for _ in range(MAX_WEEK_FALLBACK):
-            try:
-                data_this_week = await hass.async_add_executor_job(api.get_data, year, week, disease_id)
-                break
-            except ThlNoDataException:
-                _LOGGER.warning(f"No THL data for year {year} week {week} yet, trying the previous week")
-                year, week = previous_iso_week(year, week)
+    # A disease that cannot be read becomes unavailable and keeps retrying; it
+    # does not stop the others from being set up.
+    await asyncio.gather(*(coordinator.async_refresh() for coordinator in coordinators.values()))
 
-        if data_this_week is None:
-            raise UpdateFailed(f"No THL data available within the last {MAX_WEEK_FALLBACK} weeks")
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-        previous_year, previous_week = previous_iso_week(year, week)
-        try:
-            data_previous_week = await hass.async_add_executor_job(api.get_data, previous_year, previous_week, disease_id)
-        except ThlNoDataException:
-            _LOGGER.warning(f"No THL data for year {previous_year} week {previous_week}, change figures unavailable")
-            data_previous_week = []
-
-        return {"year": year, "week": week, "current": data_this_week, "previous": data_previous_week}
-
-    coord = DataUpdateCoordinator(
-        hass,
-        _LOGGER,
-        name=entry.unique_id or DOMAIN,
-        update_method=async_update_data,
-        update_interval=timedelta(minutes=30),
-    )
-
-    await coord.async_config_entry_first_refresh()
-
-    hass.data[DOMAIN][entry.entry_id] = coord
-
-    await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
+    # Adding or removing a disease, or changing the language, reloads everything.
+    entry.async_on_unload(entry.add_update_listener(async_update_listener))
 
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    if unload_ok := await hass.config_entries.async_forward_entry_unload(entry, "sensor"):
-        hass.data[DOMAIN].pop(entry.entry_id)
+async def async_update_listener(hass: HomeAssistant, entry: ThlConfigEntry) -> None:
+    await hass.config_entries.async_reload(entry.entry_id)
 
-    return unload_ok
+
+async def async_unload_entry(hass: HomeAssistant, entry: ThlConfigEntry) -> bool:
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+
+async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    # Entries from before 2.0 are merged into one in async_setup, which runs first.
+    # A newer version than this means Home Assistant was downgraded.
+    return entry.version <= VERSION
