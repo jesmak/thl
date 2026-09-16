@@ -1,5 +1,18 @@
 # THL disease statistics for Home Assistant
 
+Home Assistant integration for the weekly infectious disease numbers published by the Finnish Institute for Health and
+Welfare (THL).
+
+[![GitHub Release][releases-shield]][releases]
+[![License][license-shield]](LICENSE)
+[![GitHub Activity][commits-shield]][commits]
+
+## Support
+
+Hey dude! Help me out for a couple of :beers: or a :coffee:!
+
+[![coffee](https://www.buymeacoffee.com/assets/img/custom_images/black_img.png)](https://www.buymeacoffee.com/jesmak)
+
 ## What is it?
 
 A custom component that follows the weekly case numbers of infectious diseases from the open data of the Finnish
@@ -97,3 +110,9 @@ python3.14 -m venv .venv
 | `coordinator.py`               | Fetching the newest published week every half hour   |
 | `sensor.py`                    | The sensor                                           |
 | `translations/<language>.json` | Home Assistant UI texts                              |
+
+[commits-shield]: https://img.shields.io/github/commit-activity/y/jesmak/thl.svg?style=for-the-badge
+[commits]: https://github.com/jesmak/thl/commits/main
+[license-shield]: https://img.shields.io/github/license/jesmak/thl.svg?style=for-the-badge
+[releases-shield]: https://img.shields.io/github/release/jesmak/thl.svg?style=for-the-badge
+[releases]: https://github.com/jesmak/thl/releases
