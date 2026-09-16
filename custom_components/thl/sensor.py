@@ -1,80 +1,67 @@
-import logging
+"""The sensor of a disease: last week's cases in the whole country, with the areas in its attributes."""
 
-from homeassistant.components.sensor import SensorStateClass, SensorEntity
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, CoordinatorEntity
+from __future__ import annotations
 
-from .const import DOMAIN, STR_ALL_AREAS, CONF_LANGUAGE, CONF_DISEASE_ID, CONF_DISEASE_NAME, AREA_IDS, ATTR_DISEASE_ID, ATTR_DISEASE_NAME
+from typing import Any
 
-_LOGGER = logging.getLogger(__name__)
-ATTRIBUTION = "Data provided by Finnish Institute for Health and Welfare (THL)"
+from homeassistant.components.sensor import SensorEntity, SensorStateClass
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-ATTR_VALUES = "values"
-ATTR_NAME = "name"
-ATTR_AMOUNT_LAST_WEEK = "amount_last_week"
-ATTR_AMOUNT_TWO_WEEKS_AGO = "amount_two_weeks_ago"
-ATTR_CHANGE_IN_NUMBERS = "change_in_numbers"
-ATTR_CHANGE_PERCENTAGE = "change_percentage"
-ATTR_LAST_WEEK = "last_week"
-ATTR_AREA_ID = "area_id"
-
-
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
-    coord = hass.data[DOMAIN][entry.entry_id]
-    lang = entry.data.get(CONF_LANGUAGE)
-    disease_id = entry.data.get(CONF_DISEASE_ID)
-    disease_name = entry.data.get(CONF_DISEASE_NAME)
-    sensor = ThlSensor(coord, lang, disease_id, disease_name)
-    async_add_entities([sensor], update_before_add=True)
+from .const import (
+    ATTR_DISEASE_ID,
+    ATTR_DISEASE_NAME,
+    ATTR_LAST_WEEK,
+    ATTR_VALUES,
+    ATTRIBUTION,
+    DOMAIN,
+)
+from .coordinator import ThlConfigEntry, ThlCoordinator
 
 
-class ThlSensor(CoordinatorEntity, SensorEntity):
-    def __init__(self, coordinator: DataUpdateCoordinator, lang: str, disease_id: str, disease_name: str):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: ThlConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
+) -> None:
+    for subentry_id, coordinator in entry.runtime_data.coordinators.items():
+        async_add_entities([ThlSensor(coordinator)], config_subentry_id=subentry_id)
+
+
+class ThlSensor(CoordinatorEntity[ThlCoordinator], SensorEntity):
+    """Last week's cases of one disease in the whole country."""
+
+    # The areas change once a week and would fill the database; the state is history enough.
+    _unrecorded_attributes = frozenset({ATTR_VALUES})
+    _attr_attribution = ATTRIBUTION
+    _attr_has_entity_name = True
+    _attr_name = None
+    _attr_icon = "mdi:virus"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(self, coordinator: ThlCoordinator) -> None:
         super().__init__(coordinator)
-        self._attr_attribution = ATTRIBUTION
-        self._attr_icon = "mdi:virus"
-        self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_name = f"THL {disease_name}"
-        self._attr_unique_id = f"thl_{disease_id}"
-        self.lang = lang
-        self.disease_id = disease_id
-        self.disease_name = disease_name
-
-        if coordinator.data:
-            _LOGGER.debug(f"Coordinator data sizes: current={len(coordinator.data['current'])}, previous={len(coordinator.data['previous'])}")
-        else:
-            _LOGGER.debug("Coordinator data is empty")
-
-        self._attr_extra_state_attributes = {}
-        self.update_attributes()
-
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        self.update_attributes()
-        self.async_write_ha_state()
-
-    def update_attributes(self):
-        data = []
-
-        for current_value in self.coordinator.data["current"]:
-            entry = {ATTR_NAME: current_value["name"], ATTR_AMOUNT_LAST_WEEK: int(current_value["value"]), ATTR_AREA_ID: AREA_IDS[current_value["sid"]]}
-            previous_value = next(
-                (entry for entry in self.coordinator.data["previous"] if entry["name"] == current_value["name"]), None)
-            if previous_value is not None:
-                entry[ATTR_AMOUNT_TWO_WEEKS_AGO] = int(previous_value["value"])
-                entry[ATTR_CHANGE_IN_NUMBERS] = int(current_value["value"]) - int(previous_value["value"])
-                entry[ATTR_CHANGE_PERCENTAGE] = 0 if int(previous_value["value"]) == 0 else "{:.0f}".format((int(current_value["value"]) - int(previous_value["value"])) / int(previous_value[
-                    "value"]) * 100)
-            data.append(entry)
-
-        self._attr_extra_state_attributes[ATTR_LAST_WEEK] = self.coordinator.data["week"]
-        self._attr_extra_state_attributes[ATTR_VALUES] = data
-        self._attr_extra_state_attributes[ATTR_DISEASE_ID] = self.disease_id
-        self._attr_extra_state_attributes[ATTR_DISEASE_NAME] = self.disease_name
+        # The same unique id as in earlier versions, so the entity keeps its id and history.
+        self._attr_unique_id = f"thl_{coordinator.disease_id}"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, coordinator.subentry.subentry_id)},
+            name=coordinator.subentry.title,
+            manufacturer="THL",
+            entry_type=DeviceEntryType.SERVICE,
+        )
 
     @property
-    def native_value(self):
-        value = next((entry for entry in self.coordinator.data["current"] if entry["name"] == STR_ALL_AREAS[self.lang]), None)
-        return int(value["value"]) if value is not None else None
+    def native_value(self) -> int | None:
+        return self.coordinator.data.cases if self.coordinator.data else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        data = self.coordinator.data
+        return {
+            ATTR_LAST_WEEK: data.week if data else None,
+            ATTR_VALUES: data.values if data else [],
+            ATTR_DISEASE_ID: self.coordinator.disease_id,
+            ATTR_DISEASE_NAME: self.coordinator.disease_name,
+        }

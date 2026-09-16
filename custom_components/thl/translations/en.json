@@ -1,30 +1,73 @@
 {
   "config": {
-    "abort": {
-      "already_configured": "A configuration for this disease already exists",
-      "cannot_connect": "Could not connect to THL API"
-    },
     "step": {
       "user": {
-        "title": "THL statistics",
-        "description": "Select the language for disease names and data",
+        "title": "THL disease statistics",
+        "description": "Weekly case numbers of infectious diseases, from THL's open data.",
         "data": {
           "language": "Language"
+        },
+        "data_description": {
+          "language": "The language of the disease and area names, and of the data."
         }
       },
       "disease": {
-        "title": "THL statistics",
-        "description": "Select the disease to track",
+        "title": "First disease",
+        "description": "More can be added afterwards.",
         "data": {
           "disease_id": "Disease"
+        },
+        "data_description": {
+          "disease_id": "One sensor is created for the disease."
         }
       },
       "reconfigure": {
-        "title": "THL statistics - Reconfigure",
-        "description": "Change the language for disease names and data",
+        "title": "THL disease statistics",
+        "description": "The language of the disease and area names. Every disease being followed is renamed.",
         "data": {
           "language": "Language"
+        },
+        "data_description": {
+          "language": "The language of the disease and area names, and of the data."
         }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "THL disease statistics has already been added; add further diseases to it.",
+      "cannot_connect": "THL couldn't be reached. Try again in a moment.",
+      "reconfigure_successful": "Language saved."
+    }
+  },
+  "config_subentries": {
+    "disease": {
+      "initiate_flow": {
+        "user": "Add disease"
+      },
+      "entry_type": "Disease",
+      "step": {
+        "user": {
+          "title": "Disease",
+          "description": "The diseases THL reports weekly. The ones already being followed are left out.",
+          "data": {
+            "disease_id": "Disease"
+          },
+          "data_description": {
+            "disease_id": "One sensor is created for the disease."
+          }
+        }
+      },
+      "abort": {
+        "already_configured": "This disease has already been added.",
+        "all_configured": "Every disease THL reports has already been added.",
+        "cannot_connect": "THL couldn't be reached. Try again in a moment."
+      }
+    }
+  },
+  "selector": {
+    "language": {
+      "options": {
+        "fi": "Suomi",
+        "en": "English"
       }
     }
   }
