@@ -56,7 +56,16 @@ async def test_every_disease_gets_a_sensor_of_last_weeks_cases(
         "amount_two_weeks_ago": 20,
         "change_in_numbers": -3,
         "change_percentage": "-15",
+        "incidence_last_week": 0.3,
+        "incidence_two_weeks_ago": 0.4,
+        "entity_id": INFLUENZA_SENSOR,
+        "incidence_entity_id": "sensor.thl_influenssa_incidence",
     }
+    assert state.attributes["values"][1]["change_percentage"] == "25", "a rounded string, as earlier versions wrote it"
+    assert state.attributes["values"][2]["change_percentage"] == 0, "zero when there was nothing to compare with"
+    assert state.attributes["values"][2]["incidence_last_week"] == 0.0, "a cell THL left out means no cases"
+    assert state.attributes["values"][1]["entity_id"] == "sensor.thl_influenssa_ita_uusimaa"
+    assert state.attributes["values"][1]["incidence_entity_id"] == "sensor.thl_influenssa_ita_uusimaa_incidence"
     assert hass.states.get(ADENOVIRUS_SENSOR).attributes["disease_name"] == "Adenovirus"
 
     assert await hass.config_entries.async_unload(entry.entry_id)

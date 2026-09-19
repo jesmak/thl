@@ -18,12 +18,12 @@
           "disease_id": "Tauti"
         },
         "data_description": {
-          "disease_id": "Taudille luodaan yksi sensori."
+          "disease_id": "Sensorit luodaan koko maalle ja jokaiselle hyvinvointialueelle: tapaukset ja ilmaantuvuus 100 000 asukasta kohden."
         }
       },
       "reconfigure": {
         "title": "THL-tautitilastot",
-        "description": "Tautien ja alueiden nimien kieli. Jokainen seurattava tauti nimetään uudelleen.",
+        "description": "Tautien ja alueiden nimien kieli. Kaikki seurattava nimetään uudelleen.",
         "data": {
           "language": "Kieli"
         },
@@ -52,7 +52,7 @@
             "disease_id": "Tauti"
           },
           "data_description": {
-            "disease_id": "Taudille luodaan yksi sensori."
+            "disease_id": "Sensorit luodaan koko maalle ja jokaiselle hyvinvointialueelle: tapaukset ja ilmaantuvuus 100 000 asukasta kohden."
           }
         }
       },
@@ -61,6 +61,21 @@
         "all_configured": "Kaikki THL:n raportoimat taudit on jo lisätty.",
         "cannot_connect": "THL:ään ei saatu yhteyttä. Yritä hetken kuluttua uudelleen."
       }
+    },
+    "ili": {
+      "initiate_flow": {
+        "user": "Lisää influenssankaltaiset käynnit"
+      },
+      "entry_type": "Influenssankaltaiset käynnit",
+      "step": {
+        "user": {
+          "title": "Influenssankaltaiset käynnit",
+          "description": "Influenssankaltaisen taudin vuoksi tehdyt perusterveydenhuollon käynnit osuutena kaikista käynneistä, koko maassa ja jokaisella hyvinvointialueella. Ne kertovat influenssakauden alkamisesta ennen laboratoriovarmistettuja tapauksia."
+        }
+      },
+      "abort": {
+        "already_configured": "Influenssankaltaisia käyntejä seurataan jo."
+      }
     }
   },
   "selector": {
@@ -68,6 +83,22 @@
       "options": {
         "fi": "Suomi",
         "en": "English"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "incidence": {
+        "name": "Ilmaantuvuus"
+      },
+      "area_cases": {
+        "name": "{area}"
+      },
+      "area_incidence": {
+        "name": "{area} ilmaantuvuus"
+      },
+      "area_share": {
+        "name": "{area}"
       }
     }
   }

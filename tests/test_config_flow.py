@@ -1,4 +1,4 @@
-"""Adding the integration, following more diseases, and changing the language."""
+"""Adding the integration, following more diseases and the flu-like illness visits, and changing the language."""
 
 from __future__ import annotations
 
@@ -10,7 +10,14 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
-from custom_components.thl.const import CONF_DISEASE_ID, CONF_DISEASE_NAME, CONF_LANGUAGE, DOMAIN, SUBENTRY_DISEASE
+from custom_components.thl.const import (
+    CONF_DISEASE_ID,
+    CONF_DISEASE_NAME,
+    CONF_LANGUAGE,
+    DOMAIN,
+    SUBENTRY_DISEASE,
+    SUBENTRY_ILI,
+)
 
 from .conftest import ADENOVIRUS, DIMENSIONS_FI_URL, INFLUENZA, thl_entry
 
@@ -79,6 +86,32 @@ async def test_following_one_more_disease(
     assert hass.states.get("sensor.thl_adenovirus").state == "17"
 
 
+async def test_following_the_flu_like_illness_visits(
+    hass: HomeAssistant, thl: AiohttpClientMocker, freezer: FrozenDateTimeFactory
+) -> None:
+    freezer.move_to(NOW)
+    entry = thl_entry(hass, (INFLUENZA, "Influenssa"))
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    result = await hass.config_entries.subentries.async_init(
+        (entry.entry_id, SUBENTRY_ILI), context={"source": SOURCE_USER}
+    )
+    assert result["step_id"] == "user", "nothing to choose; the form explains what is added"
+    result = await hass.config_entries.subentries.async_configure(result["flow_id"], {})
+    await hass.async_block_till_done()
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["title"] == "THL Influenssankaltaiset käynnit"
+    assert hass.states.get("sensor.thl_influenssankaltaiset_kaynnit").state == "0.0125"
+
+    result = await hass.config_entries.subentries.async_init(
+        (entry.entry_id, SUBENTRY_ILI), context={"source": SOURCE_USER}
+    )
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "already_configured", "there is one set of flu-like illness visits"
+
+
 async def test_when_every_disease_is_already_followed(hass: HomeAssistant, thl: AiohttpClientMocker) -> None:
     entry = thl_entry(hass, (INFLUENZA, "Influenssa"), (ADENOVIRUS, "Adenovirus"))
 
@@ -104,7 +137,7 @@ async def test_changing_the_language_renames_every_disease(
     hass: HomeAssistant, thl: AiohttpClientMocker, freezer: FrozenDateTimeFactory
 ) -> None:
     freezer.move_to(NOW)
-    entry = thl_entry(hass, (INFLUENZA, "Influenssa"), (ADENOVIRUS, "Adenovirus"))
+    entry = thl_entry(hass, (INFLUENZA, "Influenssa"), (ADENOVIRUS, "Adenovirus"), ili=True)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
 
@@ -117,7 +150,7 @@ async def test_changing_the_language_renames_every_disease(
     assert result["reason"] == "reconfigure_successful"
     assert entry.data[CONF_LANGUAGE] == "en"
     titles = {subentry.title for subentry in entry.subentries.values()}
-    assert titles == {"THL Influenza", "THL Adenovirus"}
+    assert titles == {"THL Influenza", "THL Adenovirus", "THL Flu-like illness visits"}
 
     state = hass.states.get("sensor.thl_influenssa")
     assert state.attributes["disease_name"] == "Influenza", "the entity keeps its id, the names change"

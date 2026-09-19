@@ -18,12 +18,12 @@
           "disease_id": "Disease"
         },
         "data_description": {
-          "disease_id": "One sensor is created for the disease."
+          "disease_id": "Sensors are created for the whole country and for each wellbeing services county: cases and incidence per 100 000 people."
         }
       },
       "reconfigure": {
         "title": "THL disease statistics",
-        "description": "The language of the disease and area names. Every disease being followed is renamed.",
+        "description": "The language of the disease and area names. Everything being followed is renamed.",
         "data": {
           "language": "Language"
         },
@@ -52,7 +52,7 @@
             "disease_id": "Disease"
           },
           "data_description": {
-            "disease_id": "One sensor is created for the disease."
+            "disease_id": "Sensors are created for the whole country and for each wellbeing services county: cases and incidence per 100 000 people."
           }
         }
       },
@@ -61,6 +61,21 @@
         "all_configured": "Every disease THL reports has already been added.",
         "cannot_connect": "THL couldn't be reached. Try again in a moment."
       }
+    },
+    "ili": {
+      "initiate_flow": {
+        "user": "Add flu-like illness visits"
+      },
+      "entry_type": "Flu-like illness visits",
+      "step": {
+        "user": {
+          "title": "Flu-like illness visits",
+          "description": "Visits to primary care for influenza-like illness, as a share of all visits, in the whole country and in each wellbeing services county. They show a flu season starting before the lab-confirmed cases do."
+        }
+      },
+      "abort": {
+        "already_configured": "The flu-like illness visits are already being followed."
+      }
     }
   },
   "selector": {
@@ -68,6 +83,22 @@
       "options": {
         "fi": "Suomi",
         "en": "English"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "incidence": {
+        "name": "Incidence"
+      },
+      "area_cases": {
+        "name": "{area}"
+      },
+      "area_incidence": {
+        "name": "{area} incidence"
+      },
+      "area_share": {
+        "name": "{area}"
       }
     }
   }
