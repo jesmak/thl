@@ -1,7 +1,8 @@
 """Config flow: one THL entry holds the language, and each disease is a subentry of it.
 
-The disease list comes from THL's dimensions file. Changing the language later
-renames every disease that is being followed.
+The disease list comes from THL's dimensions file. The flu-like illness visits
+are a subentry of their own, added once. Changing the language later renames
+every subentry.
 """
 
 from __future__ import annotations
@@ -26,7 +27,17 @@ from homeassistant.helpers.selector import (
 )
 
 from .api import ThlClient
-from .const import CONF_DISEASE_ID, CONF_DISEASE_NAME, CONF_LANGUAGE, DOMAIN, LANGUAGES, SUBENTRY_DISEASE
+from .const import (
+    CONF_DISEASE_ID,
+    CONF_DISEASE_NAME,
+    CONF_LANGUAGE,
+    DOMAIN,
+    ILI_TITLE,
+    ILI_UNIQUE_ID,
+    LANGUAGES,
+    SUBENTRY_DISEASE,
+    SUBENTRY_ILI,
+)
 from .exceptions import ThlError
 from .migration import TITLE, VERSION
 from .statistics import diseases
@@ -128,6 +139,9 @@ class ThlConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="cannot_connect")
 
         for subentry in list(entry.subentries.values()):
+            if subentry.subentry_type == SUBENTRY_ILI:
+                self.hass.config_entries.async_update_subentry(entry, subentry, title=ILI_TITLE[language])
+                continue
             disease_id = str(subentry.data[CONF_DISEASE_ID])
             name = names.get(disease_id, subentry.data[CONF_DISEASE_NAME])
             self.hass.config_entries.async_update_subentry(
@@ -142,7 +156,7 @@ class ThlConfigFlow(ConfigFlow, domain=DOMAIN):
     @classmethod
     @callback
     def async_get_supported_subentry_types(cls, config_entry: ConfigEntry) -> dict[str, type[ConfigSubentryFlow]]:
-        return {SUBENTRY_DISEASE: DiseaseSubentryFlow}
+        return {SUBENTRY_DISEASE: DiseaseSubentryFlow, SUBENTRY_ILI: IliSubentryFlow}
 
 
 class DiseaseSubentryFlow(ConfigSubentryFlow):
@@ -169,3 +183,15 @@ class DiseaseSubentryFlow(ConfigSubentryFlow):
             return self.async_abort(reason="all_configured")
 
         return self.async_show_form(step_id="user", data_schema=disease_schema(self._diseases))
+
+
+class IliSubentryFlow(ConfigSubentryFlow):
+    """Following the flu-like illness visits in primary care. There is nothing to choose."""
+
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> SubentryFlowResult:
+        entry = self._get_entry()
+        if any(subentry.subentry_type == SUBENTRY_ILI for subentry in entry.subentries.values()):
+            return self.async_abort(reason="already_configured")
+        if user_input is None:
+            return self.async_show_form(step_id="user", data_schema=vol.Schema({}))
+        return self.async_create_entry(title=ILI_TITLE[entry.data[CONF_LANGUAGE]], data={}, unique_id=ILI_UNIQUE_ID)

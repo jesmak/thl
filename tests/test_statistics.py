@@ -1,32 +1,39 @@
-"""Reading THL's dimensions and case numbers."""
+"""Reading THL's dimensions and data files."""
 
 from __future__ import annotations
 
+from datetime import date
+
 import pytest
 
+from custom_components.thl.const import ILI_ALL_AREAS, ILI_AREA_IDS, MEASURE_CASES, MEASURE_INCIDENCE
 from custom_components.thl.exceptions import ThlError
 from custom_components.thl.statistics import (
-    Area,
-    CaseCount,
+    Cube,
+    Week,
     areas,
-    build_values,
-    case_counts,
-    cell,
+    case_weeks,
     diseases,
+    first_child_sid,
+    ili_weeks,
+    is_week_before,
+    last_finished_week,
     parse_dimensions,
     previous_iso_week,
-    week_sid,
 )
 
 from .conftest import (
     ADENOVIRUS,
-    CASES_WEEK_36,
-    CASES_WEEK_37,
     DIMENSIONS,
     DIMENSIONS_JSONP,
+    FINLAND,
+    ILI_WEEK_36,
+    ILI_WEEK_37,
     INFLUENZA,
     WEEK_36,
     WEEK_37,
+    cases,
+    ili_dimensions,
 )
 
 
@@ -67,56 +74,52 @@ def test_an_area_thl_adds_later_gets_an_id_from_its_name() -> None:
     assert areas(dimensions, "fi")[1].area_id == "uuden_ahvenanmaan_hyvinvointialue"
 
 
-def test_weeks_are_found_by_year_and_number() -> None:
-    assert week_sid(DIMENSIONS, "fi", 2026, 37) == WEEK_37
-    assert week_sid(DIMENSIONS, "fi", 2026, 36) == WEEK_36
-    assert week_sid(DIMENSIONS, "fi", 2026, 38) is None, "THL hasn't published it yet"
+def test_published_weeks_newest_first() -> None:
+    assert case_weeks(DIMENSIONS, "fi", (2026, 38), 4) == [Week(2026, 37, WEEK_37), Week(2026, 36, WEEK_36)], (
+        "week 38 isn't published yet and is skipped; nor are weeks 35 and before"
+    )
+    assert case_weeks(DIMENSIONS, "fi", (2026, 37), 1) == [Week(2026, 37, WEEK_37)]
 
 
-def test_case_numbers_of_each_area() -> None:
-    counts = case_counts(CASES_WEEK_37, WEEK_37, areas(DIMENSIONS, "fi"))
-    assert [(count.area.area_id, count.cases) for count in counts] == [
-        ("finland", 17),
-        ("ita-uudenmaan_hyvinvointialue", 5),
-        ("keski-uudenmaan_hyvinvointialue", 0),
-        ("lansi-uudenmaan_hyvinvointialue", 12),
-    ], "a cell THL left out counts as no cases"
+def test_flu_like_illness_weeks_are_named_by_their_monday() -> None:
+    assert ili_weeks(ili_dimensions(), (2026, 37), 3) == [Week(2026, 37, ILI_WEEK_37), Week(2026, 36, ILI_WEEK_36)]
 
 
-def test_unreadable_case_numbers() -> None:
+def test_flu_like_illness_areas_have_the_same_ids() -> None:
+    found = areas(ili_dimensions(), "fi", ILI_ALL_AREAS, ILI_AREA_IDS)
+    assert [area.area_id for area in found] == [area.area_id for area in areas(DIMENSIONS, "fi")]
+    assert first_child_sid(ili_dimensions(), "inf_age") == "1200921", "every age group together"
+
+
+def test_cells_are_read_by_their_categories() -> None:
+    cube = Cube(cases([WEEK_36, WEEK_37]))
+    assert cube.value(hva=FINLAND, yearweek=WEEK_37, measure=MEASURE_CASES) == 17
+    assert cube.value(hva=FINLAND, yearweek=WEEK_36, measure=MEASURE_INCIDENCE) == 0.4
+    assert cube.value(hva=837147, yearweek=WEEK_37, measure=MEASURE_CASES) is None, "a cell THL left out"
+    assert cube.value(hva=FINLAND, yearweek="1", measure=MEASURE_CASES) is None, "a week not in the file"
+
+
+def test_cells_can_come_as_a_list() -> None:
+    data = cases([WEEK_37])
+    data["dataset"]["value"] = [17, 0.3]
+    cube = Cube(data)
+    assert cube.value(hva=FINLAND, yearweek=WEEK_37, measure=MEASURE_INCIDENCE) == 0.3
+    assert cube.value(hva=837181, yearweek=WEEK_37, measure=MEASURE_CASES) is None, "past the end of the list"
+
+
+def test_unreadable_numbers() -> None:
     with pytest.raises(ThlError):
-        case_counts({"dataset": {}}, WEEK_37, areas(DIMENSIONS, "fi"))
+        Cube({"dataset": {}})
 
 
-def test_missing_cells_count_as_zero() -> None:
-    assert cell({"3": "7"}, 3) == 7
-    assert cell({"3": None}, 3) == 0
-    assert cell({}, 3) == 0
-    assert cell([1, 2, 3], 1) == 2
-    assert cell([1], 5) == 0
+def test_the_last_finished_week() -> None:
+    assert last_finished_week(date(2026, 9, 16)) == (2026, 37)
+    assert last_finished_week(date(2026, 1, 1)) == (2025, 52)
 
 
-def test_values_carry_the_change_from_the_week_before() -> None:
-    of_areas = areas(DIMENSIONS, "fi")
-    current = case_counts(CASES_WEEK_37, WEEK_37, of_areas)
-    previous = case_counts(CASES_WEEK_36, WEEK_36, of_areas)
-
-    values = build_values(current, previous)
-    assert values[0] == {
-        "name": "Kaikki hyvinvointialueet",
-        "amount_last_week": 17,
-        "area_id": "finland",
-        "amount_two_weeks_ago": 20,
-        "change_in_numbers": -3,
-        "change_percentage": "-15",
-    }
-    assert values[1]["change_percentage"] == "25", "a rounded string, as earlier versions wrote it"
-    assert values[2]["change_percentage"] == 0, "the number zero when there was nothing to compare with"
-
-
-def test_values_without_the_week_before() -> None:
-    [value] = build_values([CaseCount(Area(1, "Kaikki", "finland"), 3)], [])
-    assert value == {"name": "Kaikki", "amount_last_week": 3, "area_id": "finland"}
+def test_a_week_follows_another() -> None:
+    assert is_week_before(Week(2025, 52, ""), Week(2026, 1, ""))
+    assert not is_week_before(Week(2026, 35, ""), Week(2026, 37, ""))
 
 
 @pytest.mark.parametrize(

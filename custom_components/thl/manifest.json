@@ -1,6 +1,9 @@
 {
   "domain": "thl",
   "name": "THL disease statistics",
+  "after_dependencies": [
+    "recorder"
+  ],
   "codeowners": [
     "@jesmak"
   ],
