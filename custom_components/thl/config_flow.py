@@ -80,11 +80,7 @@ def subentry_data(disease_id: str, disease_name: str) -> ConfigSubentryData:
 
 
 def already_followed(entry: ConfigEntry) -> set[str]:
-    return {
-        str(subentry.data[CONF_DISEASE_ID])
-        for subentry in entry.subentries.values()
-        if subentry.subentry_type == SUBENTRY_DISEASE
-    }
+    return {str(subentry.data[CONF_DISEASE_ID]) for subentry in entry.subentries.values() if subentry.subentry_type == SUBENTRY_DISEASE}
 
 
 class ThlConfigFlow(ConfigFlow, domain=DOMAIN):

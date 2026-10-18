@@ -62,21 +62,17 @@ async def test_the_integration_is_added_only_once(hass: HomeAssistant, thl: Aioh
     assert result["reason"] == "single_instance_allowed", "further diseases are added to the entry that exists"
 
 
-async def test_following_one_more_disease(
-    hass: HomeAssistant, thl: AiohttpClientMocker, freezer: FrozenDateTimeFactory
-) -> None:
+async def test_following_one_more_disease(hass: HomeAssistant, thl: AiohttpClientMocker, freezer: FrozenDateTimeFactory) -> None:
     freezer.move_to(NOW)
     entry = thl_entry(hass, (INFLUENZA, "Influenssa"))
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
 
-    result = await hass.config_entries.subentries.async_init(
-        (entry.entry_id, SUBENTRY_DISEASE), context={"source": SOURCE_USER}
-    )
+    result = await hass.config_entries.subentries.async_init((entry.entry_id, SUBENTRY_DISEASE), context={"source": SOURCE_USER})
     assert result["step_id"] == "user"
-    assert [option["label"] for option in result["data_schema"].schema[CONF_DISEASE_ID].config["options"]] == [
-        "Adenovirus"
-    ], "the disease already being followed is left out"
+    assert [option["label"] for option in result["data_schema"].schema[CONF_DISEASE_ID].config["options"]] == ["Adenovirus"], (
+        "the disease already being followed is left out"
+    )
 
     result = await hass.config_entries.subentries.async_configure(result["flow_id"], {CONF_DISEASE_ID: ADENOVIRUS})
     await hass.async_block_till_done()
@@ -86,17 +82,13 @@ async def test_following_one_more_disease(
     assert hass.states.get("sensor.thl_adenovirus").state == "17"
 
 
-async def test_following_the_flu_like_illness_visits(
-    hass: HomeAssistant, thl: AiohttpClientMocker, freezer: FrozenDateTimeFactory
-) -> None:
+async def test_following_the_flu_like_illness_visits(hass: HomeAssistant, thl: AiohttpClientMocker, freezer: FrozenDateTimeFactory) -> None:
     freezer.move_to(NOW)
     entry = thl_entry(hass, (INFLUENZA, "Influenssa"))
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
 
-    result = await hass.config_entries.subentries.async_init(
-        (entry.entry_id, SUBENTRY_ILI), context={"source": SOURCE_USER}
-    )
+    result = await hass.config_entries.subentries.async_init((entry.entry_id, SUBENTRY_ILI), context={"source": SOURCE_USER})
     assert result["step_id"] == "user", "nothing to choose; the form explains what is added"
     result = await hass.config_entries.subentries.async_configure(result["flow_id"], {})
     await hass.async_block_till_done()
@@ -105,9 +97,7 @@ async def test_following_the_flu_like_illness_visits(
     assert result["title"] == "THL Influenssankaltaiset käynnit"
     assert hass.states.get("sensor.thl_influenssankaltaiset_kaynnit").state == "0.0125"
 
-    result = await hass.config_entries.subentries.async_init(
-        (entry.entry_id, SUBENTRY_ILI), context={"source": SOURCE_USER}
-    )
+    result = await hass.config_entries.subentries.async_init((entry.entry_id, SUBENTRY_ILI), context={"source": SOURCE_USER})
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "already_configured", "there is one set of flu-like illness visits"
 
@@ -115,9 +105,7 @@ async def test_following_the_flu_like_illness_visits(
 async def test_when_every_disease_is_already_followed(hass: HomeAssistant, thl: AiohttpClientMocker) -> None:
     entry = thl_entry(hass, (INFLUENZA, "Influenssa"), (ADENOVIRUS, "Adenovirus"))
 
-    result = await hass.config_entries.subentries.async_init(
-        (entry.entry_id, SUBENTRY_DISEASE), context={"source": SOURCE_USER}
-    )
+    result = await hass.config_entries.subentries.async_init((entry.entry_id, SUBENTRY_DISEASE), context={"source": SOURCE_USER})
 
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "all_configured"

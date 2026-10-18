@@ -243,8 +243,7 @@ def ili_dimensions(language: str = "fi") -> list[dict[str, Any]]:
                     "sid": ILI_FINLAND,
                     "label": "Kaikki alueet" if language == "fi" else "All areas",
                     "children": [
-                        {"sid": sid, "label": labels["areas"][area_sid]}
-                        for sid, area_sid in zip(ILI_AREA_SIDS, AREA_SIDS, strict=True)
+                        {"sid": sid, "label": labels["areas"][area_sid]} for sid, area_sid in zip(ILI_AREA_SIDS, AREA_SIDS, strict=True)
                     ],
                 }
             ],
@@ -291,9 +290,7 @@ def thl(aioclient_mock: AiohttpClientMocker) -> AiohttpClientMocker:
     return aioclient_mock
 
 
-def thl_entry(
-    hass: HomeAssistant, *diseases: tuple[str, str], language: str = "fi", ili: bool = False
-) -> MockConfigEntry:
+def thl_entry(hass: HomeAssistant, *diseases: tuple[str, str], language: str = "fi", ili: bool = False) -> MockConfigEntry:
     """The THL entry, with a subentry per disease, and one for the flu-like illness visits if asked."""
     entry = MockConfigEntry(
         domain=DOMAIN,
@@ -309,15 +306,7 @@ def thl_entry(
             )
             for disease_id, name in diseases
         ]
-        + (
-            [
-                ConfigSubentryData(
-                    data={}, subentry_type=SUBENTRY_ILI, title=ILI_TITLE[language], unique_id=ILI_UNIQUE_ID
-                )
-            ]
-            if ili
-            else []
-        ),
+        + ([ConfigSubentryData(data={}, subentry_type=SUBENTRY_ILI, title=ILI_TITLE[language], unique_id=ILI_UNIQUE_ID)] if ili else []),
     )
     entry.add_to_hass(hass)
     return entry

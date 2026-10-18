@@ -55,9 +55,7 @@ async def test_county_sensors_exist_for_every_county_thl_reports(
     assert f"thl_{INFLUENZA}_etela-karjalan_hyvinvointialue_incidence" in ids
     # 23 counties with two sensors each, and the whole country's cases and incidence.
     assert len(ids) == 48
-    assert hass.states.get("sensor.thl_influenssa_etela_karjala").state == STATE_UNKNOWN, (
-        "a county missing from the data has no number"
-    )
+    assert hass.states.get("sensor.thl_influenssa_etela_karjala").state == STATE_UNKNOWN, "a county missing from the data has no number"
 
 
 async def test_county_sensors_are_made_while_thl_is_down(

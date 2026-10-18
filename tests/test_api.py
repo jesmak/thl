@@ -47,9 +47,7 @@ async def test_errors(hass: HomeAssistant, aioclient_mock: AiohttpClientMocker) 
         await ThlClient(hass, "fi").dimensions()
 
 
-async def test_every_disease_shares_one_copy_of_the_dimensions(
-    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
-) -> None:
+async def test_every_disease_shares_one_copy_of_the_dimensions(hass: HomeAssistant, aioclient_mock: AiohttpClientMocker) -> None:
     aioclient_mock.get(DIMENSIONS_FI_URL, text=DIMENSIONS_JSONP)
     cache = DimensionsCache()
     client = ThlClient(hass, "fi")

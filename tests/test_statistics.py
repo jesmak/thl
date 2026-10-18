@@ -122,8 +122,6 @@ def test_a_week_follows_another() -> None:
     assert not is_week_before(Week(2026, 35, ""), Week(2026, 37, ""))
 
 
-@pytest.mark.parametrize(
-    ("year", "week", "before"), [(2026, 37, (2026, 36)), (2026, 1, (2025, 52)), (2021, 1, (2020, 53))]
-)
+@pytest.mark.parametrize(("year", "week", "before"), [(2026, 37, (2026, 36)), (2026, 1, (2025, 52)), (2021, 1, (2020, 53))])
 def test_the_week_before(year: int, week: int, before: tuple[int, int]) -> None:
     assert previous_iso_week(year, week) == before

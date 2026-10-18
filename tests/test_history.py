@@ -123,7 +123,5 @@ async def test_nothing_is_written_once_the_past_has_been_given(
 async def test_weeks_are_shown_from_the_start_of_the_week_after(hass: HomeAssistant) -> None:
     await hass.config.async_set_time_zone("Europe/Helsinki")
 
-    assert shown_from(Week(2026, 37, WEEK_37)) == datetime(2026, 9, 13, 21, 0, tzinfo=UTC), (
-        "Monday 14 September at midnight in Helsinki"
-    )
+    assert shown_from(Week(2026, 37, WEEK_37)) == datetime(2026, 9, 13, 21, 0, tzinfo=UTC), "Monday 14 September at midnight in Helsinki"
     assert shown_from(Week(2026, 36, WEEK_36)) == datetime(2026, 9, 6, 21, 0, tzinfo=UTC)

@@ -116,9 +116,7 @@ class WeeklyCoordinator(DataUpdateCoordinator[Weekly]):
     dimensions_url: str = ""
     data_url: str = ""
 
-    def __init__(
-        self, hass: HomeAssistant, entry: ThlConfigEntry, subentry: ConfigSubentry, cache: DimensionsCache
-    ) -> None:
+    def __init__(self, hass: HomeAssistant, entry: ThlConfigEntry, subentry: ConfigSubentry, cache: DimensionsCache) -> None:
         super().__init__(
             hass,
             _LOGGER,
@@ -151,10 +149,7 @@ class WeeklyCoordinator(DataUpdateCoordinator[Weekly]):
         # Oldest first.
         return Weekly(
             of_areas,
-            [
-                WeekFigures(week, {area.area_id: self._figures(cube, area, week) for area in of_areas})
-                for week in reversed(kept)
-            ],
+            [WeekFigures(week, {area.area_id: self._figures(cube, area, week) for area in of_areas}) for week in reversed(kept)],
         )
 
     def _categories(self, dimensions: list[Any], newest: tuple[int, int]) -> tuple[list[Area], list[Week]]:
@@ -175,17 +170,13 @@ class ThlCoordinator(WeeklyCoordinator):
     dimensions_url = DIMENSIONS_URL
     data_url = DATA_URL
 
-    def __init__(
-        self, hass: HomeAssistant, entry: ThlConfigEntry, subentry: ConfigSubentry, cache: DimensionsCache
-    ) -> None:
+    def __init__(self, hass: HomeAssistant, entry: ThlConfigEntry, subentry: ConfigSubentry, cache: DimensionsCache) -> None:
         super().__init__(hass, entry, subentry, cache)
         self.disease_id = str(subentry.data[CONF_DISEASE_ID])
         self.disease_name: str = subentry.data[CONF_DISEASE_NAME]
 
     def _categories(self, dimensions: list[Any], newest: tuple[int, int]) -> tuple[list[Area], list[Week]]:
-        return areas(dimensions, self.language), case_weeks(
-            dimensions, self.language, newest, HISTORY_WEEKS + MAX_WEEK_FALLBACK
-        )
+        return areas(dimensions, self.language), case_weeks(dimensions, self.language, newest, HISTORY_WEEKS + MAX_WEEK_FALLBACK)
 
     def _params(self, dimensions: list[Any], whole_country: Area, weeks: list[Week]) -> list[tuple[str, str]]:
         return [

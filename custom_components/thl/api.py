@@ -45,9 +45,7 @@ class ThlClient:
 
     async def _get(self, url: str, params: list[tuple[str, str]] | None = None) -> str:
         try:
-            async with self._session.get(
-                url, params=params, headers={"User-Agent": USER_AGENT}, timeout=TIMEOUT
-            ) as response:
+            async with self._session.get(url, params=params, headers={"User-Agent": USER_AGENT}, timeout=TIMEOUT) as response:
                 if response.status != 200:
                     raise ThlError(f"THL answered with status {response.status}")
                 return await response.text()

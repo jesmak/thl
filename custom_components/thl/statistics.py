@@ -134,17 +134,12 @@ def case_weeks(dimensions: Sequence[Any], language: str, newest: tuple[int, int]
         children[0] if children else None,
     )
     by_label = {str(entry.get("label")): str(entry["sid"]) for entry in leaves([all_weeks] if all_weeks else [])}
-    return published(
-        newest, count, lambda year, week: by_label.get(WEEK_LABEL[language].format(year=year, week=str(week).zfill(2)))
-    )
+    return published(newest, count, lambda year, week: by_label.get(WEEK_LABEL[language].format(year=year, week=str(week).zfill(2))))
 
 
 def ili_weeks(dimensions: Sequence[Any], newest: tuple[int, int], count: int) -> list[Week]:
     """The same for the flu-like illness visits, whose weeks are named by their Monday: "2026-09-07"."""
-    by_label = {
-        str(entry.get("label")): str(entry["sid"])
-        for entry in leaves(dimension(dimensions, "weeks40").get("children") or [])
-    }
+    by_label = {str(entry.get("label")): str(entry["sid"]) for entry in leaves(dimension(dimensions, "weeks40").get("children") or [])}
     return published(newest, count, lambda year, week: by_label.get(date.fromisocalendar(year, week, 1).isoformat()))
 
 
@@ -169,8 +164,7 @@ class Cube:
             self._names: list[str] = list(dimensions["id"])
             self._sizes: list[int] = [int(size) for size in dimensions["size"]]
             self._index: dict[str, dict[str, int]] = {
-                name: {str(key): int(value) for key, value in dimensions[name]["category"]["index"].items()}
-                for name in self._names
+                name: {str(key): int(value) for key, value in dimensions[name]["category"]["index"].items()} for name in self._names
             }
             self._values: Any = dataset["value"]
         except (KeyError, IndexError, TypeError, ValueError) as err:

@@ -69,22 +69,13 @@ def entities_of(coordinator: WeeklyCoordinator) -> list[SensorEntity]:
             AreaSensor(coordinator, WHOLE_COUNTRY, INCIDENCE, f"{prefix}_incidence", "incidence"),
         ]
         for area in of_areas:
-            entities.append(
-                AreaSensor(coordinator, area.area_id, CASES, f"{prefix}_{area.area_id}", "area_cases", area)
-            )
-            entities.append(
-                AreaSensor(
-                    coordinator, area.area_id, INCIDENCE, f"{prefix}_{area.area_id}_incidence", "area_incidence", area
-                )
-            )
+            entities.append(AreaSensor(coordinator, area.area_id, CASES, f"{prefix}_{area.area_id}", "area_cases", area))
+            entities.append(AreaSensor(coordinator, area.area_id, INCIDENCE, f"{prefix}_{area.area_id}_incidence", "area_incidence", area))
         return [*entities, ThlSensor(coordinator)]
     if isinstance(coordinator, IliCoordinator):
         of_areas = counties(coordinator, ILI_AREA_IDS)
         return [
-            *(
-                AreaSensor(coordinator, area.area_id, SHARE, f"{ILI_UNIQUE_ID}_{area.area_id}", "area_share", area)
-                for area in of_areas
-            ),
+            *(AreaSensor(coordinator, area.area_id, SHARE, f"{ILI_UNIQUE_ID}_{area.area_id}", "area_share", area) for area in of_areas),
             IliSensor(coordinator),
         ]
     return []
@@ -282,10 +273,6 @@ class IliSensor(SummarySensor):
             }
             if previous is not None:
                 entry["share_two_weeks_ago"] = data.figure(area.area_id, SHARE, previous)
-            entry["entity_id"] = (
-                self.entity_id
-                if area.area_id == WHOLE_COUNTRY
-                else self.entity_id_of(f"{ILI_UNIQUE_ID}_{area.area_id}")
-            )
+            entry["entity_id"] = self.entity_id if area.area_id == WHOLE_COUNTRY else self.entity_id_of(f"{ILI_UNIQUE_ID}_{area.area_id}")
             result.append(entry)
         return result

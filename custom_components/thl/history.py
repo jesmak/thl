@@ -44,9 +44,7 @@ async def has_statistics(hass: HomeAssistant, statistic_id: str) -> bool:
     return bool(found.get(statistic_id))
 
 
-async def async_import_history(
-    hass: HomeAssistant, entity_id: str, unit: str | None, points: list[tuple[Week, float | None]]
-) -> bool:
+async def async_import_history(hass: HomeAssistant, entity_id: str, unit: str | None, points: list[tuple[Week, float | None]]) -> bool:
     """Writes the weeks into the sensor's statistics, unless it already has some. Tells whether it wrote any."""
     if not points or not recording(hass) or await has_statistics(hass, entity_id):
         return False
