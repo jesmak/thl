@@ -16,9 +16,8 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
 from .api import DimensionsCache
-from .const import CONF_HISTORY_IMPORTED, CONF_HISTORY_WEEKS, DOMAIN, HISTORY_WEEKS, SUBENTRY_DISEASE, SUBENTRY_ILI
+from .const import DOMAIN, SUBENTRY_DISEASE, SUBENTRY_ILI
 from .coordinator import IliCoordinator, ThlConfigEntry, ThlCoordinator, ThlRuntimeData, WeeklyCoordinator
-from .history import recording
 from .migration import VERSION, async_migrate_to_subentries
 
 PLATFORMS = [Platform.SENSOR]
@@ -49,17 +48,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ThlConfigEntry) -> bool:
     await asyncio.gather(*(coordinator.async_refresh() for coordinator in coordinators.values()))
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    _remember_history_weeks(hass, entry)
+    for coordinator in coordinators.values():
+        coordinator.async_write_history()
 
-    # Adding or removing a disease, or changing the language, reloads everything. Added last, so noting
-    # the flag above does not reload the entry that is still being set up.
+    # Adding or removing a disease, or changing the language, reloads everything.
     entry.async_on_unload(entry.add_update_listener(async_update_listener))
 
     return True
 
 
 async def async_update_listener(hass: HomeAssistant, entry: ThlConfigEntry) -> None:
-    await hass.config_entries.async_reload(entry.entry_id)
+    # Changing the language updates every subentry and then the entry, and each update calls this. One reload covers them
+    # all, once the flow has made every update: the listener runs at once, and a reload could finish before the last one.
+    if entry.runtime_data.reload_scheduled:
+        return
+    entry.runtime_data.reload_scheduled = True
+    hass.loop.call_soon(hass.config_entries.async_schedule_reload, entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ThlConfigEntry) -> bool:
@@ -70,19 +74,3 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Entries from before 2.0 are merged into one in async_setup, which runs first.
     # A newer version than this means Home Assistant was downgraded.
     return entry.version <= VERSION
-
-
-def _remember_history_weeks(hass: HomeAssistant, entry: ThlConfigEntry) -> None:
-    """Note on each subentry how many past weeks its sensors have been given.
-
-    The sensors write them as they are added, when THL could be read. Without the note every
-    start would ask the recorder about every sensor again. Without a recorder nothing was written.
-    """
-    if not recording(hass):
-        return
-    for coordinator in entry.runtime_data.coordinators.values():
-        if coordinator.history_weeks >= HISTORY_WEEKS or coordinator.data is None:
-            continue
-        coordinator.history_weeks = HISTORY_WEEKS
-        data = {key: value for key, value in coordinator.subentry.data.items() if key != CONF_HISTORY_IMPORTED}
-        hass.config_entries.async_update_subentry(entry, coordinator.subentry, data={**data, CONF_HISTORY_WEEKS: HISTORY_WEEKS})

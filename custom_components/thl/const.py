@@ -28,11 +28,6 @@ WEEK_LABEL: Final = {"fi": "Vuosi {year} Viikko {week}", "en": "Year {year} Week
 CONF_LANGUAGE: Final = "language"
 CONF_DISEASE_ID: Final = "disease_id"
 CONF_DISEASE_NAME: Final = "disease_name"
-# How many past weeks have been written into the statistics of a subentry's sensors.
-CONF_HISTORY_WEEKS: Final = "history_weeks"
-# Before 2.1 it was only noted that they had been, and that was 26 weeks.
-CONF_HISTORY_IMPORTED: Final = "history_imported"
-HISTORY_WEEKS_BEFORE: Final = 26
 
 # Each disease is a subentry of the one THL entry.
 SUBENTRY_DISEASE: Final = "disease"
@@ -58,6 +53,8 @@ ATTR_VALUES: Final = "values"
 UPDATE_INTERVAL: Final = timedelta(minutes=30)
 # The dimensions file is over 100 kB and changes once a week, so every sensor shares one copy of it.
 DIMENSIONS_TTL: Final = timedelta(minutes=30)
+# When THL can't be read, the others in the same round are told so at once instead of each waiting for it in turn.
+DIMENSIONS_RETRY: Final = timedelta(minutes=1)
 # THL publishes a week's numbers with a lag, so the newest finished week is often still missing.
 MAX_WEEK_FALLBACK: Final = 4
 # How many weeks are written into the statistics of a sensor, so its graphs have a past from the start: a year and a

@@ -110,6 +110,25 @@ def test_cells_can_come_as_a_list() -> None:
 def test_unreadable_numbers() -> None:
     with pytest.raises(ThlError):
         Cube({"dataset": {}})
+    data = cases([WEEK_37])
+    data["dataset"]["dimension"]["hva"]["category"]["index"] = [str(FINLAND)]
+    with pytest.raises(ThlError, match="unexpected format"):
+        Cube(data)
+
+
+def test_numbers_with_a_dimension_that_was_not_asked_for() -> None:
+    with pytest.raises(ThlError, match="measure"):
+        Cube(cases([WEEK_37])).value(hva=FINLAND, yearweek=WEEK_37)
+
+
+def test_unreadable_dimensions() -> None:
+    hva = next(entry for entry in DIMENSIONS if entry["id"] == "hva")
+    bad_id = [{**entry, "children": [{"sid": "Lappi", "label": "Lappi"}]} if entry is hva else entry for entry in DIMENSIONS]
+    with pytest.raises(ThlError, match="valid id"):
+        areas(bad_id, "fi")
+    not_a_list = [{**entry, "children": {"sid": 1}} if entry is hva else entry for entry in DIMENSIONS]
+    with pytest.raises(ThlError, match="unexpected format"):
+        areas(not_a_list, "fi")
 
 
 def test_the_last_finished_week() -> None:

@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
 from custom_components.thl.api import DimensionsCache, ThlClient
-from custom_components.thl.const import DATA_URL, DIMENSIONS_TTL, ILI_DIMENSIONS_URL
+from custom_components.thl.const import DATA_URL, DIMENSIONS_RETRY, DIMENSIONS_TTL, ILI_DIMENSIONS_URL
 from custom_components.thl.exceptions import ThlError
 
 from .conftest import (
@@ -45,6 +45,27 @@ async def test_errors(hass: HomeAssistant, aioclient_mock: AiohttpClientMocker) 
     aioclient_mock.get(DIMENSIONS_FI_URL, status=503)
     with pytest.raises(ThlError):
         await ThlClient(hass, "fi").dimensions()
+
+    aioclient_mock.clear_requests()
+    aioclient_mock.get(DIMENSIONS_FI_URL, content=b"thl.pivot.loadDimensions(\xff\xfe);")
+    with pytest.raises(ThlError, match="valid"):
+        await ThlClient(hass, "fi").dimensions()
+
+
+async def test_thl_failing_is_told_to_the_others_at_once(hass: HomeAssistant, aioclient_mock: AiohttpClientMocker) -> None:
+    aioclient_mock.get(DIMENSIONS_FI_URL, status=503)
+    cache = DimensionsCache()
+    client = ThlClient(hass, "fi")
+
+    with pytest.raises(ThlError, match="503"):
+        await cache.get(client, now=1000.0)
+    with pytest.raises(ThlError, match="503"):
+        await cache.get(client, now=1000.0 + DIMENSIONS_RETRY.total_seconds() - 1)
+    assert len(aioclient_mock.mock_calls) == 1, "the others don't wait for THL in turn"
+
+    aioclient_mock.clear_requests()
+    aioclient_mock.get(DIMENSIONS_FI_URL, text=DIMENSIONS_JSONP)
+    assert await cache.get(client, now=1000.0 + DIMENSIONS_RETRY.total_seconds()) == DIMENSIONS, "tried again after a while"
 
 
 async def test_every_disease_shares_one_copy_of_the_dimensions(hass: HomeAssistant, aioclient_mock: AiohttpClientMocker) -> None:

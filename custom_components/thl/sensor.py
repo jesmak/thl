@@ -15,7 +15,7 @@ from typing import Any
 
 from homeassistant.components.sensor import SensorEntity, SensorStateClass
 from homeassistant.const import PERCENTAGE
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -30,7 +30,6 @@ from .const import (
     ATTR_VALUES,
     ATTRIBUTION,
     DOMAIN,
-    HISTORY_WEEKS,
     ILI_AREA_IDS,
     ILI_NAME,
     ILI_UNIQUE_ID,
@@ -46,7 +45,6 @@ from .coordinator import (
     ThlCoordinator,
     WeeklyCoordinator,
 )
-from .history import async_import_history
 from .statistics import Area
 
 WHOLE_COUNTRY = "finland"
@@ -127,7 +125,6 @@ class WeeklySensor(CoordinatorEntity[WeeklyCoordinator], SensorEntity):
         elif key == SHARE:
             self._attr_native_unit_of_measurement = PERCENTAGE
             self._attr_suggested_display_precision = 3
-        self._history_pending = coordinator.history_weeks < HISTORY_WEEKS
 
     @property
     def native_value(self) -> float | None:
@@ -136,22 +133,9 @@ class WeeklySensor(CoordinatorEntity[WeeklyCoordinator], SensorEntity):
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
-        await self._import_history()
-
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        super()._handle_coordinator_update()
-        # THL couldn't be reached when the sensor was added; its past is written once it can.
-        if self._history_pending and self.coordinator.data:
-            self.hass.async_create_task(self._import_history())
-
-    async def _import_history(self) -> None:
-        data = self.coordinator.data
-        if not self._history_pending or data is None:
-            return
-        self._history_pending = False
-        points = [(figures.week, figures.areas.get(self._area_id, {}).get(self._key)) for figures in data.weeks]
-        await async_import_history(self.hass, self.entity_id, self.native_unit_of_measurement, points)
+        entity_id = self.entity_id
+        self.coordinator.history_targets[entity_id] = (self.native_unit_of_measurement, self._area_id, self._key)
+        self.async_on_remove(lambda: self.coordinator.history_targets.pop(entity_id, None))
 
 
 class AreaSensor(WeeklySensor):

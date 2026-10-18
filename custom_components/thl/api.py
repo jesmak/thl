@@ -13,7 +13,7 @@ import aiohttp
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DIMENSIONS_TTL, DIMENSIONS_URL, USER_AGENT
+from .const import DIMENSIONS_RETRY, DIMENSIONS_TTL, DIMENSIONS_URL, USER_AGENT
 from .exceptions import ThlError
 from .statistics import parse_dimensions
 
@@ -51,6 +51,8 @@ class ThlClient:
                 return await response.text()
         except (aiohttp.ClientError, TimeoutError) as err:
             raise ThlError(f"THL couldn't be reached: {err}") from err
+        except UnicodeDecodeError as err:
+            raise ThlError("THL sent text that isn't valid") from err
 
 
 @dataclass
@@ -69,6 +71,8 @@ class DimensionsCache:
     def __init__(self) -> None:
         self._lock = asyncio.Lock()
         self._by_url: dict[str, _Cached] = {}
+        # A failed fetch, and when it failed.
+        self._failed: dict[str, tuple[str, float]] = {}
 
     async def get(self, client: ThlClient, url: str = DIMENSIONS_URL, now: float | None = None) -> list[Any]:
         now = time.monotonic() if now is None else now
@@ -77,7 +81,15 @@ class DimensionsCache:
             cached = self._by_url.get(key)
             if cached is not None and now - cached.fetched < DIMENSIONS_TTL.total_seconds():
                 return cached.dimensions
+            failed = self._failed.get(key)
+            if failed is not None and now - failed[1] < DIMENSIONS_RETRY.total_seconds():
+                raise ThlError(failed[0])
             _LOGGER.debug("Fetching %s", key)
-            dimensions = await client.dimensions(url)
+            try:
+                dimensions = await client.dimensions(url)
+            except ThlError as err:
+                self._failed[key] = (str(err), now)
+                raise
+            self._failed.pop(key, None)
             self._by_url[key] = _Cached(dimensions, now)
             return dimensions

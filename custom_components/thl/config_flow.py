@@ -147,7 +147,9 @@ class ThlConfigFlow(ConfigFlow, domain=DOMAIN):
                 data={**subentry.data, CONF_DISEASE_NAME: name},
             )
 
-        return self.async_update_reload_and_abort(entry, data={**entry.data, CONF_LANGUAGE: language})
+        # The update listener reloads the entry once for all of these.
+        self.hass.config_entries.async_update_entry(entry, data={**entry.data, CONF_LANGUAGE: language})
+        return self.async_abort(reason="reconfigure_successful")
 
     @classmethod
     @callback

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from unittest.mock import patch
 
+import pytest
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.core import HomeAssistant
@@ -122,7 +124,7 @@ async def test_thl_cannot_be_reached(hass: HomeAssistant, aioclient_mock: Aiohtt
 
 
 async def test_changing_the_language_renames_every_disease(
-    hass: HomeAssistant, thl: AiohttpClientMocker, freezer: FrozenDateTimeFactory
+    hass: HomeAssistant, thl: AiohttpClientMocker, freezer: FrozenDateTimeFactory, caplog: pytest.LogCaptureFixture
 ) -> None:
     freezer.move_to(NOW)
     entry = thl_entry(hass, (INFLUENZA, "Influenssa"), (ADENOVIRUS, "Adenovirus"), ili=True)
@@ -131,11 +133,15 @@ async def test_changing_the_language_renames_every_disease(
 
     result = await entry.start_reconfigure_flow(hass)
     assert result["step_id"] == "reconfigure"
-    result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_LANGUAGE: "en"})
-    await hass.async_block_till_done()
+    reload = hass.config_entries.async_schedule_reload
+    with patch.object(hass.config_entries, "async_schedule_reload", wraps=reload) as scheduled:
+        result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_LANGUAGE: "en"})
+        await hass.async_block_till_done()
 
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "reconfigure_successful"
+    assert scheduled.call_count == 1, "one reload for the entry and every subentry renamed"
+    assert "update listener" not in caplog.text
     assert entry.data[CONF_LANGUAGE] == "en"
     titles = {subentry.title for subentry in entry.subentries.values()}
     assert titles == {"THL Influenza", "THL Adenovirus", "THL Flu-like illness visits"}

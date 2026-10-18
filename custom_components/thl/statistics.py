@@ -62,12 +62,19 @@ def dimension(dimensions: Sequence[Any], name: str) -> dict[str, Any]:
     return found
 
 
+def children(entry: dict[str, Any]) -> list[dict[str, Any]]:
+    """The entries under one in a dimension, such as the counties under the whole country."""
+    found = entry.get("children") or []
+    if not isinstance(found, list) or not all(isinstance(child, dict) for child in found):
+        raise ThlError("THL sent the dimensions in an unexpected format")
+    return found
+
+
 def diseases(dimensions: Sequence[Any]) -> dict[str, str]:
     """The diseases THL reports, by id and sorted by name. They are grouped, and a group can have one disease."""
     result: dict[str, str] = {}
-    for entry in dimension(dimensions, "nidrreportgroup").get("children") or []:
-        children = entry.get("children") or [entry]
-        for child in children:
+    for entry in children(dimension(dimensions, "nidrreportgroup")):
+        for child in children(entry) or [entry]:
             if child.get("sid") is not None:
                 result[str(child["sid"])] = str(child.get("label") or child["sid"])
     if not result:
@@ -82,20 +89,23 @@ def areas(
     ids: Mapping[int, str] = AREA_IDS,
 ) -> list[Area]:
     """The whole country first, then the welfare counties."""
-    children = dimension(dimensions, "hva").get("children") or []
+    of_areas = children(dimension(dimensions, "hva"))
     whole_country = next(
-        (entry for entry in children if entry.get("label") == all_areas.get(language)),
-        children[0] if children else None,
+        (entry for entry in of_areas if entry.get("label") == all_areas.get(language)),
+        of_areas[0] if of_areas else None,
     )
     if whole_country is None or whole_country.get("sid") is None:
         raise ThlError("THL's dimensions have no areas")
     found = [area(whole_country, ids)]
-    found.extend(area(entry, ids) for entry in whole_country.get("children") or [] if entry.get("sid") is not None)
+    found.extend(area(entry, ids) for entry in children(whole_country) if entry.get("sid") is not None)
     return found
 
 
 def area(entry: dict[str, Any], ids: Mapping[int, str] = AREA_IDS) -> Area:
-    sid = int(entry["sid"])
+    try:
+        sid = int(entry["sid"])
+    except (KeyError, TypeError, ValueError) as err:
+        raise ThlError(f"THL sent an area without a valid id: {entry.get('sid')!r}") from err
     name = str(entry.get("label") or sid)
     return Area(sid, name, ids.get(sid) or area_id_from_name(name) or str(sid))
 
@@ -108,19 +118,18 @@ def area_id_from_name(name: str) -> str:
 
 def first_child_sid(dimensions: Sequence[Any], name: str) -> str:
     """The id of a dimension's total, such as all ages."""
-    children = dimension(dimensions, name).get("children") or []
-    if not children or children[0].get("sid") is None:
+    entries = children(dimension(dimensions, name))
+    if not entries or entries[0].get("sid") is None:
         raise ThlError(f"THL's dimensions have nothing in {name}")
-    return str(children[0]["sid"])
+    return str(entries[0]["sid"])
 
 
 def leaves(entries: Sequence[Any]) -> list[dict[str, Any]]:
     """The innermost entries of a dimension, such as the weeks under their years."""
     found: list[dict[str, Any]] = []
     for entry in entries:
-        children = entry.get("children") or []
-        if children:
-            found.extend(leaves(children))
+        if inner := children(entry):
+            found.extend(leaves(inner))
         elif entry.get("sid") is not None:
             found.append(entry)
     return found
@@ -128,10 +137,10 @@ def leaves(entries: Sequence[Any]) -> list[dict[str, Any]]:
 
 def case_weeks(dimensions: Sequence[Any], language: str, newest: tuple[int, int], count: int) -> list[Week]:
     """The weeks THL has published in the case numbers, newest first, from `newest` back over `count` weeks."""
-    children = dimension(dimensions, "yearweek").get("children") or []
+    years = children(dimension(dimensions, "yearweek"))
     all_weeks = next(
-        (entry for entry in children if entry.get("label") == ALL_WEEKS.get(language)),
-        children[0] if children else None,
+        (entry for entry in years if entry.get("label") == ALL_WEEKS.get(language)),
+        years[0] if years else None,
     )
     by_label = {str(entry.get("label")): str(entry["sid"]) for entry in leaves([all_weeks] if all_weeks else [])}
     return published(newest, count, lambda year, week: by_label.get(WEEK_LABEL[language].format(year=year, week=str(week).zfill(2))))
@@ -139,7 +148,7 @@ def case_weeks(dimensions: Sequence[Any], language: str, newest: tuple[int, int]
 
 def ili_weeks(dimensions: Sequence[Any], newest: tuple[int, int], count: int) -> list[Week]:
     """The same for the flu-like illness visits, whose weeks are named by their Monday: "2026-09-07"."""
-    by_label = {str(entry.get("label")): str(entry["sid"]) for entry in leaves(dimension(dimensions, "weeks40").get("children") or [])}
+    by_label = {str(entry.get("label")): str(entry["sid"]) for entry in leaves(children(dimension(dimensions, "weeks40")))}
     return published(newest, count, lambda year, week: by_label.get(date.fromisocalendar(year, week, 1).isoformat()))
 
 
@@ -167,18 +176,17 @@ class Cube:
                 name: {str(key): int(value) for key, value in dimensions[name]["category"]["index"].items()} for name in self._names
             }
             self._values: Any = dataset["value"]
-        except (KeyError, IndexError, TypeError, ValueError) as err:
+        except (AttributeError, KeyError, IndexError, TypeError, ValueError) as err:
             raise ThlError("THL sent the numbers in an unexpected format") from err
         if len(self._names) != len(self._sizes):
             raise ThlError("THL sent the numbers in an unexpected format")
-
-    def has(self, name: str, category: str) -> bool:
-        return str(category) in self._index.get(name, {})
 
     def value(self, **categories: str | int) -> float | None:
         """One cell. THL leaves out the cells with nothing in them, and those are None."""
         position = 0
         for name, size in zip(self._names, self._sizes, strict=True):
+            if name not in categories:
+                raise ThlError(f"THL's numbers have a dimension that wasn't asked for: {name}")
             index = self._index[name].get(str(categories[name]))
             if index is None:
                 return None
