@@ -3,17 +3,12 @@
 Home Assistant integration for the weekly infectious disease numbers published by the Finnish Institute for Health and
 Welfare (THL).
 
-[![GitHub Release][releases-shield]][releases] [![GitHub Release Date][release-date-shield]][releases]
+[![GitHub Release][releases-shield]][releases] [![GitHub Release Date][release-date-shield]][releases] [![HACS][hacs-shield]][hacs] [![License][license-shield]](LICENSE)
 
-[![HACS][hacs-shield]][hacs] [![Home Assistant][home-assistant-shield]][home-assistant] [![License][license-shield]](LICENSE)
+<img src="https://raw.githubusercontent.com/jesmak/thl/main/docs/images/dashboard-light.png#gh-light-mode-only" width="1000" alt="A dashboard with four maps of Finland's wellbeing services counties, coloured by incidence: COVID-19, influenza, flu-like illness visits and norovirus in February, each with Pirkanmaa's figures and its trend over 26 weeks">
+<img src="https://raw.githubusercontent.com/jesmak/thl/main/docs/images/dashboard-dark.png#gh-dark-mode-only" width="1000" alt="A dashboard with four maps of Finland's wellbeing services counties, coloured by incidence: COVID-19, influenza, flu-like illness visits and norovirus in February, each with Pirkanmaa's figures and its trend over 26 weeks">
 
-![Project Maintenance][maintenance-shield] [![GitHub Activity][commits-shield]][commits] [![Open bugs][bugs-shield]][bugs] [![Open enhancements][enhancements-shield]][enhancements]
-
-## Support
-
-Hey dude! Help me out for a couple of :beers: or a :coffee:!
-
-[![coffee](https://www.buymeacoffee.com/assets/img/custom_images/black_img.png)](https://www.buymeacoffee.com/jesmak)
+The data in the picture is made up.
 
 ## What is it?
 
@@ -113,19 +108,34 @@ is what thl-card shows as its title, and every area in its `values` attribute:
 | `all_visits_last_week` | All primary care visits last week                 |
 | `entity_id`            | The area's sensor                                 |
 
-## The history
+### The history
 
 When a sensor is added, the past year is written into its statistics, a year and a week to be exact, so the same week a
 year ago is there too. Each week's figure is placed at the start of the week after it, which is when the sensor would
 have shown it, so the past and what the recorder keeps from then on line up.
 
-Only the weeks without any statistics are written. A sensor that has been running keeps what it recorded itself and
-gets the weeks before that. A sensor that got six months from an earlier version gets the rest of the year once, after
-the upgrade.
+Only the weeks without any statistics are written, and this is checked at every start. A sensor that has been running
+keeps what it recorded itself and gets the weeks before that. A sensor enabled later gets its past when it is added, and
+one that got six months from an earlier version gets the rest of the year after the upgrade.
 
 A graph therefore shows each week about a week after the week it describes. The shape of the curve is the same.
 
-## Usage with apexcharts-card
+## Examples
+
+### The diseases on maps
+
+[thl-card](https://github.com/jesmak/thl-card) draws a disease on a map of the counties. The dashboard in the picture
+above has one card for each disease, all opening on the same county:
+
+```yaml
+type: custom:thl-card
+entity: sensor.thl_influenssa
+default_area: pirkanmaan_hyvinvointialue
+```
+
+The flu-like illness visits take the same card, with `entity: sensor.thl_influenssankaltaiset_kaynnit`.
+
+### A county's incidence over half a year
 
 [apexcharts-card](https://github.com/RomRider/apexcharts-card) can draw a county's incidence from its statistics:
 
@@ -162,19 +172,33 @@ that already existed keep the history they have.
 
 ## Data
 
-Disease statistics and primary care visits: [THL](https://thl.fi/), from the open data of the infectious diseases
-register and the primary health care register (Avohilmo).
+The data comes from [THL's open data](https://thl.fi/en/statistics-and-data/data-and-services/open-data) under the
+[Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/) licence. The disease numbers come
+from the infectious diseases register, and the primary care visits from the primary health care register (Avohilmo).
+Every entity credits THL in its attribution.
+
+The newest weeks are read every half hour. The names of the diseases and areas are kept for half an hour and shared
+by every disease.
+
+## Translating
+
+The texts are in `custom_components/thl/translations/`, one JSON file per language, such as `en.json` and `fi.json`.
+To add a language, copy `en.json` to the new language's code and translate the values. The names of the diseases and
+areas come from THL in Finnish or English.
 
 ## Development
 
-Requires Python 3.14.
+Requires the Python that the current Home Assistant release needs, 3.14 at the moment.
 
 ```
 python3.14 -m venv .venv
 .venv/bin/pip install -r requirements_test.txt
 .venv/bin/pytest
 .venv/bin/ruff check .
+.venv/bin/ruff format --check .
 ```
+
+The tests run on made-up data, without network access.
 
 | Path                           | What it contains                                                              |
 | ------------------------------ | ----------------------------------------------------------------------------- |
@@ -185,21 +209,22 @@ python3.14 -m venv .venv
 | `statistics.py`                | Reading the dimensions and data files                                         |
 | `coordinator.py`               | Fetching the newest published weeks every half hour                           |
 | `sensor.py`                    | The sensors                                                                   |
-| `history.py`                   | Writing past weeks into the statistics of new sensors                         |
+| `history.py`                   | Writing past weeks into the statistics of the sensors that have none for them |
 | `translations/<language>.json` | Home Assistant UI texts                                                       |
+
+## Support
+
+Hey dude! Help me out for a couple of :beers: or a :coffee:!
+
+[![coffee](https://www.buymeacoffee.com/assets/img/custom_images/black_img.png)](https://www.buymeacoffee.com/jesmak)
+
+## License
+
+MIT. The data is THL's, under CC BY 4.0.
 
 [releases-shield]: https://img.shields.io/github/release/jesmak/thl.svg?style=for-the-badge
 [release-date-shield]: https://img.shields.io/github/release-date/jesmak/thl?style=for-the-badge
 [releases]: https://github.com/jesmak/thl/releases
 [hacs-shield]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge
 [hacs]: https://hacs.xyz/docs/faq/custom_repositories/
-[home-assistant-shield]: https://img.shields.io/badge/Home%20Assistant-UI%20setup-green.svg?style=for-the-badge
-[home-assistant]: https://www.home-assistant.io/
 [license-shield]: https://img.shields.io/github/license/jesmak/thl.svg?style=for-the-badge
-[maintenance-shield]: https://img.shields.io/maintenance/yes/2026.svg?style=for-the-badge
-[commits-shield]: https://img.shields.io/github/commit-activity/y/jesmak/thl.svg?style=for-the-badge
-[commits]: https://github.com/jesmak/thl/commits/main
-[bugs-shield]: https://img.shields.io/github/issues/jesmak/thl/bug?style=for-the-badge&label=bugs&color=red
-[bugs]: https://github.com/jesmak/thl/labels/bug
-[enhancements-shield]: https://img.shields.io/github/issues/jesmak/thl/enhancement?style=for-the-badge&label=enhancements&color=blue
-[enhancements]: https://github.com/jesmak/thl/labels/enhancement

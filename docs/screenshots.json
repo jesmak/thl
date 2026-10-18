@@ -1,0 +1,2924 @@
+{
+    "resources": [
+        "https://raw.githubusercontent.com/jesmak/thl-card/main/dist/thl-card.js"
+    ],
+    "clock": "2027-02-10T12:00:00+02:00",
+    "states": {
+        "sensor.thl_influenssa": {
+            "state": "1530",
+            "attributes": {
+                "state_class": "measurement",
+                "last_week": 5,
+                "disease_id": "877719",
+                "disease_name": "Influenssa",
+                "values": [
+                    {
+                        "name": "Kaikki hyvinvointialueet",
+                        "amount_last_week": 1530,
+                        "area_id": "finland",
+                        "incidence_last_week": 27.3,
+                        "amount_two_weeks_ago": 1328,
+                        "change_in_numbers": 202,
+                        "change_percentage": "15",
+                        "incidence_two_weeks_ago": 23.7,
+                        "entity_id": "sensor.thl_influenssa",
+                        "incidence_entity_id": "sensor.thl_influenssa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Itä-Uudenmaan hyvinvointialue",
+                        "amount_last_week": 27,
+                        "area_id": "ita-uudenmaan_hyvinvointialue",
+                        "incidence_last_week": 27.3,
+                        "amount_two_weeks_ago": 20,
+                        "change_in_numbers": 7,
+                        "change_percentage": "35",
+                        "incidence_two_weeks_ago": 20.2,
+                        "entity_id": "sensor.thl_influenssa_ita_uusimaa",
+                        "incidence_entity_id": "sensor.thl_influenssa_ita_uusimaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Keski-Uudenmaan hyvinvointialue",
+                        "amount_last_week": 70,
+                        "area_id": "keski-uudenmaan_hyvinvointialue",
+                        "incidence_last_week": 34.1,
+                        "amount_two_weeks_ago": 64,
+                        "change_in_numbers": 6,
+                        "change_percentage": "9",
+                        "incidence_two_weeks_ago": 31.2,
+                        "entity_id": "sensor.thl_influenssa_keski_uusimaa",
+                        "incidence_entity_id": "sensor.thl_influenssa_keski_uusimaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Länsi-Uudenmaan hyvinvointialue",
+                        "amount_last_week": 121,
+                        "area_id": "lansi-uudenmaan_hyvinvointialue",
+                        "incidence_last_week": 24.8,
+                        "amount_two_weeks_ago": 98,
+                        "change_in_numbers": 23,
+                        "change_percentage": "23",
+                        "incidence_two_weeks_ago": 20.1,
+                        "entity_id": "sensor.thl_influenssa_lansi_uusimaa",
+                        "incidence_entity_id": "sensor.thl_influenssa_lansi_uusimaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Vantaan ja Keravan hyvinvointialue",
+                        "amount_last_week": 72,
+                        "area_id": "vantaan_ja_keravan_hyvinvointialue",
+                        "incidence_last_week": 25.3,
+                        "amount_two_weeks_ago": 61,
+                        "change_in_numbers": 11,
+                        "change_percentage": "18",
+                        "incidence_two_weeks_ago": 21.4,
+                        "entity_id": "sensor.thl_influenssa_vantaa_ja_kerava",
+                        "incidence_entity_id": "sensor.thl_influenssa_vantaa_ja_kerava_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Varsinais-Suomen hyvinvointialue",
+                        "amount_last_week": 112,
+                        "area_id": "varsinais-suomen_hyvinvointialue",
+                        "incidence_last_week": 22.8,
+                        "amount_two_weeks_ago": 108,
+                        "change_in_numbers": 4,
+                        "change_percentage": "4",
+                        "incidence_two_weeks_ago": 22.0,
+                        "entity_id": "sensor.thl_influenssa_varsinais_suomi",
+                        "incidence_entity_id": "sensor.thl_influenssa_varsinais_suomi_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Satakunnan hyvinvointialue",
+                        "amount_last_week": 53,
+                        "area_id": "satakunnan_hyvinvointialue",
+                        "incidence_last_week": 25.0,
+                        "amount_two_weeks_ago": 53,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 25.0,
+                        "entity_id": "sensor.thl_influenssa_satakunta",
+                        "incidence_entity_id": "sensor.thl_influenssa_satakunta_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Kanta-Hämeen hyvinvointialue",
+                        "amount_last_week": 55,
+                        "area_id": "kanta-hameen_hyvinvointialue",
+                        "incidence_last_week": 32.3,
+                        "amount_two_weeks_ago": 58,
+                        "change_in_numbers": -3,
+                        "change_percentage": "-5",
+                        "incidence_two_weeks_ago": 34.1,
+                        "entity_id": "sensor.thl_influenssa_kanta_hame",
+                        "incidence_entity_id": "sensor.thl_influenssa_kanta_hame_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Pirkanmaan hyvinvointialue",
+                        "amount_last_week": 171,
+                        "area_id": "pirkanmaan_hyvinvointialue",
+                        "incidence_last_week": 31.9,
+                        "amount_two_weeks_ago": 141,
+                        "change_in_numbers": 30,
+                        "change_percentage": "21",
+                        "incidence_two_weeks_ago": 26.3,
+                        "entity_id": "sensor.thl_influenssa_pirkanmaa",
+                        "incidence_entity_id": "sensor.thl_influenssa_pirkanmaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Päijät-Hämeen hyvinvointialue",
+                        "amount_last_week": 80,
+                        "area_id": "paijat-hameen_hyvinvointialue",
+                        "incidence_last_week": 39.0,
+                        "amount_two_weeks_ago": 58,
+                        "change_in_numbers": 22,
+                        "change_percentage": "38",
+                        "incidence_two_weeks_ago": 28.3,
+                        "entity_id": "sensor.thl_influenssa_paijat_hame",
+                        "incidence_entity_id": "sensor.thl_influenssa_paijat_hame_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Kymenlaakson hyvinvointialue",
+                        "amount_last_week": 50,
+                        "area_id": "kymenlaakson_hyvinvointialue",
+                        "incidence_last_week": 31.0,
+                        "amount_two_weeks_ago": 43,
+                        "change_in_numbers": 7,
+                        "change_percentage": "16",
+                        "incidence_two_weeks_ago": 26.7,
+                        "entity_id": "sensor.thl_influenssa_kymenlaakso",
+                        "incidence_entity_id": "sensor.thl_influenssa_kymenlaakso_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Etelä-Karjalan hyvinvointialue",
+                        "amount_last_week": 40,
+                        "area_id": "etela-karjalan_hyvinvointialue",
+                        "incidence_last_week": 31.7,
+                        "amount_two_weeks_ago": 30,
+                        "change_in_numbers": 10,
+                        "change_percentage": "33",
+                        "incidence_two_weeks_ago": 23.8,
+                        "entity_id": "sensor.thl_influenssa_etela_karjala",
+                        "incidence_entity_id": "sensor.thl_influenssa_etela_karjala_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Etelä-Savon hyvinvointialue",
+                        "amount_last_week": 40,
+                        "area_id": "etela-savon_hyvinvointialue",
+                        "incidence_last_week": 31.3,
+                        "amount_two_weeks_ago": 29,
+                        "change_in_numbers": 11,
+                        "change_percentage": "38",
+                        "incidence_two_weeks_ago": 22.7,
+                        "entity_id": "sensor.thl_influenssa_etela_savo",
+                        "incidence_entity_id": "sensor.thl_influenssa_etela_savo_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Pohjois-Savon hyvinvointialue",
+                        "amount_last_week": 46,
+                        "area_id": "pohjois-savon_hyvinvointialue",
+                        "incidence_last_week": 18.5,
+                        "amount_two_weeks_ago": 38,
+                        "change_in_numbers": 8,
+                        "change_percentage": "21",
+                        "incidence_two_weeks_ago": 15.3,
+                        "entity_id": "sensor.thl_influenssa_pohjois_savo",
+                        "incidence_entity_id": "sensor.thl_influenssa_pohjois_savo_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Pohjois-Karjalan hyvinvointialue",
+                        "amount_last_week": 57,
+                        "area_id": "pohjois-karjalan_hyvinvointialue",
+                        "incidence_last_week": 34.9,
+                        "amount_two_weeks_ago": 42,
+                        "change_in_numbers": 15,
+                        "change_percentage": "36",
+                        "incidence_two_weeks_ago": 25.7,
+                        "entity_id": "sensor.thl_influenssa_pohjois_karjala",
+                        "incidence_entity_id": "sensor.thl_influenssa_pohjois_karjala_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Keski-Suomen hyvinvointialue",
+                        "amount_last_week": 83,
+                        "area_id": "keski-suomen_hyvinvointialue",
+                        "incidence_last_week": 30.2,
+                        "amount_two_weeks_ago": 73,
+                        "change_in_numbers": 10,
+                        "change_percentage": "14",
+                        "incidence_two_weeks_ago": 26.5,
+                        "entity_id": "sensor.thl_influenssa_keski_suomi",
+                        "incidence_entity_id": "sensor.thl_influenssa_keski_suomi_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Etelä-Pohjanmaan hyvinvointialue",
+                        "amount_last_week": 55,
+                        "area_id": "etela-pohjanmaan_hyvinvointialue",
+                        "incidence_last_week": 29.0,
+                        "amount_two_weeks_ago": 57,
+                        "change_in_numbers": -2,
+                        "change_percentage": "-4",
+                        "incidence_two_weeks_ago": 30.0,
+                        "entity_id": "sensor.thl_influenssa_etela_pohjanmaa",
+                        "incidence_entity_id": "sensor.thl_influenssa_etela_pohjanmaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Pohjanmaan hyvinvointialue",
+                        "amount_last_week": 32,
+                        "area_id": "pohjanmaan_hyvinvointialue",
+                        "incidence_last_week": 18.1,
+                        "amount_two_weeks_ago": 30,
+                        "change_in_numbers": 2,
+                        "change_percentage": "7",
+                        "incidence_two_weeks_ago": 17.0,
+                        "entity_id": "sensor.thl_influenssa_pohjanmaa",
+                        "incidence_entity_id": "sensor.thl_influenssa_pohjanmaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Keski-Pohjanmaan hyvinvointialue",
+                        "amount_last_week": 10,
+                        "area_id": "keski-pohjanmaan_hyvinvointialue",
+                        "incidence_last_week": 14.7,
+                        "amount_two_weeks_ago": 11,
+                        "change_in_numbers": -1,
+                        "change_percentage": "-9",
+                        "incidence_two_weeks_ago": 16.2,
+                        "entity_id": "sensor.thl_influenssa_keski_pohjanmaa",
+                        "incidence_entity_id": "sensor.thl_influenssa_keski_pohjanmaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Pohjois-Pohjanmaan hyvinvointialue",
+                        "amount_last_week": 88,
+                        "area_id": "pohjois-pohjanmaan_hyvinvointialue",
+                        "incidence_last_week": 21.0,
+                        "amount_two_weeks_ago": 84,
+                        "change_in_numbers": 4,
+                        "change_percentage": "5",
+                        "incidence_two_weeks_ago": 20.1,
+                        "entity_id": "sensor.thl_influenssa_pohjois_pohjanmaa",
+                        "incidence_entity_id": "sensor.thl_influenssa_pohjois_pohjanmaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Kainuun hyvinvointialue",
+                        "amount_last_week": 19,
+                        "area_id": "kainuun_hyvinvointialue",
+                        "incidence_last_week": 26.6,
+                        "amount_two_weeks_ago": 15,
+                        "change_in_numbers": 4,
+                        "change_percentage": "27",
+                        "incidence_two_weeks_ago": 21.0,
+                        "entity_id": "sensor.thl_influenssa_kainuu",
+                        "incidence_entity_id": "sensor.thl_influenssa_kainuu_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Lapin hyvinvointialue",
+                        "amount_last_week": 54,
+                        "area_id": "lapin_hyvinvointialue",
+                        "incidence_last_week": 30.8,
+                        "amount_two_weeks_ago": 41,
+                        "change_in_numbers": 13,
+                        "change_percentage": "32",
+                        "incidence_two_weeks_ago": 23.4,
+                        "entity_id": "sensor.thl_influenssa_lappi",
+                        "incidence_entity_id": "sensor.thl_influenssa_lappi_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Helsingin kaupunki",
+                        "amount_last_week": 186,
+                        "area_id": "helsingin_kaupunki",
+                        "incidence_last_week": 27.6,
+                        "amount_two_weeks_ago": 166,
+                        "change_in_numbers": 20,
+                        "change_percentage": "12",
+                        "incidence_two_weeks_ago": 24.6,
+                        "entity_id": "sensor.thl_influenssa_helsinki",
+                        "incidence_entity_id": "sensor.thl_influenssa_helsinki_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Ahvenanmaa",
+                        "amount_last_week": 9,
+                        "area_id": "ahvenanmaa",
+                        "incidence_last_week": 29.5,
+                        "amount_two_weeks_ago": 8,
+                        "change_in_numbers": 1,
+                        "change_percentage": "12",
+                        "incidence_two_weeks_ago": 26.2,
+                        "entity_id": "sensor.thl_influenssa_ahvenanmaa",
+                        "incidence_entity_id": "sensor.thl_influenssa_ahvenanmaa_ilmaantuvuus"
+                    }
+                ],
+                "icon": "mdi:virus",
+                "attribution": "Data provided by Finnish Institute for Health and Welfare (THL)",
+                "friendly_name": "THL Influenssa Tila"
+            }
+        },
+        "sensor.thl_influenssa_pirkanmaa": {
+            "state": "171",
+            "attributes": {
+                "state_class": "measurement",
+                "last_week": 5,
+                "attribution": "Data provided by Finnish Institute for Health and Welfare (THL)",
+                "friendly_name": "THL Influenssa Pirkanmaa"
+            }
+        },
+        "sensor.thl_influenssa_pirkanmaa_ilmaantuvuus": {
+            "state": "31.9",
+            "attributes": {
+                "state_class": "measurement",
+                "last_week": 5,
+                "attribution": "Data provided by Finnish Institute for Health and Welfare (THL)",
+                "friendly_name": "THL Influenssa Pirkanmaa",
+                "unit_of_measurement": "per 100 000"
+            }
+        },
+        "sensor.thl_koronavirus_sars_cov_2": {
+            "state": "145",
+            "attributes": {
+                "state_class": "measurement",
+                "last_week": 5,
+                "disease_id": "877943",
+                "disease_name": "Koronavirus SARS-CoV-2",
+                "values": [
+                    {
+                        "name": "Kaikki hyvinvointialueet",
+                        "amount_last_week": 145,
+                        "area_id": "finland",
+                        "incidence_last_week": 2.6,
+                        "amount_two_weeks_ago": 143,
+                        "change_in_numbers": 2,
+                        "change_percentage": "1",
+                        "incidence_two_weeks_ago": 2.6,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Itä-Uudenmaan hyvinvointialue",
+                        "amount_last_week": 2,
+                        "area_id": "ita-uudenmaan_hyvinvointialue",
+                        "incidence_last_week": 2.0,
+                        "amount_two_weeks_ago": 2,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 2.0,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_ita_uusimaa",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_ita_uusimaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Keski-Uudenmaan hyvinvointialue",
+                        "amount_last_week": 4,
+                        "area_id": "keski-uudenmaan_hyvinvointialue",
+                        "incidence_last_week": 1.9,
+                        "amount_two_weeks_ago": 4,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 1.9,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_keski_uusimaa",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_keski_uusimaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Länsi-Uudenmaan hyvinvointialue",
+                        "amount_last_week": 17,
+                        "area_id": "lansi-uudenmaan_hyvinvointialue",
+                        "incidence_last_week": 3.5,
+                        "amount_two_weeks_ago": 15,
+                        "change_in_numbers": 2,
+                        "change_percentage": "13",
+                        "incidence_two_weeks_ago": 3.1,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_lansi_uusimaa",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_lansi_uusimaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Vantaan ja Keravan hyvinvointialue",
+                        "amount_last_week": 5,
+                        "area_id": "vantaan_ja_keravan_hyvinvointialue",
+                        "incidence_last_week": 1.8,
+                        "amount_two_weeks_ago": 6,
+                        "change_in_numbers": -1,
+                        "change_percentage": "-17",
+                        "incidence_two_weeks_ago": 2.1,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_vantaa_ja_kerava",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_vantaa_ja_kerava_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Varsinais-Suomen hyvinvointialue",
+                        "amount_last_week": 10,
+                        "area_id": "varsinais-suomen_hyvinvointialue",
+                        "incidence_last_week": 2.0,
+                        "amount_two_weeks_ago": 12,
+                        "change_in_numbers": -2,
+                        "change_percentage": "-17",
+                        "incidence_two_weeks_ago": 2.4,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_varsinais_suomi",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_varsinais_suomi_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Satakunnan hyvinvointialue",
+                        "amount_last_week": 4,
+                        "area_id": "satakunnan_hyvinvointialue",
+                        "incidence_last_week": 1.9,
+                        "amount_two_weeks_ago": 4,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 1.9,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_satakunta",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_satakunta_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Kanta-Hämeen hyvinvointialue",
+                        "amount_last_week": 2,
+                        "area_id": "kanta-hameen_hyvinvointialue",
+                        "incidence_last_week": 1.2,
+                        "amount_two_weeks_ago": 3,
+                        "change_in_numbers": -1,
+                        "change_percentage": "-33",
+                        "incidence_two_weeks_ago": 1.8,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_kanta_hame",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_kanta_hame_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Pirkanmaan hyvinvointialue",
+                        "amount_last_week": 15,
+                        "area_id": "pirkanmaan_hyvinvointialue",
+                        "incidence_last_week": 2.8,
+                        "amount_two_weeks_ago": 17,
+                        "change_in_numbers": -2,
+                        "change_percentage": "-12",
+                        "incidence_two_weeks_ago": 3.2,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_pirkanmaa",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_pirkanmaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Päijät-Hämeen hyvinvointialue",
+                        "amount_last_week": 7,
+                        "area_id": "paijat-hameen_hyvinvointialue",
+                        "incidence_last_week": 3.4,
+                        "amount_two_weeks_ago": 7,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 3.4,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_paijat_hame",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_paijat_hame_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Kymenlaakson hyvinvointialue",
+                        "amount_last_week": 4,
+                        "area_id": "kymenlaakson_hyvinvointialue",
+                        "incidence_last_week": 2.5,
+                        "amount_two_weeks_ago": 4,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 2.5,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_kymenlaakso",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_kymenlaakso_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Etelä-Karjalan hyvinvointialue",
+                        "amount_last_week": 3,
+                        "area_id": "etela-karjalan_hyvinvointialue",
+                        "incidence_last_week": 2.4,
+                        "amount_two_weeks_ago": 2,
+                        "change_in_numbers": 1,
+                        "change_percentage": "50",
+                        "incidence_two_weeks_ago": 1.6,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_etela_karjala",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_etela_karjala_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Etelä-Savon hyvinvointialue",
+                        "amount_last_week": 2,
+                        "area_id": "etela-savon_hyvinvointialue",
+                        "incidence_last_week": 1.6,
+                        "amount_two_weeks_ago": 2,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 1.6,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_etela_savo",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_etela_savo_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Pohjois-Savon hyvinvointialue",
+                        "amount_last_week": 8,
+                        "area_id": "pohjois-savon_hyvinvointialue",
+                        "incidence_last_week": 3.2,
+                        "amount_two_weeks_ago": 7,
+                        "change_in_numbers": 1,
+                        "change_percentage": "14",
+                        "incidence_two_weeks_ago": 2.8,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_pohjois_savo",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_pohjois_savo_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Pohjois-Karjalan hyvinvointialue",
+                        "amount_last_week": 7,
+                        "area_id": "pohjois-karjalan_hyvinvointialue",
+                        "incidence_last_week": 4.3,
+                        "amount_two_weeks_ago": 5,
+                        "change_in_numbers": 2,
+                        "change_percentage": "40",
+                        "incidence_two_weeks_ago": 3.1,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_pohjois_karjala",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_pohjois_karjala_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Keski-Suomen hyvinvointialue",
+                        "amount_last_week": 7,
+                        "area_id": "keski-suomen_hyvinvointialue",
+                        "incidence_last_week": 2.5,
+                        "amount_two_weeks_ago": 7,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 2.5,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_keski_suomi",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_keski_suomi_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Etelä-Pohjanmaan hyvinvointialue",
+                        "amount_last_week": 6,
+                        "area_id": "etela-pohjanmaan_hyvinvointialue",
+                        "incidence_last_week": 3.2,
+                        "amount_two_weeks_ago": 6,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 3.2,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_etela_pohjanmaa",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_etela_pohjanmaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Pohjanmaan hyvinvointialue",
+                        "amount_last_week": 7,
+                        "area_id": "pohjanmaan_hyvinvointialue",
+                        "incidence_last_week": 4.0,
+                        "amount_two_weeks_ago": 7,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 4.0,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_pohjanmaa",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_pohjanmaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Keski-Pohjanmaan hyvinvointialue",
+                        "amount_last_week": 3,
+                        "area_id": "keski-pohjanmaan_hyvinvointialue",
+                        "incidence_last_week": 4.4,
+                        "amount_two_weeks_ago": 2,
+                        "change_in_numbers": 1,
+                        "change_percentage": "50",
+                        "incidence_two_weeks_ago": 2.9,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_keski_pohjanmaa",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_keski_pohjanmaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Pohjois-Pohjanmaan hyvinvointialue",
+                        "amount_last_week": 11,
+                        "area_id": "pohjois-pohjanmaan_hyvinvointialue",
+                        "incidence_last_week": 2.6,
+                        "amount_two_weeks_ago": 10,
+                        "change_in_numbers": 1,
+                        "change_percentage": "10",
+                        "incidence_two_weeks_ago": 2.4,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_pohjois_pohjanmaa",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_pohjois_pohjanmaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Kainuun hyvinvointialue",
+                        "amount_last_week": 3,
+                        "area_id": "kainuun_hyvinvointialue",
+                        "incidence_last_week": 4.2,
+                        "amount_two_weeks_ago": 2,
+                        "change_in_numbers": 1,
+                        "change_percentage": "50",
+                        "incidence_two_weeks_ago": 2.8,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_kainuu",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_kainuu_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Lapin hyvinvointialue",
+                        "amount_last_week": 6,
+                        "area_id": "lapin_hyvinvointialue",
+                        "incidence_last_week": 3.4,
+                        "amount_two_weeks_ago": 5,
+                        "change_in_numbers": 1,
+                        "change_percentage": "20",
+                        "incidence_two_weeks_ago": 2.8,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_lappi",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_lappi_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Helsingin kaupunki",
+                        "amount_last_week": 11,
+                        "area_id": "helsingin_kaupunki",
+                        "incidence_last_week": 1.6,
+                        "amount_two_weeks_ago": 13,
+                        "change_in_numbers": -2,
+                        "change_percentage": "-15",
+                        "incidence_two_weeks_ago": 1.9,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_helsinki",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_helsinki_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Ahvenanmaa",
+                        "amount_last_week": 1,
+                        "area_id": "ahvenanmaa",
+                        "incidence_last_week": 3.3,
+                        "amount_two_weeks_ago": 1,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 3.3,
+                        "entity_id": "sensor.thl_koronavirus_sars_cov_2_ahvenanmaa",
+                        "incidence_entity_id": "sensor.thl_koronavirus_sars_cov_2_ahvenanmaa_ilmaantuvuus"
+                    }
+                ],
+                "icon": "mdi:virus",
+                "attribution": "Data provided by Finnish Institute for Health and Welfare (THL)",
+                "friendly_name": "THL Koronavirus SARS-CoV-2 Tila"
+            }
+        },
+        "sensor.thl_koronavirus_sars_cov_2_pirkanmaa": {
+            "state": "15",
+            "attributes": {
+                "state_class": "measurement",
+                "last_week": 5,
+                "attribution": "Data provided by Finnish Institute for Health and Welfare (THL)",
+                "friendly_name": "THL Koronavirus SARS-CoV-2 Pirkanmaa"
+            }
+        },
+        "sensor.thl_koronavirus_sars_cov_2_pirkanmaa_ilmaantuvuus": {
+            "state": "2.8",
+            "attributes": {
+                "state_class": "measurement",
+                "last_week": 5,
+                "attribution": "Data provided by Finnish Institute for Health and Welfare (THL)",
+                "friendly_name": "THL Koronavirus SARS-CoV-2 Pirkanmaa",
+                "unit_of_measurement": "per 100 000"
+            }
+        },
+        "sensor.thl_norovirus": {
+            "state": "459",
+            "attributes": {
+                "state_class": "measurement",
+                "last_week": 5,
+                "disease_id": "877835",
+                "disease_name": "Norovirus",
+                "values": [
+                    {
+                        "name": "Kaikki hyvinvointialueet",
+                        "amount_last_week": 459,
+                        "area_id": "finland",
+                        "incidence_last_week": 8.2,
+                        "amount_two_weeks_ago": 439,
+                        "change_in_numbers": 20,
+                        "change_percentage": "5",
+                        "incidence_two_weeks_ago": 7.8,
+                        "entity_id": "sensor.thl_norovirus",
+                        "incidence_entity_id": "sensor.thl_norovirus_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Itä-Uudenmaan hyvinvointialue",
+                        "amount_last_week": 9,
+                        "area_id": "ita-uudenmaan_hyvinvointialue",
+                        "incidence_last_week": 9.1,
+                        "amount_two_weeks_ago": 10,
+                        "change_in_numbers": -1,
+                        "change_percentage": "-10",
+                        "incidence_two_weeks_ago": 10.1,
+                        "entity_id": "sensor.thl_norovirus_ita_uusimaa",
+                        "incidence_entity_id": "sensor.thl_norovirus_ita_uusimaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Keski-Uudenmaan hyvinvointialue",
+                        "amount_last_week": 12,
+                        "area_id": "keski-uudenmaan_hyvinvointialue",
+                        "incidence_last_week": 5.8,
+                        "amount_two_weeks_ago": 10,
+                        "change_in_numbers": 2,
+                        "change_percentage": "20",
+                        "incidence_two_weeks_ago": 4.9,
+                        "entity_id": "sensor.thl_norovirus_keski_uusimaa",
+                        "incidence_entity_id": "sensor.thl_norovirus_keski_uusimaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Länsi-Uudenmaan hyvinvointialue",
+                        "amount_last_week": 51,
+                        "area_id": "lansi-uudenmaan_hyvinvointialue",
+                        "incidence_last_week": 10.5,
+                        "amount_two_weeks_ago": 50,
+                        "change_in_numbers": 1,
+                        "change_percentage": "2",
+                        "incidence_two_weeks_ago": 10.3,
+                        "entity_id": "sensor.thl_norovirus_lansi_uusimaa",
+                        "incidence_entity_id": "sensor.thl_norovirus_lansi_uusimaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Vantaan ja Keravan hyvinvointialue",
+                        "amount_last_week": 21,
+                        "area_id": "vantaan_ja_keravan_hyvinvointialue",
+                        "incidence_last_week": 7.4,
+                        "amount_two_weeks_ago": 21,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 7.4,
+                        "entity_id": "sensor.thl_norovirus_vantaa_ja_kerava",
+                        "incidence_entity_id": "sensor.thl_norovirus_vantaa_ja_kerava_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Varsinais-Suomen hyvinvointialue",
+                        "amount_last_week": 36,
+                        "area_id": "varsinais-suomen_hyvinvointialue",
+                        "incidence_last_week": 7.3,
+                        "amount_two_weeks_ago": 30,
+                        "change_in_numbers": 6,
+                        "change_percentage": "20",
+                        "incidence_two_weeks_ago": 6.1,
+                        "entity_id": "sensor.thl_norovirus_varsinais_suomi",
+                        "incidence_entity_id": "sensor.thl_norovirus_varsinais_suomi_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Satakunnan hyvinvointialue",
+                        "amount_last_week": 27,
+                        "area_id": "satakunnan_hyvinvointialue",
+                        "incidence_last_week": 12.7,
+                        "amount_two_weeks_ago": 22,
+                        "change_in_numbers": 5,
+                        "change_percentage": "23",
+                        "incidence_two_weeks_ago": 10.4,
+                        "entity_id": "sensor.thl_norovirus_satakunta",
+                        "incidence_entity_id": "sensor.thl_norovirus_satakunta_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Kanta-Hämeen hyvinvointialue",
+                        "amount_last_week": 12,
+                        "area_id": "kanta-hameen_hyvinvointialue",
+                        "incidence_last_week": 7.1,
+                        "amount_two_weeks_ago": 12,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 7.1,
+                        "entity_id": "sensor.thl_norovirus_kanta_hame",
+                        "incidence_entity_id": "sensor.thl_norovirus_kanta_hame_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Pirkanmaan hyvinvointialue",
+                        "amount_last_week": 29,
+                        "area_id": "pirkanmaan_hyvinvointialue",
+                        "incidence_last_week": 5.4,
+                        "amount_two_weeks_ago": 30,
+                        "change_in_numbers": -1,
+                        "change_percentage": "-3",
+                        "incidence_two_weeks_ago": 5.6,
+                        "entity_id": "sensor.thl_norovirus_pirkanmaa",
+                        "incidence_entity_id": "sensor.thl_norovirus_pirkanmaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Päijät-Hämeen hyvinvointialue",
+                        "amount_last_week": 13,
+                        "area_id": "paijat-hameen_hyvinvointialue",
+                        "incidence_last_week": 6.3,
+                        "amount_two_weeks_ago": 15,
+                        "change_in_numbers": -2,
+                        "change_percentage": "-13",
+                        "incidence_two_weeks_ago": 7.3,
+                        "entity_id": "sensor.thl_norovirus_paijat_hame",
+                        "incidence_entity_id": "sensor.thl_norovirus_paijat_hame_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Kymenlaakson hyvinvointialue",
+                        "amount_last_week": 13,
+                        "area_id": "kymenlaakson_hyvinvointialue",
+                        "incidence_last_week": 8.1,
+                        "amount_two_weeks_ago": 10,
+                        "change_in_numbers": 3,
+                        "change_percentage": "30",
+                        "incidence_two_weeks_ago": 6.2,
+                        "entity_id": "sensor.thl_norovirus_kymenlaakso",
+                        "incidence_entity_id": "sensor.thl_norovirus_kymenlaakso_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Etelä-Karjalan hyvinvointialue",
+                        "amount_last_week": 8,
+                        "area_id": "etela-karjalan_hyvinvointialue",
+                        "incidence_last_week": 6.3,
+                        "amount_two_weeks_ago": 8,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 6.3,
+                        "entity_id": "sensor.thl_norovirus_etela_karjala",
+                        "incidence_entity_id": "sensor.thl_norovirus_etela_karjala_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Etelä-Savon hyvinvointialue",
+                        "amount_last_week": 10,
+                        "area_id": "etela-savon_hyvinvointialue",
+                        "incidence_last_week": 7.8,
+                        "amount_two_weeks_ago": 8,
+                        "change_in_numbers": 2,
+                        "change_percentage": "25",
+                        "incidence_two_weeks_ago": 6.3,
+                        "entity_id": "sensor.thl_norovirus_etela_savo",
+                        "incidence_entity_id": "sensor.thl_norovirus_etela_savo_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Pohjois-Savon hyvinvointialue",
+                        "amount_last_week": 26,
+                        "area_id": "pohjois-savon_hyvinvointialue",
+                        "incidence_last_week": 10.5,
+                        "amount_two_weeks_ago": 27,
+                        "change_in_numbers": -1,
+                        "change_percentage": "-4",
+                        "incidence_two_weeks_ago": 10.9,
+                        "entity_id": "sensor.thl_norovirus_pohjois_savo",
+                        "incidence_entity_id": "sensor.thl_norovirus_pohjois_savo_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Pohjois-Karjalan hyvinvointialue",
+                        "amount_last_week": 13,
+                        "area_id": "pohjois-karjalan_hyvinvointialue",
+                        "incidence_last_week": 8.0,
+                        "amount_two_weeks_ago": 13,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 8.0,
+                        "entity_id": "sensor.thl_norovirus_pohjois_karjala",
+                        "incidence_entity_id": "sensor.thl_norovirus_pohjois_karjala_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Keski-Suomen hyvinvointialue",
+                        "amount_last_week": 14,
+                        "area_id": "keski-suomen_hyvinvointialue",
+                        "incidence_last_week": 5.1,
+                        "amount_two_weeks_ago": 17,
+                        "change_in_numbers": -3,
+                        "change_percentage": "-18",
+                        "incidence_two_weeks_ago": 6.2,
+                        "entity_id": "sensor.thl_norovirus_keski_suomi",
+                        "incidence_entity_id": "sensor.thl_norovirus_keski_suomi_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Etelä-Pohjanmaan hyvinvointialue",
+                        "amount_last_week": 26,
+                        "area_id": "etela-pohjanmaan_hyvinvointialue",
+                        "incidence_last_week": 13.7,
+                        "amount_two_weeks_ago": 25,
+                        "change_in_numbers": 1,
+                        "change_percentage": "4",
+                        "incidence_two_weeks_ago": 13.2,
+                        "entity_id": "sensor.thl_norovirus_etela_pohjanmaa",
+                        "incidence_entity_id": "sensor.thl_norovirus_etela_pohjanmaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Pohjanmaan hyvinvointialue",
+                        "amount_last_week": 13,
+                        "area_id": "pohjanmaan_hyvinvointialue",
+                        "incidence_last_week": 7.4,
+                        "amount_two_weeks_ago": 12,
+                        "change_in_numbers": 1,
+                        "change_percentage": "8",
+                        "incidence_two_weeks_ago": 6.8,
+                        "entity_id": "sensor.thl_norovirus_pohjanmaa",
+                        "incidence_entity_id": "sensor.thl_norovirus_pohjanmaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Keski-Pohjanmaan hyvinvointialue",
+                        "amount_last_week": 5,
+                        "area_id": "keski-pohjanmaan_hyvinvointialue",
+                        "incidence_last_week": 7.4,
+                        "amount_two_weeks_ago": 5,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 7.4,
+                        "entity_id": "sensor.thl_norovirus_keski_pohjanmaa",
+                        "incidence_entity_id": "sensor.thl_norovirus_keski_pohjanmaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Pohjois-Pohjanmaan hyvinvointialue",
+                        "amount_last_week": 40,
+                        "area_id": "pohjois-pohjanmaan_hyvinvointialue",
+                        "incidence_last_week": 9.6,
+                        "amount_two_weeks_ago": 36,
+                        "change_in_numbers": 4,
+                        "change_percentage": "11",
+                        "incidence_two_weeks_ago": 8.6,
+                        "entity_id": "sensor.thl_norovirus_pohjois_pohjanmaa",
+                        "incidence_entity_id": "sensor.thl_norovirus_pohjois_pohjanmaa_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Kainuun hyvinvointialue",
+                        "amount_last_week": 7,
+                        "area_id": "kainuun_hyvinvointialue",
+                        "incidence_last_week": 9.8,
+                        "amount_two_weeks_ago": 7,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 9.8,
+                        "entity_id": "sensor.thl_norovirus_kainuu",
+                        "incidence_entity_id": "sensor.thl_norovirus_kainuu_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Lapin hyvinvointialue",
+                        "amount_last_week": 14,
+                        "area_id": "lapin_hyvinvointialue",
+                        "incidence_last_week": 8.0,
+                        "amount_two_weeks_ago": 13,
+                        "change_in_numbers": 1,
+                        "change_percentage": "8",
+                        "incidence_two_weeks_ago": 7.4,
+                        "entity_id": "sensor.thl_norovirus_lappi",
+                        "incidence_entity_id": "sensor.thl_norovirus_lappi_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Helsingin kaupunki",
+                        "amount_last_week": 55,
+                        "area_id": "helsingin_kaupunki",
+                        "incidence_last_week": 8.2,
+                        "amount_two_weeks_ago": 55,
+                        "change_in_numbers": 0,
+                        "change_percentage": "0",
+                        "incidence_two_weeks_ago": 8.2,
+                        "entity_id": "sensor.thl_norovirus_helsinki",
+                        "incidence_entity_id": "sensor.thl_norovirus_helsinki_ilmaantuvuus"
+                    },
+                    {
+                        "name": "Ahvenanmaa",
+                        "amount_last_week": 5,
+                        "area_id": "ahvenanmaa",
+                        "incidence_last_week": 16.4,
+                        "amount_two_weeks_ago": 3,
+                        "change_in_numbers": 2,
+                        "change_percentage": "67",
+                        "incidence_two_weeks_ago": 9.8,
+                        "entity_id": "sensor.thl_norovirus_ahvenanmaa",
+                        "incidence_entity_id": "sensor.thl_norovirus_ahvenanmaa_ilmaantuvuus"
+                    }
+                ],
+                "icon": "mdi:virus",
+                "attribution": "Data provided by Finnish Institute for Health and Welfare (THL)",
+                "friendly_name": "THL Norovirus Tila"
+            }
+        },
+        "sensor.thl_norovirus_pirkanmaa": {
+            "state": "29",
+            "attributes": {
+                "state_class": "measurement",
+                "last_week": 5,
+                "attribution": "Data provided by Finnish Institute for Health and Welfare (THL)",
+                "friendly_name": "THL Norovirus Pirkanmaa"
+            }
+        },
+        "sensor.thl_norovirus_pirkanmaa_ilmaantuvuus": {
+            "state": "5.4",
+            "attributes": {
+                "state_class": "measurement",
+                "last_week": 5,
+                "attribution": "Data provided by Finnish Institute for Health and Welfare (THL)",
+                "friendly_name": "THL Norovirus Pirkanmaa",
+                "unit_of_measurement": "per 100 000"
+            }
+        },
+        "sensor.thl_influenssankaltaiset_kaynnit": {
+            "state": "0.8813",
+            "attributes": {
+                "state_class": "measurement",
+                "last_week": 5,
+                "disease_name": "Influenssankaltaiset käynnit",
+                "values": [
+                    {
+                        "name": "Kaikki alueet",
+                        "area_id": "finland",
+                        "share_last_week": 0.8813,
+                        "visits_last_week": 1853,
+                        "all_visits_last_week": 210260,
+                        "share_two_weeks_ago": 0.7577,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit"
+                    },
+                    {
+                        "name": "Ahvenanmaa",
+                        "area_id": "ahvenanmaa",
+                        "share_last_week": 0.8828,
+                        "visits_last_week": 11,
+                        "all_visits_last_week": 1246,
+                        "share_two_weeks_ago": 1.0008,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_ahvenanmaa"
+                    },
+                    {
+                        "name": "Etelä-Karjalan hyvinvointialue",
+                        "area_id": "etela-karjalan_hyvinvointialue",
+                        "share_last_week": 0.6309,
+                        "visits_last_week": 28,
+                        "all_visits_last_week": 4438,
+                        "share_two_weeks_ago": 0.5247,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_etela_karjala"
+                    },
+                    {
+                        "name": "Etelä-Pohjanmaan hyvinvointialue",
+                        "area_id": "etela-pohjanmaan_hyvinvointialue",
+                        "share_last_week": 0.6472,
+                        "visits_last_week": 41,
+                        "all_visits_last_week": 6335,
+                        "share_two_weeks_ago": 0.6844,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_etela_pohjanmaa"
+                    },
+                    {
+                        "name": "Etelä-Savon hyvinvointialue",
+                        "area_id": "etela-savon_hyvinvointialue",
+                        "share_last_week": 0.9202,
+                        "visits_last_week": 46,
+                        "all_visits_last_week": 4999,
+                        "share_two_weeks_ago": 0.7213,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_etela_savo"
+                    },
+                    {
+                        "name": "Helsingin kaupunki",
+                        "area_id": "helsingin_kaupunki",
+                        "share_last_week": 0.7433,
+                        "visits_last_week": 190,
+                        "all_visits_last_week": 25562,
+                        "share_two_weeks_ago": 0.6829,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_helsinki"
+                    },
+                    {
+                        "name": "Itä-Uudenmaan hyvinvointialue",
+                        "area_id": "ita-uudenmaan_hyvinvointialue",
+                        "share_last_week": 0.945,
+                        "visits_last_week": 38,
+                        "all_visits_last_week": 4021,
+                        "share_two_weeks_ago": 0.8456,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_ita_uusimaa"
+                    },
+                    {
+                        "name": "Kainuun hyvinvointialue",
+                        "area_id": "kainuun_hyvinvointialue",
+                        "share_last_week": 0.5435,
+                        "visits_last_week": 16,
+                        "all_visits_last_week": 2944,
+                        "share_two_weeks_ago": 0.5491,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_kainuu"
+                    },
+                    {
+                        "name": "Kanta-Hämeen hyvinvointialue",
+                        "area_id": "kanta-hameen_hyvinvointialue",
+                        "share_last_week": 1.2712,
+                        "visits_last_week": 78,
+                        "all_visits_last_week": 6136,
+                        "share_two_weeks_ago": 1.2056,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_kanta_hame"
+                    },
+                    {
+                        "name": "Keski-Pohjanmaan hyvinvointialue",
+                        "area_id": "keski-pohjanmaan_hyvinvointialue",
+                        "share_last_week": 0.7652,
+                        "visits_last_week": 22,
+                        "all_visits_last_week": 2875,
+                        "share_two_weeks_ago": 0.7581,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_keski_pohjanmaa"
+                    },
+                    {
+                        "name": "Keski-Suomen hyvinvointialue",
+                        "area_id": "keski-suomen_hyvinvointialue",
+                        "share_last_week": 1.1663,
+                        "visits_last_week": 108,
+                        "all_visits_last_week": 9260,
+                        "share_two_weeks_ago": 0.8374,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_keski_suomi"
+                    },
+                    {
+                        "name": "Keski-Uudenmaan hyvinvointialue",
+                        "area_id": "keski-uudenmaan_hyvinvointialue",
+                        "share_last_week": 0.7757,
+                        "visits_last_week": 58,
+                        "all_visits_last_week": 7477,
+                        "share_two_weeks_ago": 0.617,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_keski_uusimaa"
+                    },
+                    {
+                        "name": "Kymenlaakson hyvinvointialue",
+                        "area_id": "kymenlaakson_hyvinvointialue",
+                        "share_last_week": 0.7297,
+                        "visits_last_week": 51,
+                        "all_visits_last_week": 6989,
+                        "share_two_weeks_ago": 0.9013,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_kymenlaakso"
+                    },
+                    {
+                        "name": "Länsi-Uudenmaan hyvinvointialue",
+                        "area_id": "lansi-uudenmaan_hyvinvointialue",
+                        "share_last_week": 1.363,
+                        "visits_last_week": 227,
+                        "all_visits_last_week": 16655,
+                        "share_two_weeks_ago": 0.9993,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_lansi_uusimaa"
+                    },
+                    {
+                        "name": "Lapin hyvinvointialue",
+                        "area_id": "lapin_hyvinvointialue",
+                        "share_last_week": 0.5809,
+                        "visits_last_week": 42,
+                        "all_visits_last_week": 7230,
+                        "share_two_weeks_ago": 0.4316,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_lappi"
+                    },
+                    {
+                        "name": "Päijät-Hämeen hyvinvointialue",
+                        "area_id": "paijat-hameen_hyvinvointialue",
+                        "share_last_week": 0.9974,
+                        "visits_last_week": 80,
+                        "all_visits_last_week": 8021,
+                        "share_two_weeks_ago": 1.1388,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_paijat_hame"
+                    },
+                    {
+                        "name": "Pirkanmaan hyvinvointialue",
+                        "area_id": "pirkanmaan_hyvinvointialue",
+                        "share_last_week": 0.8531,
+                        "visits_last_week": 185,
+                        "all_visits_last_week": 21685,
+                        "share_two_weeks_ago": 0.677,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_pirkanmaa"
+                    },
+                    {
+                        "name": "Pohjanmaan hyvinvointialue",
+                        "area_id": "pohjanmaan_hyvinvointialue",
+                        "share_last_week": 0.6819,
+                        "visits_last_week": 42,
+                        "all_visits_last_week": 6159,
+                        "share_two_weeks_ago": 0.4871,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_pohjanmaa"
+                    },
+                    {
+                        "name": "Pohjois-Karjalan hyvinvointialue",
+                        "area_id": "pohjois-karjalan_hyvinvointialue",
+                        "share_last_week": 0.6878,
+                        "visits_last_week": 49,
+                        "all_visits_last_week": 7124,
+                        "share_two_weeks_ago": 0.6441,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_pohjois_karjala"
+                    },
+                    {
+                        "name": "Pohjois-Pohjanmaan hyvinvointialue",
+                        "area_id": "pohjois-pohjanmaan_hyvinvointialue",
+                        "share_last_week": 0.908,
+                        "visits_last_week": 139,
+                        "all_visits_last_week": 15308,
+                        "share_two_weeks_ago": 0.605,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_pohjois_pohjanmaa"
+                    },
+                    {
+                        "name": "Pohjois-Savon hyvinvointialue",
+                        "area_id": "pohjois-savon_hyvinvointialue",
+                        "share_last_week": 1.1393,
+                        "visits_last_week": 112,
+                        "all_visits_last_week": 9831,
+                        "share_two_weeks_ago": 0.9473,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_pohjois_savo"
+                    },
+                    {
+                        "name": "Satakunnan hyvinvointialue",
+                        "area_id": "satakunnan_hyvinvointialue",
+                        "share_last_week": 1.0123,
+                        "visits_last_week": 82,
+                        "all_visits_last_week": 8100,
+                        "share_two_weeks_ago": 0.7157,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_satakunta"
+                    },
+                    {
+                        "name": "Vantaan ja Keravan hyvinvointialue",
+                        "area_id": "vantaan_ja_keravan_hyvinvointialue",
+                        "share_last_week": 0.7718,
+                        "visits_last_week": 74,
+                        "all_visits_last_week": 9588,
+                        "share_two_weeks_ago": 0.5996,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_vantaa_ja_kerava"
+                    },
+                    {
+                        "name": "Varsinais-Suomen hyvinvointialue",
+                        "area_id": "varsinais-suomen_hyvinvointialue",
+                        "share_last_week": 0.7332,
+                        "visits_last_week": 134,
+                        "all_visits_last_week": 18277,
+                        "share_two_weeks_ago": 0.8523,
+                        "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_varsinais_suomi"
+                    }
+                ],
+                "unit_of_measurement": "%",
+                "attribution": "Data provided by Finnish Institute for Health and Welfare (THL)",
+                "icon": "mdi:stethoscope",
+                "friendly_name": "THL Influenssankaltaiset käynnit Tila"
+            }
+        },
+        "sensor.thl_influenssankaltaiset_kaynnit_pirkanmaa": {
+            "state": "0.8531",
+            "attributes": {
+                "state_class": "measurement",
+                "last_week": 5,
+                "unit_of_measurement": "%",
+                "attribution": "Data provided by Finnish Institute for Health and Welfare (THL)",
+                "friendly_name": "THL Influenssankaltaiset käynnit Pirkanmaa"
+            }
+        }
+    },
+    "statistics": {
+        "sensor.thl_influenssa_pirkanmaa": {
+            "unit": null,
+            "mean": [
+                [
+                    "2026-01-06T08:00:00+00:00",
+                    117
+                ],
+                [
+                    "2026-01-13T08:00:00+00:00",
+                    118
+                ],
+                [
+                    "2026-01-20T08:00:00+00:00",
+                    143
+                ],
+                [
+                    "2026-01-27T08:00:00+00:00",
+                    119
+                ],
+                [
+                    "2026-02-03T08:00:00+00:00",
+                    127
+                ],
+                [
+                    "2026-02-10T08:00:00+00:00",
+                    93
+                ],
+                [
+                    "2026-02-17T08:00:00+00:00",
+                    81
+                ],
+                [
+                    "2026-02-24T08:00:00+00:00",
+                    64
+                ],
+                [
+                    "2026-03-03T08:00:00+00:00",
+                    48
+                ],
+                [
+                    "2026-03-10T08:00:00+00:00",
+                    35
+                ],
+                [
+                    "2026-03-17T08:00:00+00:00",
+                    27
+                ],
+                [
+                    "2026-03-24T08:00:00+00:00",
+                    20
+                ],
+                [
+                    "2026-03-31T08:00:00+00:00",
+                    15
+                ],
+                [
+                    "2026-04-07T08:00:00+00:00",
+                    8
+                ],
+                [
+                    "2026-04-14T08:00:00+00:00",
+                    8
+                ],
+                [
+                    "2026-04-21T08:00:00+00:00",
+                    6
+                ],
+                [
+                    "2026-04-28T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-05-05T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-05-12T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-05-19T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-05-26T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-06-02T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-06-09T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-06-16T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-06-23T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-06-30T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-07-07T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-07-14T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-07-21T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-07-28T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-08-04T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-08-11T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-08-18T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-08-25T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-09-01T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-09-08T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-09-15T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-09-22T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-09-29T08:00:00+00:00",
+                    6
+                ],
+                [
+                    "2026-10-06T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-10-13T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-10-20T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-10-27T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-11-03T08:00:00+00:00",
+                    7
+                ],
+                [
+                    "2026-11-10T08:00:00+00:00",
+                    9
+                ],
+                [
+                    "2026-11-17T08:00:00+00:00",
+                    9
+                ],
+                [
+                    "2026-11-24T08:00:00+00:00",
+                    12
+                ],
+                [
+                    "2026-12-01T08:00:00+00:00",
+                    15
+                ],
+                [
+                    "2026-12-08T08:00:00+00:00",
+                    21
+                ],
+                [
+                    "2026-12-15T08:00:00+00:00",
+                    34
+                ],
+                [
+                    "2026-12-22T08:00:00+00:00",
+                    36
+                ],
+                [
+                    "2026-12-29T08:00:00+00:00",
+                    49
+                ],
+                [
+                    "2027-01-05T08:00:00+00:00",
+                    73
+                ],
+                [
+                    "2027-01-12T08:00:00+00:00",
+                    84
+                ],
+                [
+                    "2027-01-19T08:00:00+00:00",
+                    99
+                ],
+                [
+                    "2027-01-26T08:00:00+00:00",
+                    140
+                ],
+                [
+                    "2027-02-02T08:00:00+00:00",
+                    141
+                ],
+                [
+                    "2027-02-09T08:00:00+00:00",
+                    171
+                ]
+            ]
+        },
+        "sensor.thl_influenssa_pirkanmaa_ilmaantuvuus": {
+            "unit": "per 100 000",
+            "mean": [
+                [
+                    "2026-01-06T08:00:00+00:00",
+                    21.9
+                ],
+                [
+                    "2026-01-13T08:00:00+00:00",
+                    22.0
+                ],
+                [
+                    "2026-01-20T08:00:00+00:00",
+                    26.7
+                ],
+                [
+                    "2026-01-27T08:00:00+00:00",
+                    22.2
+                ],
+                [
+                    "2026-02-03T08:00:00+00:00",
+                    23.7
+                ],
+                [
+                    "2026-02-10T08:00:00+00:00",
+                    17.4
+                ],
+                [
+                    "2026-02-17T08:00:00+00:00",
+                    15.1
+                ],
+                [
+                    "2026-02-24T08:00:00+00:00",
+                    12.0
+                ],
+                [
+                    "2026-03-03T08:00:00+00:00",
+                    9.0
+                ],
+                [
+                    "2026-03-10T08:00:00+00:00",
+                    6.5
+                ],
+                [
+                    "2026-03-17T08:00:00+00:00",
+                    5.0
+                ],
+                [
+                    "2026-03-24T08:00:00+00:00",
+                    3.7
+                ],
+                [
+                    "2026-03-31T08:00:00+00:00",
+                    2.8
+                ],
+                [
+                    "2026-04-07T08:00:00+00:00",
+                    1.5
+                ],
+                [
+                    "2026-04-14T08:00:00+00:00",
+                    1.5
+                ],
+                [
+                    "2026-04-21T08:00:00+00:00",
+                    1.1
+                ],
+                [
+                    "2026-04-28T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-05-05T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-05-12T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-05-19T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-05-26T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-06-02T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-06-09T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-06-16T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-06-23T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-06-30T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-07-07T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-07-14T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-07-21T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-07-28T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-08-04T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-08-11T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-08-18T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-08-25T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-09-01T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-09-08T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-09-15T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-09-22T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-09-29T08:00:00+00:00",
+                    1.1
+                ],
+                [
+                    "2026-10-06T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-10-13T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-10-20T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-10-27T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-11-03T08:00:00+00:00",
+                    1.3
+                ],
+                [
+                    "2026-11-10T08:00:00+00:00",
+                    1.7
+                ],
+                [
+                    "2026-11-17T08:00:00+00:00",
+                    1.7
+                ],
+                [
+                    "2026-11-24T08:00:00+00:00",
+                    2.2
+                ],
+                [
+                    "2026-12-01T08:00:00+00:00",
+                    2.8
+                ],
+                [
+                    "2026-12-08T08:00:00+00:00",
+                    3.9
+                ],
+                [
+                    "2026-12-15T08:00:00+00:00",
+                    6.4
+                ],
+                [
+                    "2026-12-22T08:00:00+00:00",
+                    6.7
+                ],
+                [
+                    "2026-12-29T08:00:00+00:00",
+                    9.2
+                ],
+                [
+                    "2027-01-05T08:00:00+00:00",
+                    13.6
+                ],
+                [
+                    "2027-01-12T08:00:00+00:00",
+                    15.7
+                ],
+                [
+                    "2027-01-19T08:00:00+00:00",
+                    18.5
+                ],
+                [
+                    "2027-01-26T08:00:00+00:00",
+                    26.2
+                ],
+                [
+                    "2027-02-02T08:00:00+00:00",
+                    26.3
+                ],
+                [
+                    "2027-02-09T08:00:00+00:00",
+                    31.9
+                ]
+            ]
+        },
+        "sensor.thl_koronavirus_sars_cov_2_pirkanmaa": {
+            "unit": null,
+            "mean": [
+                [
+                    "2026-01-06T08:00:00+00:00",
+                    31
+                ],
+                [
+                    "2026-01-13T08:00:00+00:00",
+                    25
+                ],
+                [
+                    "2026-01-20T08:00:00+00:00",
+                    24
+                ],
+                [
+                    "2026-01-27T08:00:00+00:00",
+                    24
+                ],
+                [
+                    "2026-02-03T08:00:00+00:00",
+                    21
+                ],
+                [
+                    "2026-02-10T08:00:00+00:00",
+                    16
+                ],
+                [
+                    "2026-02-17T08:00:00+00:00",
+                    13
+                ],
+                [
+                    "2026-02-24T08:00:00+00:00",
+                    9
+                ],
+                [
+                    "2026-03-03T08:00:00+00:00",
+                    9
+                ],
+                [
+                    "2026-03-10T08:00:00+00:00",
+                    10
+                ],
+                [
+                    "2026-03-17T08:00:00+00:00",
+                    9
+                ],
+                [
+                    "2026-03-24T08:00:00+00:00",
+                    7
+                ],
+                [
+                    "2026-03-31T08:00:00+00:00",
+                    7
+                ],
+                [
+                    "2026-04-07T08:00:00+00:00",
+                    8
+                ],
+                [
+                    "2026-04-14T08:00:00+00:00",
+                    8
+                ],
+                [
+                    "2026-04-21T08:00:00+00:00",
+                    7
+                ],
+                [
+                    "2026-04-28T08:00:00+00:00",
+                    8
+                ],
+                [
+                    "2026-05-05T08:00:00+00:00",
+                    8
+                ],
+                [
+                    "2026-05-12T08:00:00+00:00",
+                    6
+                ],
+                [
+                    "2026-05-19T08:00:00+00:00",
+                    8
+                ],
+                [
+                    "2026-05-26T08:00:00+00:00",
+                    7
+                ],
+                [
+                    "2026-06-02T08:00:00+00:00",
+                    8
+                ],
+                [
+                    "2026-06-09T08:00:00+00:00",
+                    7
+                ],
+                [
+                    "2026-06-16T08:00:00+00:00",
+                    7
+                ],
+                [
+                    "2026-06-23T08:00:00+00:00",
+                    8
+                ],
+                [
+                    "2026-06-30T08:00:00+00:00",
+                    7
+                ],
+                [
+                    "2026-07-07T08:00:00+00:00",
+                    7
+                ],
+                [
+                    "2026-07-14T08:00:00+00:00",
+                    8
+                ],
+                [
+                    "2026-07-21T08:00:00+00:00",
+                    9
+                ],
+                [
+                    "2026-07-28T08:00:00+00:00",
+                    9
+                ],
+                [
+                    "2026-08-04T08:00:00+00:00",
+                    11
+                ],
+                [
+                    "2026-08-11T08:00:00+00:00",
+                    12
+                ],
+                [
+                    "2026-08-18T08:00:00+00:00",
+                    13
+                ],
+                [
+                    "2026-08-25T08:00:00+00:00",
+                    22
+                ],
+                [
+                    "2026-09-01T08:00:00+00:00",
+                    25
+                ],
+                [
+                    "2026-09-08T08:00:00+00:00",
+                    31
+                ],
+                [
+                    "2026-09-15T08:00:00+00:00",
+                    42
+                ],
+                [
+                    "2026-09-22T08:00:00+00:00",
+                    40
+                ],
+                [
+                    "2026-09-29T08:00:00+00:00",
+                    45
+                ],
+                [
+                    "2026-10-06T08:00:00+00:00",
+                    53
+                ],
+                [
+                    "2026-10-13T08:00:00+00:00",
+                    47
+                ],
+                [
+                    "2026-10-20T08:00:00+00:00",
+                    45
+                ],
+                [
+                    "2026-10-27T08:00:00+00:00",
+                    46
+                ],
+                [
+                    "2026-11-03T08:00:00+00:00",
+                    47
+                ],
+                [
+                    "2026-11-10T08:00:00+00:00",
+                    32
+                ],
+                [
+                    "2026-11-17T08:00:00+00:00",
+                    29
+                ],
+                [
+                    "2026-11-24T08:00:00+00:00",
+                    22
+                ],
+                [
+                    "2026-12-01T08:00:00+00:00",
+                    20
+                ],
+                [
+                    "2026-12-08T08:00:00+00:00",
+                    17
+                ],
+                [
+                    "2026-12-15T08:00:00+00:00",
+                    14
+                ],
+                [
+                    "2026-12-22T08:00:00+00:00",
+                    11
+                ],
+                [
+                    "2026-12-29T08:00:00+00:00",
+                    10
+                ],
+                [
+                    "2027-01-05T08:00:00+00:00",
+                    12
+                ],
+                [
+                    "2027-01-12T08:00:00+00:00",
+                    12
+                ],
+                [
+                    "2027-01-19T08:00:00+00:00",
+                    17
+                ],
+                [
+                    "2027-01-26T08:00:00+00:00",
+                    16
+                ],
+                [
+                    "2027-02-02T08:00:00+00:00",
+                    17
+                ],
+                [
+                    "2027-02-09T08:00:00+00:00",
+                    15
+                ]
+            ]
+        },
+        "sensor.thl_koronavirus_sars_cov_2_pirkanmaa_ilmaantuvuus": {
+            "unit": "per 100 000",
+            "mean": [
+                [
+                    "2026-01-06T08:00:00+00:00",
+                    5.8
+                ],
+                [
+                    "2026-01-13T08:00:00+00:00",
+                    4.7
+                ],
+                [
+                    "2026-01-20T08:00:00+00:00",
+                    4.5
+                ],
+                [
+                    "2026-01-27T08:00:00+00:00",
+                    4.5
+                ],
+                [
+                    "2026-02-03T08:00:00+00:00",
+                    3.9
+                ],
+                [
+                    "2026-02-10T08:00:00+00:00",
+                    3.0
+                ],
+                [
+                    "2026-02-17T08:00:00+00:00",
+                    2.4
+                ],
+                [
+                    "2026-02-24T08:00:00+00:00",
+                    1.7
+                ],
+                [
+                    "2026-03-03T08:00:00+00:00",
+                    1.7
+                ],
+                [
+                    "2026-03-10T08:00:00+00:00",
+                    1.9
+                ],
+                [
+                    "2026-03-17T08:00:00+00:00",
+                    1.7
+                ],
+                [
+                    "2026-03-24T08:00:00+00:00",
+                    1.3
+                ],
+                [
+                    "2026-03-31T08:00:00+00:00",
+                    1.3
+                ],
+                [
+                    "2026-04-07T08:00:00+00:00",
+                    1.5
+                ],
+                [
+                    "2026-04-14T08:00:00+00:00",
+                    1.5
+                ],
+                [
+                    "2026-04-21T08:00:00+00:00",
+                    1.3
+                ],
+                [
+                    "2026-04-28T08:00:00+00:00",
+                    1.5
+                ],
+                [
+                    "2026-05-05T08:00:00+00:00",
+                    1.5
+                ],
+                [
+                    "2026-05-12T08:00:00+00:00",
+                    1.1
+                ],
+                [
+                    "2026-05-19T08:00:00+00:00",
+                    1.5
+                ],
+                [
+                    "2026-05-26T08:00:00+00:00",
+                    1.3
+                ],
+                [
+                    "2026-06-02T08:00:00+00:00",
+                    1.5
+                ],
+                [
+                    "2026-06-09T08:00:00+00:00",
+                    1.3
+                ],
+                [
+                    "2026-06-16T08:00:00+00:00",
+                    1.3
+                ],
+                [
+                    "2026-06-23T08:00:00+00:00",
+                    1.5
+                ],
+                [
+                    "2026-06-30T08:00:00+00:00",
+                    1.3
+                ],
+                [
+                    "2026-07-07T08:00:00+00:00",
+                    1.3
+                ],
+                [
+                    "2026-07-14T08:00:00+00:00",
+                    1.5
+                ],
+                [
+                    "2026-07-21T08:00:00+00:00",
+                    1.7
+                ],
+                [
+                    "2026-07-28T08:00:00+00:00",
+                    1.7
+                ],
+                [
+                    "2026-08-04T08:00:00+00:00",
+                    2.1
+                ],
+                [
+                    "2026-08-11T08:00:00+00:00",
+                    2.2
+                ],
+                [
+                    "2026-08-18T08:00:00+00:00",
+                    2.4
+                ],
+                [
+                    "2026-08-25T08:00:00+00:00",
+                    4.1
+                ],
+                [
+                    "2026-09-01T08:00:00+00:00",
+                    4.7
+                ],
+                [
+                    "2026-09-08T08:00:00+00:00",
+                    5.8
+                ],
+                [
+                    "2026-09-15T08:00:00+00:00",
+                    7.8
+                ],
+                [
+                    "2026-09-22T08:00:00+00:00",
+                    7.5
+                ],
+                [
+                    "2026-09-29T08:00:00+00:00",
+                    8.4
+                ],
+                [
+                    "2026-10-06T08:00:00+00:00",
+                    9.9
+                ],
+                [
+                    "2026-10-13T08:00:00+00:00",
+                    8.8
+                ],
+                [
+                    "2026-10-20T08:00:00+00:00",
+                    8.4
+                ],
+                [
+                    "2026-10-27T08:00:00+00:00",
+                    8.6
+                ],
+                [
+                    "2026-11-03T08:00:00+00:00",
+                    8.8
+                ],
+                [
+                    "2026-11-10T08:00:00+00:00",
+                    6.0
+                ],
+                [
+                    "2026-11-17T08:00:00+00:00",
+                    5.4
+                ],
+                [
+                    "2026-11-24T08:00:00+00:00",
+                    4.1
+                ],
+                [
+                    "2026-12-01T08:00:00+00:00",
+                    3.7
+                ],
+                [
+                    "2026-12-08T08:00:00+00:00",
+                    3.2
+                ],
+                [
+                    "2026-12-15T08:00:00+00:00",
+                    2.6
+                ],
+                [
+                    "2026-12-22T08:00:00+00:00",
+                    2.1
+                ],
+                [
+                    "2026-12-29T08:00:00+00:00",
+                    1.9
+                ],
+                [
+                    "2027-01-05T08:00:00+00:00",
+                    2.2
+                ],
+                [
+                    "2027-01-12T08:00:00+00:00",
+                    2.2
+                ],
+                [
+                    "2027-01-19T08:00:00+00:00",
+                    3.2
+                ],
+                [
+                    "2027-01-26T08:00:00+00:00",
+                    3.0
+                ],
+                [
+                    "2027-02-02T08:00:00+00:00",
+                    3.2
+                ],
+                [
+                    "2027-02-09T08:00:00+00:00",
+                    2.8
+                ]
+            ]
+        },
+        "sensor.thl_norovirus_pirkanmaa": {
+            "unit": null,
+            "mean": [
+                [
+                    "2026-01-06T08:00:00+00:00",
+                    21
+                ],
+                [
+                    "2026-01-13T08:00:00+00:00",
+                    27
+                ],
+                [
+                    "2026-01-20T08:00:00+00:00",
+                    29
+                ],
+                [
+                    "2026-01-27T08:00:00+00:00",
+                    26
+                ],
+                [
+                    "2026-02-03T08:00:00+00:00",
+                    33
+                ],
+                [
+                    "2026-02-10T08:00:00+00:00",
+                    26
+                ],
+                [
+                    "2026-02-17T08:00:00+00:00",
+                    28
+                ],
+                [
+                    "2026-02-24T08:00:00+00:00",
+                    23
+                ],
+                [
+                    "2026-03-03T08:00:00+00:00",
+                    20
+                ],
+                [
+                    "2026-03-10T08:00:00+00:00",
+                    17
+                ],
+                [
+                    "2026-03-17T08:00:00+00:00",
+                    16
+                ],
+                [
+                    "2026-03-24T08:00:00+00:00",
+                    12
+                ],
+                [
+                    "2026-03-31T08:00:00+00:00",
+                    11
+                ],
+                [
+                    "2026-04-07T08:00:00+00:00",
+                    9
+                ],
+                [
+                    "2026-04-14T08:00:00+00:00",
+                    6
+                ],
+                [
+                    "2026-04-21T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-04-28T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-05-05T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-05-12T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-05-19T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-05-26T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-06-02T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-06-09T08:00:00+00:00",
+                    3
+                ],
+                [
+                    "2026-06-16T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-06-23T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-06-30T08:00:00+00:00",
+                    3
+                ],
+                [
+                    "2026-07-07T08:00:00+00:00",
+                    3
+                ],
+                [
+                    "2026-07-14T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-07-21T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-07-28T08:00:00+00:00",
+                    3
+                ],
+                [
+                    "2026-08-04T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-08-11T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-08-18T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-08-25T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-09-01T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-09-08T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-09-15T08:00:00+00:00",
+                    3
+                ],
+                [
+                    "2026-09-22T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-09-29T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-10-06T08:00:00+00:00",
+                    3
+                ],
+                [
+                    "2026-10-13T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-10-20T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-10-27T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-11-03T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-11-10T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-11-17T08:00:00+00:00",
+                    4
+                ],
+                [
+                    "2026-11-24T08:00:00+00:00",
+                    6
+                ],
+                [
+                    "2026-12-01T08:00:00+00:00",
+                    5
+                ],
+                [
+                    "2026-12-08T08:00:00+00:00",
+                    6
+                ],
+                [
+                    "2026-12-15T08:00:00+00:00",
+                    8
+                ],
+                [
+                    "2026-12-22T08:00:00+00:00",
+                    10
+                ],
+                [
+                    "2026-12-29T08:00:00+00:00",
+                    14
+                ],
+                [
+                    "2027-01-05T08:00:00+00:00",
+                    15
+                ],
+                [
+                    "2027-01-12T08:00:00+00:00",
+                    20
+                ],
+                [
+                    "2027-01-19T08:00:00+00:00",
+                    28
+                ],
+                [
+                    "2027-01-26T08:00:00+00:00",
+                    26
+                ],
+                [
+                    "2027-02-02T08:00:00+00:00",
+                    30
+                ],
+                [
+                    "2027-02-09T08:00:00+00:00",
+                    29
+                ]
+            ]
+        },
+        "sensor.thl_norovirus_pirkanmaa_ilmaantuvuus": {
+            "unit": "per 100 000",
+            "mean": [
+                [
+                    "2026-01-06T08:00:00+00:00",
+                    3.9
+                ],
+                [
+                    "2026-01-13T08:00:00+00:00",
+                    5.0
+                ],
+                [
+                    "2026-01-20T08:00:00+00:00",
+                    5.4
+                ],
+                [
+                    "2026-01-27T08:00:00+00:00",
+                    4.9
+                ],
+                [
+                    "2026-02-03T08:00:00+00:00",
+                    6.2
+                ],
+                [
+                    "2026-02-10T08:00:00+00:00",
+                    4.9
+                ],
+                [
+                    "2026-02-17T08:00:00+00:00",
+                    5.2
+                ],
+                [
+                    "2026-02-24T08:00:00+00:00",
+                    4.3
+                ],
+                [
+                    "2026-03-03T08:00:00+00:00",
+                    3.7
+                ],
+                [
+                    "2026-03-10T08:00:00+00:00",
+                    3.2
+                ],
+                [
+                    "2026-03-17T08:00:00+00:00",
+                    3.0
+                ],
+                [
+                    "2026-03-24T08:00:00+00:00",
+                    2.2
+                ],
+                [
+                    "2026-03-31T08:00:00+00:00",
+                    2.1
+                ],
+                [
+                    "2026-04-07T08:00:00+00:00",
+                    1.7
+                ],
+                [
+                    "2026-04-14T08:00:00+00:00",
+                    1.1
+                ],
+                [
+                    "2026-04-21T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-04-28T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-05-05T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-05-12T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-05-19T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-05-26T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-06-02T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-06-09T08:00:00+00:00",
+                    0.6
+                ],
+                [
+                    "2026-06-16T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-06-23T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-06-30T08:00:00+00:00",
+                    0.6
+                ],
+                [
+                    "2026-07-07T08:00:00+00:00",
+                    0.6
+                ],
+                [
+                    "2026-07-14T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-07-21T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-07-28T08:00:00+00:00",
+                    0.6
+                ],
+                [
+                    "2026-08-04T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-08-11T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-08-18T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-08-25T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-09-01T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-09-08T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-09-15T08:00:00+00:00",
+                    0.6
+                ],
+                [
+                    "2026-09-22T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-09-29T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-10-06T08:00:00+00:00",
+                    0.6
+                ],
+                [
+                    "2026-10-13T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-10-20T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-10-27T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-11-03T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-11-10T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-11-17T08:00:00+00:00",
+                    0.7
+                ],
+                [
+                    "2026-11-24T08:00:00+00:00",
+                    1.1
+                ],
+                [
+                    "2026-12-01T08:00:00+00:00",
+                    0.9
+                ],
+                [
+                    "2026-12-08T08:00:00+00:00",
+                    1.1
+                ],
+                [
+                    "2026-12-15T08:00:00+00:00",
+                    1.5
+                ],
+                [
+                    "2026-12-22T08:00:00+00:00",
+                    1.9
+                ],
+                [
+                    "2026-12-29T08:00:00+00:00",
+                    2.6
+                ],
+                [
+                    "2027-01-05T08:00:00+00:00",
+                    2.8
+                ],
+                [
+                    "2027-01-12T08:00:00+00:00",
+                    3.7
+                ],
+                [
+                    "2027-01-19T08:00:00+00:00",
+                    5.2
+                ],
+                [
+                    "2027-01-26T08:00:00+00:00",
+                    4.9
+                ],
+                [
+                    "2027-02-02T08:00:00+00:00",
+                    5.6
+                ],
+                [
+                    "2027-02-09T08:00:00+00:00",
+                    5.4
+                ]
+            ]
+        },
+        "sensor.thl_influenssankaltaiset_kaynnit_pirkanmaa": {
+            "unit": "%",
+            "mean": [
+                [
+                    "2026-01-06T08:00:00+00:00",
+                    0.5506
+                ],
+                [
+                    "2026-01-13T08:00:00+00:00",
+                    0.5841
+                ],
+                [
+                    "2026-01-20T08:00:00+00:00",
+                    0.7243
+                ],
+                [
+                    "2026-01-27T08:00:00+00:00",
+                    0.7958
+                ],
+                [
+                    "2026-02-03T08:00:00+00:00",
+                    0.6851
+                ],
+                [
+                    "2026-02-10T08:00:00+00:00",
+                    0.6198
+                ],
+                [
+                    "2026-02-17T08:00:00+00:00",
+                    0.5882
+                ],
+                [
+                    "2026-02-24T08:00:00+00:00",
+                    0.3967
+                ],
+                [
+                    "2026-03-03T08:00:00+00:00",
+                    0.3022
+                ],
+                [
+                    "2026-03-10T08:00:00+00:00",
+                    0.2287
+                ],
+                [
+                    "2026-03-17T08:00:00+00:00",
+                    0.176
+                ],
+                [
+                    "2026-03-24T08:00:00+00:00",
+                    0.123
+                ],
+                [
+                    "2026-03-31T08:00:00+00:00",
+                    0.0822
+                ],
+                [
+                    "2026-04-07T08:00:00+00:00",
+                    0.0688
+                ],
+                [
+                    "2026-04-14T08:00:00+00:00",
+                    0.0424
+                ],
+                [
+                    "2026-04-21T08:00:00+00:00",
+                    0.0342
+                ],
+                [
+                    "2026-04-28T08:00:00+00:00",
+                    0.0302
+                ],
+                [
+                    "2026-05-05T08:00:00+00:00",
+                    0.0321
+                ],
+                [
+                    "2026-05-12T08:00:00+00:00",
+                    0.0276
+                ],
+                [
+                    "2026-05-19T08:00:00+00:00",
+                    0.0337
+                ],
+                [
+                    "2026-05-26T08:00:00+00:00",
+                    0.022
+                ],
+                [
+                    "2026-06-02T08:00:00+00:00",
+                    0.0337
+                ],
+                [
+                    "2026-06-09T08:00:00+00:00",
+                    0.0273
+                ],
+                [
+                    "2026-06-16T08:00:00+00:00",
+                    0.0245
+                ],
+                [
+                    "2026-06-23T08:00:00+00:00",
+                    0.0225
+                ],
+                [
+                    "2026-06-30T08:00:00+00:00",
+                    0.0289
+                ],
+                [
+                    "2026-07-07T08:00:00+00:00",
+                    0.026
+                ],
+                [
+                    "2026-07-14T08:00:00+00:00",
+                    0.0325
+                ],
+                [
+                    "2026-07-21T08:00:00+00:00",
+                    0.0315
+                ],
+                [
+                    "2026-07-28T08:00:00+00:00",
+                    0.0232
+                ],
+                [
+                    "2026-08-04T08:00:00+00:00",
+                    0.0279
+                ],
+                [
+                    "2026-08-11T08:00:00+00:00",
+                    0.0312
+                ],
+                [
+                    "2026-08-18T08:00:00+00:00",
+                    0.0239
+                ],
+                [
+                    "2026-08-25T08:00:00+00:00",
+                    0.0255
+                ],
+                [
+                    "2026-09-01T08:00:00+00:00",
+                    0.0261
+                ],
+                [
+                    "2026-09-08T08:00:00+00:00",
+                    0.0257
+                ],
+                [
+                    "2026-09-15T08:00:00+00:00",
+                    0.0223
+                ],
+                [
+                    "2026-09-22T08:00:00+00:00",
+                    0.0265
+                ],
+                [
+                    "2026-09-29T08:00:00+00:00",
+                    0.0266
+                ],
+                [
+                    "2026-10-06T08:00:00+00:00",
+                    0.0258
+                ],
+                [
+                    "2026-10-13T08:00:00+00:00",
+                    0.028
+                ],
+                [
+                    "2026-10-20T08:00:00+00:00",
+                    0.0267
+                ],
+                [
+                    "2026-10-27T08:00:00+00:00",
+                    0.0354
+                ],
+                [
+                    "2026-11-03T08:00:00+00:00",
+                    0.0415
+                ],
+                [
+                    "2026-11-10T08:00:00+00:00",
+                    0.0519
+                ],
+                [
+                    "2026-11-17T08:00:00+00:00",
+                    0.0639
+                ],
+                [
+                    "2026-11-24T08:00:00+00:00",
+                    0.0637
+                ],
+                [
+                    "2026-12-01T08:00:00+00:00",
+                    0.087
+                ],
+                [
+                    "2026-12-08T08:00:00+00:00",
+                    0.1291
+                ],
+                [
+                    "2026-12-15T08:00:00+00:00",
+                    0.1497
+                ],
+                [
+                    "2026-12-22T08:00:00+00:00",
+                    0.1804
+                ],
+                [
+                    "2026-12-29T08:00:00+00:00",
+                    0.3313
+                ],
+                [
+                    "2027-01-05T08:00:00+00:00",
+                    0.3194
+                ],
+                [
+                    "2027-01-12T08:00:00+00:00",
+                    0.4895
+                ],
+                [
+                    "2027-01-19T08:00:00+00:00",
+                    0.5849
+                ],
+                [
+                    "2027-01-26T08:00:00+00:00",
+                    0.5716
+                ],
+                [
+                    "2027-02-02T08:00:00+00:00",
+                    0.677
+                ],
+                [
+                    "2027-02-09T08:00:00+00:00",
+                    0.8531
+                ]
+            ]
+        }
+    },
+    "shots": [
+        {
+            "name": "dashboard",
+            "width": 1000,
+            "view": {
+                "type": "sections",
+                "max_columns": 2,
+                "sections": [
+                    {
+                        "type": "grid",
+                        "cards": [
+                            {
+                                "type": "custom:thl-card",
+                                "entity": "sensor.thl_koronavirus_sars_cov_2",
+                                "default_area": "pirkanmaan_hyvinvointialue"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "grid",
+                        "cards": [
+                            {
+                                "type": "custom:thl-card",
+                                "entity": "sensor.thl_influenssa",
+                                "default_area": "pirkanmaan_hyvinvointialue"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "grid",
+                        "cards": [
+                            {
+                                "type": "custom:thl-card",
+                                "entity": "sensor.thl_influenssankaltaiset_kaynnit",
+                                "default_area": "pirkanmaan_hyvinvointialue"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "grid",
+                        "cards": [
+                            {
+                                "type": "custom:thl-card",
+                                "entity": "sensor.thl_norovirus",
+                                "default_area": "pirkanmaan_hyvinvointialue"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}
