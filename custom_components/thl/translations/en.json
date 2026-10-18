@@ -33,7 +33,7 @@
       }
     },
     "abort": {
-      "single_instance_allowed": "THL disease statistics has already been added; add further diseases to it.",
+      "single_instance_allowed": "THL disease statistics has already been added. Add further diseases to it.",
       "cannot_connect": "THL couldn't be reached. Try again in a moment.",
       "reconfigure_successful": "Language saved."
     }

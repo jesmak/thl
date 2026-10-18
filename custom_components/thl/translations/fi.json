@@ -33,7 +33,7 @@
       }
     },
     "abort": {
-      "single_instance_allowed": "THL-tautitilastot on jo lisätty; lisää uudet taudit siihen.",
+      "single_instance_allowed": "THL-tautitilastot on jo lisätty. Lisää uudet taudit siihen.",
       "cannot_connect": "THL:ään ei saatu yhteyttä. Yritä hetken kuluttua uudelleen.",
       "reconfigure_successful": "Kieli tallennettu."
     }
