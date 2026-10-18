@@ -1,8 +1,8 @@
-"""Writing past weeks into the statistics of new sensors."""
+"""Writing past weeks into the statistics of sensors."""
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from freezegun.api import FrozenDateTimeFactory
@@ -12,7 +12,7 @@ from homeassistant.components.recorder.statistics import async_import_statistics
 from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
-from custom_components.thl.const import CONF_HISTORY_IMPORTED
+from custom_components.thl.const import CONF_HISTORY_IMPORTED, CONF_HISTORY_WEEKS, HISTORY_WEEKS
 from custom_components.thl.history import shown_from
 from custom_components.thl.statistics import Week
 
@@ -69,10 +69,10 @@ async def test_a_new_sensor_gets_the_past_weeks(
     )
     assert await stored(hass, COUNTY_INCIDENCE) == [(start_of(36), 3.8), (start_of(37), 4.7)]
     [subentry] = entry.subentries.values()
-    assert subentry.data[CONF_HISTORY_IMPORTED] is True, "the next start doesn't ask the recorder again"
+    assert subentry.data[CONF_HISTORY_WEEKS] == HISTORY_WEEKS, "the next start doesn't ask the recorder again"
 
 
-async def test_a_sensor_with_statistics_of_its_own_is_left_alone(
+async def test_a_running_sensor_keeps_what_it_recorded_and_gets_the_weeks_it_has_nothing_for(
     recorder_mock,
     enable_custom_integrations,
     hass: HomeAssistant,
@@ -80,8 +80,8 @@ async def test_a_sensor_with_statistics_of_its_own_is_left_alone(
     freezer: FrozenDateTimeFactory,
 ) -> None:
     freezer.move_to(NOW)
-    # The whole country's sensor has been running since 1.x and has recorded its own.
-    recorded = datetime(2026, 9, 1, 12, 0, tzinfo=UTC)
+    # The whole country's sensor has been running since week 37, when week 36's figure was shown.
+    recorded = datetime(2026, 9, 8, 12, 0, tzinfo=UTC)
     async_import_statistics(
         hass,
         StatisticMetaData(
@@ -99,8 +99,11 @@ async def test_a_sensor_with_statistics_of_its_own_is_left_alone(
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
 
-    assert await stored(hass, WHOLE_COUNTRY) == [(recorded.timestamp(), 42.0)]
-    assert len(await stored(hass, COUNTY)) == 2, "the new county sensors still get theirs"
+    rows = await stored(hass, WHOLE_COUNTRY)
+    assert (recorded.timestamp(), 42.0) in rows, "what it recorded is kept"
+    assert start_of(36) not in [start for start, _ in rows], "the week it recorded is not written over"
+    assert start_of(37) in [start for start, _ in rows], "the week it has nothing for is filled in"
+    assert len(await stored(hass, COUNTY)) == 2, "the new county sensors get theirs"
 
 
 async def test_nothing_is_written_once_the_past_has_been_given(
@@ -113,11 +116,48 @@ async def test_nothing_is_written_once_the_past_has_been_given(
     freezer.move_to(NOW)
     entry = thl_entry(hass, (INFLUENZA, "Influenssa"))
     [subentry] = entry.subentries.values()
-    hass.config_entries.async_update_subentry(entry, subentry, data={**subentry.data, CONF_HISTORY_IMPORTED: True})
+    hass.config_entries.async_update_subentry(entry, subentry, data={**subentry.data, CONF_HISTORY_WEEKS: HISTORY_WEEKS})
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
 
     assert await stored(hass, COUNTY) == []
+
+
+async def test_sensors_given_six_months_before_get_the_rest_of_the_year(
+    recorder_mock,
+    enable_custom_integrations,
+    hass: HomeAssistant,
+    thl: AiohttpClientMocker,
+    freezer: FrozenDateTimeFactory,
+) -> None:
+    freezer.move_to(NOW)
+    entry = thl_entry(hass, (INFLUENZA, "Influenssa"))
+    [subentry] = entry.subentries.values()
+    # Before 2.1 the subentry only noted that its 26 weeks had been written.
+    hass.config_entries.async_update_subentry(entry, subentry, data={**subentry.data, CONF_HISTORY_IMPORTED: True})
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert len(await stored(hass, COUNTY)) == 2
+    [subentry] = entry.subentries.values()
+    assert subentry.data[CONF_HISTORY_WEEKS] == HISTORY_WEEKS
+    assert CONF_HISTORY_IMPORTED not in subentry.data
+
+
+async def test_the_hours_the_recorder_has_not_compiled_yet_are_left_to_it(
+    recorder_mock,
+    enable_custom_integrations,
+    hass: HomeAssistant,
+    thl: AiohttpClientMocker,
+    freezer: FrozenDateTimeFactory,
+) -> None:
+    # Half an hour into week 38, which week 37's figure is shown from: the recorder compiles that hour itself.
+    freezer.move_to(shown_from(Week(2026, 37, WEEK_37)) + timedelta(minutes=30))
+    entry = thl_entry(hass, (INFLUENZA, "Influenssa"))
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert await stored(hass, COUNTY) == [(start_of(36), 4.0)]
 
 
 async def test_weeks_are_shown_from_the_start_of_the_week_after(hass: HomeAssistant) -> None:

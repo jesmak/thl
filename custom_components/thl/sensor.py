@@ -30,7 +30,9 @@ from .const import (
     ATTR_VALUES,
     ATTRIBUTION,
     DOMAIN,
+    HISTORY_WEEKS,
     ILI_AREA_IDS,
+    ILI_NAME,
     ILI_UNIQUE_ID,
 )
 from .coordinator import (
@@ -125,7 +127,7 @@ class WeeklySensor(CoordinatorEntity[WeeklyCoordinator], SensorEntity):
         elif key == SHARE:
             self._attr_native_unit_of_measurement = PERCENTAGE
             self._attr_suggested_display_precision = 3
-        self._history_pending = not coordinator.history_imported
+        self._history_pending = coordinator.history_weeks < HISTORY_WEEKS
 
     @property
     def native_value(self) -> float | None:
@@ -256,6 +258,8 @@ class IliSensor(SummarySensor):
         return {
             ATTR_LAST_WEEK: data.latest.week.week if data else None,
             ATTR_VALUES: self._values() if data else [],
+            # Under the same key as a disease's name, which thl-card shows as its title.
+            ATTR_DISEASE_NAME: ILI_NAME[self.coordinator.language],
         }
 
     def _values(self) -> list[dict[str, Any]]:

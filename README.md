@@ -24,7 +24,7 @@ for Health and Welfare (THL). Each disease is added separately, and gets sensors
 It can also follow **flu-like illness visits** in primary care: the share of all visits made for influenza-like
 illness, in the whole country and in every county. These show a flu season starting before the lab-confirmed cases do.
 
-New sensors get the past six months written into their statistics, so graphs have a history from the start.
+Sensors get the past year written into their statistics, so graphs have a history from the start.
 
 The numbers can be shown with [thl-card](https://github.com/jesmak/thl-card), which draws them on a map of Finland.
 
@@ -101,7 +101,8 @@ A device named **THL Influenssankaltaiset käynnit** (or **THL Flu-like illness 
 whole country and one per county. The state is the percentage of all primary care visits that were made for
 influenza-like illness. It is a small number outside the flu season: around 0.01 %.
 
-The whole country's sensor carries every area in its `values` attribute:
+The whole country's sensor carries the name of the visits in its `disease_name` attribute, as a disease's does, which
+is what thl-card shows as its title, and every area in its `values` attribute:
 
 | Key                    | Description                                       |
 | ---------------------- | ------------------------------------------------- |
@@ -114,9 +115,13 @@ The whole country's sensor carries every area in its `values` attribute:
 
 ## The history
 
-When a sensor is added, the past six months are written into its statistics. Each week's figure is placed at the start
-of the week after it, which is when the sensor would have shown it, so the past and what the recorder keeps from then
-on line up. A sensor that already has statistics of its own keeps them untouched.
+When a sensor is added, the past year is written into its statistics, a year and a week to be exact, so the same week a
+year ago is there too. Each week's figure is placed at the start of the week after it, which is when the sensor would
+have shown it, so the past and what the recorder keeps from then on line up.
+
+Only the weeks without any statistics are written. A sensor that has been running keeps what it recorded itself and
+gets the weeks before that. A sensor that got six months from an earlier version gets the rest of the year once, after
+the upgrade.
 
 A graph therefore shows each week about a week after the week it describes. The shape of the curve is the same.
 

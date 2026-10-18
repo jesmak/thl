@@ -28,15 +28,20 @@ WEEK_LABEL: Final = {"fi": "Vuosi {year} Viikko {week}", "en": "Year {year} Week
 CONF_LANGUAGE: Final = "language"
 CONF_DISEASE_ID: Final = "disease_id"
 CONF_DISEASE_NAME: Final = "disease_name"
-# Set once the past weeks have been written into the statistics of a subentry's sensors.
+# How many past weeks have been written into the statistics of a subentry's sensors.
+CONF_HISTORY_WEEKS: Final = "history_weeks"
+# Before 2.1 it was only noted that they had been, and that was 26 weeks.
 CONF_HISTORY_IMPORTED: Final = "history_imported"
+HISTORY_WEEKS_BEFORE: Final = 26
 
 # Each disease is a subentry of the one THL entry.
 SUBENTRY_DISEASE: Final = "disease"
 # Flu-like illness visits are a subentry of their own; there can be one.
 SUBENTRY_ILI: Final = "ili"
 ILI_UNIQUE_ID: Final = "thl_ili"
-ILI_TITLE: Final = {"fi": "THL Influenssankaltaiset käynnit", "en": "THL Flu-like illness visits"}
+# The flu-like illness visits' name, for thl-card's title, and the device's name, which is it with THL before it.
+ILI_NAME: Final = {"fi": "Influenssankaltaiset käynnit", "en": "Flu-like illness visits"}
+ILI_TITLE: Final = {language: f"THL {name}" for language, name in ILI_NAME.items()}
 
 # The measures of the case numbers cube, and of the flu-like illness cube.
 MEASURE_CASES: Final = "877837"
@@ -55,8 +60,9 @@ UPDATE_INTERVAL: Final = timedelta(minutes=30)
 DIMENSIONS_TTL: Final = timedelta(minutes=30)
 # THL publishes a week's numbers with a lag, so the newest finished week is often still missing.
 MAX_WEEK_FALLBACK: Final = 4
-# How many weeks are written into the statistics of a new sensor, so its graphs have a past from the start.
-HISTORY_WEEKS: Final = 26
+# How many weeks are written into the statistics of a sensor, so its graphs have a past from the start: a year and a
+# week, so the same week a year ago is there in a year of 53 weeks too.
+HISTORY_WEEKS: Final = 54
 
 # The areas of THL's data, and the ids they have in the sensor's attributes. Areas added later get an id
 # made from their name.

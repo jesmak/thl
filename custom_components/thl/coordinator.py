@@ -22,11 +22,13 @@ from .const import (
     CONF_DISEASE_ID,
     CONF_DISEASE_NAME,
     CONF_HISTORY_IMPORTED,
+    CONF_HISTORY_WEEKS,
     CONF_LANGUAGE,
     DATA_URL,
     DIMENSIONS_URL,
     DOMAIN,
     HISTORY_WEEKS,
+    HISTORY_WEEKS_BEFORE,
     ILI_ALL_AREAS,
     ILI_AREA_IDS,
     ILI_DATA_URL,
@@ -126,7 +128,9 @@ class WeeklyCoordinator(DataUpdateCoordinator[Weekly]):
         )
         self.subentry = subentry
         self.language: str = entry.data[CONF_LANGUAGE]
-        self.history_imported: bool = bool(subentry.data.get(CONF_HISTORY_IMPORTED))
+        self.history_weeks: int = subentry.data.get(
+            CONF_HISTORY_WEEKS, HISTORY_WEEKS_BEFORE if subentry.data.get(CONF_HISTORY_IMPORTED) else 0
+        )
         self._client = ThlClient(hass, self.language)
         self._cache = cache
 

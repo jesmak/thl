@@ -77,6 +77,7 @@ async def test_flu_like_illness_visits_as_a_share_of_all_visits(
     assert whole_country.state == "0.0125", "250 visits out of 2 000 000"
     assert whole_country.attributes["unit_of_measurement"] == "%"
     assert whole_country.attributes["last_week"] == 37
+    assert whole_country.attributes["disease_name"] == "Influenssankaltaiset käynnit", "thl-card's title"
     assert whole_country.attributes["values"][1] == {
         "name": "Itä-Uudenmaan hyvinvointialue",
         "area_id": "ita-uudenmaan_hyvinvointialue",
