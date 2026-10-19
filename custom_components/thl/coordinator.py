@@ -1,6 +1,6 @@
 """Fetching THL's weekly numbers every half hour: a disease's cases, or the flu-like illness visits.
 
-Each refresh reads the newest published week and the weeks before it in one
+Each refresh reads the newest week with figures and the weeks before it in one
 request. The newest two give the sensors' states and the change figures; all of
 them are written into the statistics of new sensors, so their graphs have a past.
 """
@@ -86,7 +86,7 @@ class WeekFigures:
 class Weekly:
     # The whole country first, then the welfare counties.
     areas: list[Area]
-    # Oldest first. The last one is the newest week THL has published.
+    # Oldest first. The last one is the newest week with figures.
     weeks: list[WeekFigures]
 
     @property
@@ -140,14 +140,17 @@ class WeeklyCoordinator(DataUpdateCoordinator[Weekly]):
             of_areas, weeks = self._categories(dimensions, newest)
             # THL publishes with a lag, so the newest finished week is often missing; a few weeks back is fine.
             oldest_allowed = date.fromisocalendar(*newest, 1) - (MAX_WEEK_FALLBACK - 1) * WEEK
-            latest = weeks[0] if weeks and weeks[0].monday >= oldest_allowed else None
-            if latest is None:
+            recent = [week for week in weeks if week.monday >= oldest_allowed]
+            if not recent:
                 raise UpdateFailed(f"THL has published no data for the last {MAX_WEEK_FALLBACK} weeks")
-            # The history kept is counted back from the newest published week.
-            kept = [week for week in weeks if latest.monday - week.monday < HISTORY_WEEKS * WEEK]
-            cube = Cube(await self._client.data(self.data_url, self._params(dimensions, of_areas[0], kept)))
+            cube = Cube(await self._client.data(self.data_url, self._params(dimensions, of_areas[0], weeks)))
         except ThlError as err:
             raise UpdateFailed(str(err)) from err
+        latest = next((week for week in recent if self._has_figures(cube, of_areas[0], week)), None)
+        if latest is None:
+            raise UpdateFailed(f"THL has published no data for the last {MAX_WEEK_FALLBACK} weeks")
+        # The history kept is counted back from the newest week with figures.
+        kept = [week for week in weeks if week.monday <= latest.monday and latest.monday - week.monday < HISTORY_WEEKS * WEEK]
 
         # Oldest first.
         return Weekly(
@@ -182,11 +185,15 @@ class WeeklyCoordinator(DataUpdateCoordinator[Weekly]):
             _LOGGER.exception("Writing the past weeks of %s into the statistics failed", self.subentry.title)
 
     def _categories(self, dimensions: list[Any], newest: tuple[int, int]) -> tuple[list[Area], list[Week]]:
-        """The areas, and the published weeks newest first."""
+        """The areas, and the listed weeks newest first."""
         raise NotImplementedError
 
     def _params(self, dimensions: list[Any], whole_country: Area, weeks: list[Week]) -> list[tuple[str, str]]:
         raise NotImplementedError
+
+    def _has_figures(self, cube: Cube, whole_country: Area, week: Week) -> bool:
+        """Whether THL has filled in the week, rather than only listed it."""
+        return True
 
     def _figures(self, cube: Cube, area: Area, week: Week) -> dict[str, float | None]:
         raise NotImplementedError
@@ -242,6 +249,10 @@ class IliCoordinator(WeeklyCoordinator):
             # Every age group together.
             ("filter", f"inf_age-{first_child_sid(dimensions, 'inf_age')}"),
         ]
+
+    def _has_figures(self, cube: Cube, whole_country: Area, week: Week) -> bool:
+        # THL lists the weeks ahead of the data with zero visits of any kind in the whole country.
+        return bool(cube.value(hva=whole_country.sid, weeks40=week.sid, measure=MEASURE_ALL_VISITS))
 
     def _figures(self, cube: Cube, area: Area, week: Week) -> dict[str, float | None]:
         visits = int(cube.value(hva=area.sid, weeks40=week.sid, measure=MEASURE_ILI_VISITS) or 0)

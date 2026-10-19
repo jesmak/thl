@@ -55,9 +55,10 @@ renamed in the new language, and so are the areas in the sensor attributes. The 
 
 ## Sensors
 
-THL publishes a week's numbers during the following week, so every sensor shows the newest week that has been
-published, up to four weeks back. Its `last_week` attribute tells which week that is. A sensor is unavailable while
-THL can't be reached.
+THL publishes a week's numbers during the following week, so every sensor shows the newest week that has numbers in
+it, up to four weeks back. Its `last_week` attribute tells which week that is. The flu-like illness visits skip a week
+that THL has listed but not yet filled in. A sensor is unavailable while THL can't be reached, or when none of the last
+four weeks has numbers.
 
 ### A disease
 
@@ -207,7 +208,7 @@ The tests run on made-up data, without network access.
 | `config_flow.py`               | The language, a subentry per disease, and one for the flu-like illness visits |
 | `api.py`                       | THL's service, and one shared copy of each dimensions file                    |
 | `statistics.py`                | Reading the dimensions and data files                                         |
-| `coordinator.py`               | Fetching the newest published weeks every half hour                           |
+| `coordinator.py`               | Fetching the newest weeks with figures every half hour                        |
 | `sensor.py`                    | The sensors                                                                   |
 | `history.py`                   | Writing past weeks into the statistics of the sensors that have none for them |
 | `translations/<language>.json` | Home Assistant UI texts                                                       |

@@ -4,16 +4,22 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
+import pytest
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
-from .conftest import DIMENSIONS_FI_URL, ILI_DIMENSIONS_FI_URL, INFLUENZA, thl_entry
+from custom_components.thl.const import MEASURE_ALL_VISITS, MEASURE_ILI_VISITS
+
+from .conftest import DIMENSIONS_FI_URL, ILI_DIMENSIONS_FI_URL, ILI_WEEK_36, ILI_WEEK_37, ILI_WEEKS, INFLUENZA, thl_entry
 
 # A Wednesday of week 38, so the last finished week is 37.
 NOW = datetime(2026, 9, 16, 9, 0, tzinfo=UTC)
+
+# How THL lists a week of flu-like illness visits before its data: no visits of any kind anywhere.
+LISTED_WEEK = {MEASURE_ILI_VISITS: dict.fromkeys(range(4), 0), MEASURE_ALL_VISITS: dict.fromkeys(range(4), 0)}
 
 
 async def set_up(hass: HomeAssistant, freezer: FrozenDateTimeFactory, **kwargs: bool) -> None:
@@ -92,6 +98,31 @@ async def test_flu_like_illness_visits_as_a_share_of_all_visits(
     assert hass.states.get("sensor.thl_influenssankaltaiset_kaynnit_keski_uusimaa").state == "0.0", (
         "no flu-like illness visits among the county's visits"
     )
+    assert hass.states.get("sensor.thl_influenssa").state == "17", "the diseases carry on as before"
+
+
+async def test_flu_like_illness_visits_skip_a_week_listed_before_its_data(
+    hass: HomeAssistant, thl: AiohttpClientMocker, freezer: FrozenDateTimeFactory, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setitem(ILI_WEEKS, ILI_WEEK_37, LISTED_WEEK)
+    await set_up(hass, freezer, ili=True)
+
+    whole_country = hass.states.get("sensor.thl_influenssankaltaiset_kaynnit")
+    assert whole_country.state == "0.0125", "200 visits out of 1 600 000"
+    assert whole_country.attributes["last_week"] == 36
+    assert whole_country.attributes["values"][0]["visits_last_week"] == 200
+    assert whole_country.attributes["values"][0]["all_visits_last_week"] == 1_600_000
+
+
+async def test_flu_like_illness_visits_are_unavailable_when_no_recent_week_has_data(
+    hass: HomeAssistant, thl: AiohttpClientMocker, freezer: FrozenDateTimeFactory, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setitem(ILI_WEEKS, ILI_WEEK_36, LISTED_WEEK)
+    monkeypatch.setitem(ILI_WEEKS, ILI_WEEK_37, LISTED_WEEK)
+    await set_up(hass, freezer, ili=True)
+
+    assert hass.states.get("sensor.thl_influenssankaltaiset_kaynnit").state == STATE_UNAVAILABLE
+    assert hass.states.get("sensor.thl_influenssankaltaiset_kaynnit_ita_uusimaa").state == STATE_UNAVAILABLE
     assert hass.states.get("sensor.thl_influenssa").state == "17", "the diseases carry on as before"
 
 

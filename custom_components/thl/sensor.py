@@ -102,7 +102,7 @@ def short_name(area: Area, language: str) -> str:
 
 
 class WeeklySensor(CoordinatorEntity[WeeklyCoordinator], SensorEntity):
-    """One figure of one area in the newest published week."""
+    """One figure of one area in the newest week with figures."""
 
     _attr_attribution = ATTRIBUTION
     _attr_has_entity_name = True
