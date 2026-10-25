@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import aiohttp
 import pytest
 from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
@@ -50,6 +51,20 @@ async def test_errors(hass: HomeAssistant, aioclient_mock: AiohttpClientMocker) 
     aioclient_mock.get(DIMENSIONS_FI_URL, content=b"thl.pivot.loadDimensions(\xff\xfe);")
     with pytest.raises(ThlError, match="valid"):
         await ThlClient(hass, "fi").dimensions()
+
+
+@pytest.mark.parametrize(
+    ("error", "message"),
+    [
+        (TimeoutError(), "THL couldn't be reached: TimeoutError"),
+        (aiohttp.ClientConnectionError("Connection refused"), "THL couldn't be reached: Connection refused"),
+    ],
+)
+async def test_an_error_without_a_message_is_named(hass: HomeAssistant, aioclient_mock: AiohttpClientMocker, error, message) -> None:
+    aioclient_mock.get(DIMENSIONS_FI_URL, exc=error)
+    with pytest.raises(ThlError) as raised:
+        await ThlClient(hass, "fi").dimensions()
+    assert str(raised.value) == message
 
 
 async def test_thl_failing_is_told_to_the_others_at_once(hass: HomeAssistant, aioclient_mock: AiohttpClientMocker) -> None:

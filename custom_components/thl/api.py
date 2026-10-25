@@ -50,7 +50,8 @@ class ThlClient:
                     raise ThlError(f"THL answered with status {response.status}")
                 return await response.text()
         except (aiohttp.ClientError, TimeoutError) as err:
-            raise ThlError(f"THL couldn't be reached: {err}") from err
+            # A timeout's message is empty, and the coordinator logs only the first failure, so the type is the cause.
+            raise ThlError(f"THL couldn't be reached: {str(err) or type(err).__name__}") from err
         except UnicodeDecodeError as err:
             raise ThlError("THL sent text that isn't valid") from err
 

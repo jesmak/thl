@@ -1,4 +1,4 @@
-/*! thl-card 2.2.0 | MIT License | Includes a map adapted from Hyvinvointialueet.svg by Fenn-O-maniC, CC BY-SA 4.0, see https://github.com/jesmak/thl/blob/main/LICENSE-map */
+/*! thl-card 2.2.1 | MIT License | Includes a map adapted from Hyvinvointialueet.svg by Fenn-O-maniC, CC BY-SA 4.0, see https://github.com/jesmak/thl/blob/main/LICENSE-map */
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __decorateClass = (decorators, target, key, kind) => {
@@ -600,7 +600,7 @@ function r5(r6) {
 var o6 = (o7) => o7 ?? A;
 
 // src/const.ts
-var CARD_VERSION = "2.2.0";
+var CARD_VERSION = "2.2.1";
 var WHOLE_COUNTRY = "finland";
 
 // src/areas.ts
