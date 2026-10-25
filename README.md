@@ -21,7 +21,8 @@ illness, in the whole country and in every county. These show a flu season start
 
 Sensors get the past year written into their statistics, so graphs have a history from the start.
 
-The numbers can be shown with [thl-card](https://github.com/jesmak/thl-card), which draws them on a map of Finland.
+The numbers can be shown with the [THL card](#thl-card) that comes with the integration, which draws them on a map of
+Finland.
 
 ## Installation
 
@@ -73,7 +74,7 @@ Each disease is a device named after it, such as **THL Influenssa**, with these 
 
 Incidence is what makes the counties comparable: a large county has more cases simply because more people live there.
 
-The whole country's cases sensor carries every area in its `values` attribute, which is what thl-card reads:
+The whole country's cases sensor carries every area in its `values` attribute, which is what the THL card reads:
 
 | Key                       | Description                                    |
 | ------------------------- | ---------------------------------------------- |
@@ -98,7 +99,7 @@ whole country and one per county. The state is the percentage of all primary car
 influenza-like illness. It is a small number outside the flu season: around 0.01 %.
 
 The whole country's sensor carries the name of the visits in its `disease_name` attribute, as a disease's does, which
-is what thl-card shows as its title, and every area in its `values` attribute:
+is what the THL card shows as its title, and every area in its `values` attribute:
 
 | Key                    | Description                                       |
 | ---------------------- | ------------------------------------------------- |
@@ -121,12 +122,123 @@ one that got six months from an earlier version gets the rest of the year after 
 
 A graph therefore shows each week about a week after the week it describes. The shape of the curve is the same.
 
+## THL card
+
+<p>
+<img src="https://raw.githubusercontent.com/jesmak/thl/main/docs/images/thl-card-country-light.png#gh-light-mode-only" width="400" alt="Influenza on a map of Finland's wellbeing services counties, each coloured by its incidence against the whole country and labelled with its cases, the whole country's figures beside the map, the capital region enlarged below them, a colour key and a six-month trend">
+<img src="https://raw.githubusercontent.com/jesmak/thl/main/docs/images/thl-card-country-dark.png#gh-dark-mode-only" width="400" alt="Influenza on a map of Finland's wellbeing services counties, each coloured by its incidence against the whole country and labelled with its cases, the whole country's figures beside the map, the capital region enlarged below them, a colour key and a six-month trend">
+<img src="https://raw.githubusercontent.com/jesmak/thl/main/docs/images/thl-card-county-light.png#gh-light-mode-only" width="400" alt="Buttons for influenza and norovirus over the map, coloured by the change from the week before, with Pirkanmaa chosen and outlined, its figures including the same week a year ago, and its own trend">
+<img src="https://raw.githubusercontent.com/jesmak/thl/main/docs/images/thl-card-county-dark.png#gh-dark-mode-only" width="400" alt="Buttons for influenza and norovirus over the map, coloured by the change from the week before, with Pirkanmaa chosen and outlined, its figures including the same week a year ago, and its own trend">
+</p>
+
+The integration comes with a dashboard card that draws one disease, or the flu-like illness visits, on a map of the
+wellbeing services counties. Each county is coloured by how it compares with the whole country, or by how its cases
+changed from the week before. Clicking a county shows its own figures and trend.
+
+One card can switch between several diseases. The capital region, whose counties are too small to point at on the map,
+is drawn again larger beside the figures.
+
+The integration serves the card itself and adds it to the dashboards' resources when it starts, so the card is always
+the integration's own version. With the resources set in YAML (`resource_mode: yaml`), it can't add or update
+itself, and the log says which line to add, change or remove.
+
+### Card options
+
+The card has a visual editor. Add it from the card picker and choose the disease. The options can also be written by
+hand.
+
+| Name           | Type           | Description                                                                                                 | Default           |
+| -------------- | -------------- | ----------------------------------------------------------------------------------------------------------- | ----------------- |
+| `type`         | string         | **Required.** `custom:thl-card`                                                                             |                   |
+| `entity`       | string or list | **Required.** The whole country's sensor of a disease, or of the flu-like illness visits, or a list of them |                   |
+| `color_by`     | string         | `level` compares each county with the whole country, `change` with its own week before                      | `level`           |
+| `default_area` | string         | The `area_id` of a county chosen whenever the card loads, such as `pirkanmaan_hyvinvointialue`              | the whole country |
+| `show_trend`   | boolean        | A line of the chosen area's past six months under its figures                                               | `true`            |
+| `show_inset`   | boolean        | The capital region drawn again larger beside the figures                                                    | `true`            |
+| `show_key`     | boolean        | A key under the map that says what the colours mean                                                         | `true`            |
+| `map_width`    | number         | A fixed width for the map, in pixels                                                                        | follows the card  |
+
+### The map
+
+Each county is coloured, and its cases, or for the flu-like illness visits the visits, are written at its middle.
+Clicking a county chooses it and outlines it, and clicking it again goes back to the whole country. The counties can
+also be chosen from the keyboard, with Tab and Enter.
+
+Helsinki and Vantaa and Kerava are a few pixels each on the map. The capital region is therefore drawn again about five
+times larger beside the figures, with a dashed frame on the map around what it shows. Its counties and their numbers
+are chosen there. With `show_inset: false` it is left out, and their numbers are on the map with the rest, as hard to
+point at as they are small.
+
+### The colours
+
+By default a county is coloured by its level compared with the whole country. The level is its incidence per 100,000
+people for a disease, or its share of flu-like illness visits. The level is what makes counties comparable, since a
+large county has more cases simply because more people live there.
+
+| Colour      | What it means                                  |
+| ----------- | ---------------------------------------------- |
+| Blue        | No cases at all                                |
+| Green       | Less than half the whole country's level       |
+| Light green | Less than 0.8 times the whole country's level  |
+| Yellow      | About the same as the whole country            |
+| Orange      | More than 1.25 times the whole country's level |
+| Red         | More than twice the whole country's level      |
+
+With `color_by: change` a county is coloured by how its cases changed from the week before instead, or for the
+flu-like illness visits, how their share changed:
+
+| Colour      | What it means                                        |
+| ----------- | ---------------------------------------------------- |
+| Blue        | No cases at all, this week or the week before        |
+| Green       | Cases fell by more than 40%                          |
+| Light green | Cases fell by more than 10%                          |
+| Yellow      | Little change either way, or no week to compare with |
+| Orange      | Cases rose by more than 10%                          |
+| Red         | Cases rose by more than 40%                          |
+
+The key under the map gives the same bounds. A county the sensor carries no numbers for is left the colour of the
+text.
+
+### The figures and the trend
+
+Beside or under the map are the whole country's figures, last week's cases and incidence, the week before, and the
+change. A county that had no cases the week before has a dash for the change, as there is nothing to compare with. For
+the flu-like illness visits they are the share of visits, how many there were, and the share the week before. A chosen
+county shows its own figures instead.
+
+The same week a year ago is shown too, when Home Assistant's statistics reach that far.
+
+The trend covers the past six months, drawn from the statistics the integration keeps for each area's sensor. It is
+the incidence when colouring by level, and the cases when colouring by change. Pointing at it, tapping it or moving
+along it with the arrow keys shows a week and its figure. THL publishes a week's figures during the week after, so the
+newest point is the figure the sensor shows now, and the others are each named by the week their figure is from.
+
+### Several diseases
+
+Given a list of sensors, the card shows buttons over the map to switch between them. The first is shown when the card
+loads, and the chosen county stays chosen when switching.
+
+### Sizes
+
+In a sections view the card is the section's full width by default, and can be made as narrow as half the section. A
+card 290 pixels wide or more, which is a whole section even in a view of four, puts the figures beside the map, over the
+sea west of it, with the capital region below them. A narrower card keeps them under the map, with the capital region
+beside them when there is room and under them when not. In a wider card the map and the figures stay together in the
+middle. The map grows with the card up to a point, and the shapes and the numbers on them scale together.
+
+<p>
+<img src="https://raw.githubusercontent.com/jesmak/thl/main/docs/images/thl-card-narrow-light.png#gh-light-mode-only" width="255" alt="A narrow card with the figures, the capital region, the colour key and the trend under the map">
+<img src="https://raw.githubusercontent.com/jesmak/thl/main/docs/images/thl-card-narrow-dark.png#gh-dark-mode-only" width="255" alt="A narrow card with the figures, the capital region, the colour key and the trend under the map">
+</p>
+
+Set `map_width` to fix the map at one size whatever the card does.
+
 ## Examples
 
 ### The diseases on maps
 
-[thl-card](https://github.com/jesmak/thl-card) draws a disease on a map of the counties. The dashboard in the picture
-above has one card for each disease, all opening on the same county:
+The [THL card](#thl-card) draws a disease on a map of the counties. The dashboard in the picture above has one card
+for each disease, all opening on the same county:
 
 ```yaml
 type: custom:thl-card
@@ -135,6 +247,18 @@ default_area: pirkanmaan_hyvinvointialue
 ```
 
 The flu-like illness visits take the same card, with `entity: sensor.thl_influenssankaltaiset_kaynnit`.
+
+Three diseases to switch between, coloured by change, with a county chosen when the card loads:
+
+```yaml
+type: custom:thl-card
+entity:
+  - sensor.thl_influenssa
+  - sensor.thl_koronavirus_sars_cov_2
+  - sensor.thl_norovirus
+color_by: change
+default_area: pirkanmaan_hyvinvointialue
+```
 
 ### A county's incidence over half a year
 
@@ -161,11 +285,18 @@ series:
     curve: stepline
 ```
 
+## Upgrading from the separate THL card
+
+The THL card used to be a repository of its own, THL card. It now comes with the integration, and the separate
+repository has been removed. If you installed it, remove it in HACS, and check that its resource
+(`/hacsfiles/thl-card/…`) is gone from Settings › Dashboards › Resources. Until it is, the log warns about it at every
+start. Your dashboards need no changes, as the card's type stays `custom:thl-card`.
+
 ## Upgrading from 1.x
 
 Nothing needs to be done. Versions before 2.0 made a separate integration entry for each disease; on the first start
 they are merged into one entry with a disease inside it for each. Entity IDs and unique IDs stay as they were, so
-history, statistics, dashboards, automations and thl-card keep working. The language of the merged entry is the one
+history, statistics, dashboards, automations and the THL card keep working. The language of the merged entry is the one
 most of the old entries used.
 
 The county, incidence and flu-like illness sensors are new, and appear with six months of history. The disease sensors
@@ -178,6 +309,11 @@ The data comes from [THL's open data](https://thl.fi/en/statistics-and-data/data
 from the infectious diseases register, and the primary care visits from the primary health care register (Avohilmo).
 Every entity credits THL in its attribution.
 
+The THL card's map of the wellbeing services counties is adapted from
+[Hyvinvointialueet.svg](https://commons.wikimedia.org/wiki/File:Hyvinvointialueet.svg) by Fenn-O-maniC on Wikimedia
+Commons, licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). The adapted map in
+`frontend/src/map/counties.ts` is licensed under CC BY-SA 4.0 as well, see [LICENSE-map](LICENSE-map).
+
 The newest weeks are read every half hour. The names of the diseases and areas are kept for half an hour and shared
 by every disease.
 
@@ -186,6 +322,10 @@ by every disease.
 The texts are in `custom_components/thl/translations/`, one JSON file per language, such as `en.json` and `fi.json`.
 To add a language, copy `en.json` to the new language's code and translate the values. The names of the diseases and
 areas come from THL in Finnish or English.
+
+The THL card's texts are in `frontend/src/localize/languages/`, in the same way. To add a language there, copy
+`en.json` to the new language's code, translate the values, and add the file to `LANGUAGES` in
+`frontend/src/localize/localize.ts`. A text left out falls back to English.
 
 ## Development
 
@@ -201,6 +341,19 @@ python3.14 -m venv .venv
 
 The tests run on made-up data, without network access.
 
+The THL card is in `frontend/` and requires Node 22.13 or newer:
+
+```
+cd frontend
+npm install
+npm run check
+```
+
+`npm run check` typechecks, lints, checks formatting, runs the tests and builds `custom_components/thl/www/thl-card.js`,
+which is the file the integration serves and is committed to the repository. The card carries the integration's version
+from `manifest.json`. To have git refuse a commit whose built card doesn't match `frontend/`, run
+`git config core.hooksPath .githooks` once.
+
 | Path                           | What it contains                                                              |
 | ------------------------------ | ----------------------------------------------------------------------------- |
 | `__init__.py`                  | Setup, and the shared dimensions                                              |
@@ -212,6 +365,8 @@ The tests run on made-up data, without network access.
 | `sensor.py`                    | The sensors                                                                   |
 | `history.py`                   | Writing past weeks into the statistics of the sensors that have none for them |
 | `translations/<language>.json` | Home Assistant UI texts                                                       |
+| `card.py`, `www/`              | Serving the THL card and adding it to the dashboards' resources               |
+| `frontend/`                    | The THL card's source, tests and build                                        |
 
 ## Support
 
@@ -219,9 +374,14 @@ Hey dude! Help me out for a couple of :beers: or a :coffee:!
 
 [![coffee](https://www.buymeacoffee.com/assets/img/custom_images/black_img.png)](https://www.buymeacoffee.com/jesmak)
 
+## Thanks
+
+To Fenn-O-maniC for the map of the wellbeing services counties that the THL card draws.
+
 ## License
 
-MIT. The data is THL's, under CC BY 4.0.
+MIT, see [LICENSE](LICENSE). The THL card's map is CC BY-SA 4.0, see [LICENSE-map](LICENSE-map). The data is THL's,
+under CC BY 4.0.
 
 [releases-shield]: https://img.shields.io/github/release/jesmak/thl.svg?style=for-the-badge
 [release-date-shield]: https://img.shields.io/github/release-date/jesmak/thl?style=for-the-badge

@@ -16,6 +16,7 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
 from .api import DimensionsCache
+from .card import async_add_card_resource, async_remove_card_resource, async_serve_card
 from .const import DOMAIN, SUBENTRY_DISEASE, SUBENTRY_ILI
 from .coordinator import IliCoordinator, ThlConfigEntry, ThlCoordinator, ThlRuntimeData, WeeklyCoordinator
 from .migration import VERSION, async_migrate_to_subentries
@@ -29,11 +30,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     # Runs before any entry is set up, so the old one-entry-per-disease entries
     # are merged before Home Assistant would try to set them up one by one.
     await async_migrate_to_subentries(hass)
+    await async_serve_card(hass)
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ThlConfigEntry) -> bool:
     # Every disease shares one copy of THL's dimensions file.
+    await async_add_card_resource(hass)
     cache = DimensionsCache()
     kinds: dict[str, type[WeeklyCoordinator]] = {SUBENTRY_DISEASE: ThlCoordinator, SUBENTRY_ILI: IliCoordinator}
     coordinators = {
@@ -74,3 +77,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Entries from before 2.0 are merged into one in async_setup, which runs first.
     # A newer version than this means Home Assistant was downgraded.
     return entry.version <= VERSION
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: ThlConfigEntry) -> None:
+    await async_remove_card_resource(hass)
