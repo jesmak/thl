@@ -35,6 +35,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ThlConfigEntry) -> bool:
+    # A change saved before the update listener is added below has nothing to reload the entry, so it is looked for then.
+    modified = entry.modified_at
     # Every disease shares one copy of THL's dimensions file.
     await async_add_card_resource(hass)
     cache = DimensionsCache()
@@ -56,6 +58,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ThlConfigEntry) -> bool:
 
     # Adding or removing a disease, or changing the language, reloads everything.
     entry.async_on_unload(entry.add_update_listener(async_update_listener))
+    if entry.modified_at != modified:
+        await async_update_listener(hass, entry)
 
     return True
 

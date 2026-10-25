@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime, timedelta
+from types import MappingProxyType
 
+import pytest
 from freezegun.api import FrozenDateTimeFactory
-from homeassistant.config_entries import ConfigEntryState
+from homeassistant.config_entries import ConfigEntryState, ConfigSubentry
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
-from pytest_homeassistant_custom_component.common import async_fire_time_changed
+from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_time_changed
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
 from custom_components.thl.sensor import ThlSensor
@@ -157,3 +159,47 @@ async def test_thl_being_down_at_startup_does_not_stop_the_entry(
     assert entry.state is ConfigEntryState.LOADED, "one disease failing must not stop the others"
     assert hass.states.get(INFLUENZA_SENSOR).state == STATE_UNAVAILABLE
     assert WEEK_37 not in json.dumps(dict(hass.states.get(INFLUENZA_SENSOR).attributes))
+
+
+@pytest.mark.parametrize("change", ["data", "subentry"])
+async def test_a_change_saved_while_setting_up_is_applied(
+    hass: HomeAssistant, thl: AiohttpClientMocker, freezer: FrozenDateTimeFactory, monkeypatch: pytest.MonkeyPatch, change: str
+) -> None:
+    freezer.move_to(NOW)
+    entry = thl_entry(hass, TWO_DISEASES[0])
+    [influenza] = entry.subentries
+    adenovirus = ConfigSubentry(
+        data=MappingProxyType({"disease_id": ADENOVIRUS, "disease_name": "Adenovirus"}),
+        subentry_type="disease",
+        title="THL Adenovirus",
+        unique_id=f"thl_{ADENOVIRUS}",
+    )
+    forward = hass.config_entries.async_forward_entry_setups
+    setups = []
+
+    async def save_while_setting_up(entry: MockConfigEntry, platforms) -> None:
+        setups.append((dict(entry.data), set(entry.subentries)))
+        # Saved as a flow would save it, before setup has added its update listener.
+        if len(setups) == 1:
+            # The entry's modified_at is the clock's time, which the frozen clock would keep the same.
+            freezer.tick()
+            if change == "data":
+                hass.config_entries.async_update_entry(entry, data={"language": "en"})
+            else:
+                hass.config_entries.async_add_subentry(entry, adenovirus)
+        await forward(entry, platforms)
+
+    monkeypatch.setattr(hass.config_entries, "async_forward_entry_setups", save_while_setting_up)
+    # Not asserted: the reload may already be under way when the setup returns.
+    await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert entry.state is ConfigEntryState.LOADED
+    assert len(setups) == 2, "set up again with the change"
+    assert setups[0] != setups[1], "the first setup saw the entry before the change"
+    data, subentries = setups[-1]
+    if change == "data":
+        assert data == {"language": "en"}
+    else:
+        assert subentries == {influenza, adenovirus.subentry_id}
+        assert adenovirus.subentry_id in entry.runtime_data.coordinators
