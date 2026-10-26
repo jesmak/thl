@@ -19,7 +19,8 @@ for Health and Welfare (THL). Each disease is added separately, and gets sensors
 It can also follow **flu-like illness visits** in primary care: the share of all visits made for influenza-like
 illness, in the whole country and in every county. These show a flu season starting before the lab-confirmed cases do.
 
-Sensors get the past year written into their statistics, so graphs have a history from the start.
+Sensors get the past year written into their statistics, so graphs have a history from the start, and the statistics
+follow the figures THL corrects later.
 
 The numbers can be shown with the [THL card](#thl-card) that comes with the integration, which draws them on a map of
 Finland.
@@ -113,12 +114,13 @@ is what the THL card shows as its title, and every area in its `values` attribut
 ### The history
 
 When a sensor is added, the past year is written into its statistics, a year and a week to be exact, so the same week a
-year ago is there too. Each week's figure is placed at the start of the week after it, which is when the sensor would
-have shown it, so the past and what the recorder keeps from then on line up.
+year ago is there too. Each week's figure is placed in the week after it, which is when the sensor shows it.
 
-Only the weeks without any statistics are written, and this is checked at every start. A sensor that has been running
-keeps what it recorded itself and gets the weeks before that. A sensor enabled later gets its past when it is added, and
-one that got six months from an earlier version gets the rest of the year after the upgrade.
+THL fills in a week's numbers during the weeks after it, so a figure the sensor showed may be corrected later. The
+statistics follow THL. At every start, and whenever THL changes a figure, each week of the past year is given the figure
+THL has for it now. A week without statistics gets one row at its start, and in a week the recorder kept, every hour it
+recorded is given the figure, including the hours when the sensor still showed the week before. Hours the recorder
+didn't keep, such as while THL couldn't be reached, stay empty. A sensor enabled later gets its past when it is added.
 
 A graph therefore shows each week about a week after the week it describes. The shape of the curve is the same.
 
@@ -300,7 +302,7 @@ history, statistics, dashboards, automations and the THL card keep working. The 
 most of the old entries used.
 
 The county, incidence and flu-like illness sensors are new, and appear with six months of history. The disease sensors
-that already existed keep the history they have.
+that already existed keep the history they have, with THL's current figures in its past year.
 
 ## Data
 
@@ -363,7 +365,7 @@ from `manifest.json`. To have git refuse a commit whose built card doesn't match
 | `statistics.py`                | Reading the dimensions and data files                                         |
 | `coordinator.py`               | Fetching the newest weeks with figures every half hour                        |
 | `sensor.py`                    | The sensors                                                                   |
-| `history.py`                   | Writing past weeks into the statistics of the sensors that have none for them |
+| `history.py`                   | Keeping THL's figure for each past week in the statistics of the sensors      |
 | `translations/<language>.json` | Home Assistant UI texts                                                       |
 | `card.py`, `www/`              | Serving the THL card and adding it to the dashboards' resources               |
 | `frontend/`                    | The THL card's source, tests and build                                        |

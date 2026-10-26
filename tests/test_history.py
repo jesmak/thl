@@ -13,13 +13,16 @@ from homeassistant.components.recorder.statistics import async_import_statistics
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
+from pytest_homeassistant_custom_component.common import async_fire_time_changed
+from pytest_homeassistant_custom_component.components.recorder.common import async_wait_recording_done
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
 from custom_components.thl import history
-from custom_components.thl.history import shown_from
+from custom_components.thl.const import MEASURE_CASES
+from custom_components.thl.history import WRITE_AGAIN_AFTER, shown_from
 from custom_components.thl.statistics import Week
 
-from .conftest import ADENOVIRUS, DIMENSIONS_FI_URL, INFLUENZA, WEEK_36, WEEK_37, thl_entry
+from .conftest import ADENOVIRUS, CASE_WEEKS, DIMENSIONS_FI_URL, INFLUENZA, WEEK_36, WEEK_36_CASES, WEEK_37, thl_entry
 
 # A Wednesday of week 38, so the last finished week is 37.
 NOW = datetime(2026, 9, 16, 9, 0, tzinfo=UTC)
@@ -36,8 +39,8 @@ def auto_enable_custom_integrations() -> None:
 async def stored(hass: HomeAssistant, statistic_id: str) -> list[tuple[float, float]]:
     """The start and mean of each row of a sensor's statistics, once the past has been written in the background."""
     await hass.async_block_till_done(wait_background_tasks=True)
-    await get_instance(hass).async_block_till_done()
-    await hass.async_block_till_done()
+    # The recorder's own wait returns while it still runs the task it took off its queue.
+    await async_wait_recording_done(hass)
     found = await get_instance(hass).async_add_executor_job(
         statistics_during_period,
         hass,
@@ -89,7 +92,7 @@ async def test_the_recorder_is_asked_once_for_each_subentry(
     assert asked.call_count == 3, "not once for each of the sensors"
 
 
-async def test_a_running_sensor_keeps_what_it_recorded_and_gets_the_weeks_it_has_nothing_for(
+async def test_a_running_sensor_gets_thls_figures_for_what_it_recorded_and_for_the_weeks_it_has_nothing_for(
     recorder_mock,
     enable_custom_integrations,
     hass: HomeAssistant,
@@ -97,7 +100,7 @@ async def test_a_running_sensor_keeps_what_it_recorded_and_gets_the_weeks_it_has
     freezer: FrozenDateTimeFactory,
 ) -> None:
     freezer.move_to(NOW)
-    # The whole country's sensor has been running since week 37, when week 36's figure was shown.
+    # The whole country's sensor has been running since week 37, when it showed 42 for week 36. THL has 20 now.
     recorded = datetime(2026, 9, 8, 12, 0, tzinfo=UTC)
     async_import_statistics(
         hass,
@@ -116,11 +119,36 @@ async def test_a_running_sensor_keeps_what_it_recorded_and_gets_the_weeks_it_has
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
 
-    rows = await stored(hass, WHOLE_COUNTRY)
-    assert (recorded.timestamp(), 42.0) in rows, "what it recorded is kept"
-    assert start_of(36) not in [start for start, _ in rows], "the week it recorded is not written over"
-    assert start_of(37) in [start for start, _ in rows], "the week it has nothing for is filled in"
+    assert await stored(hass, WHOLE_COUNTRY) == [(recorded.timestamp(), 20.0), (start_of(37), 17.0)], (
+        "the hour it recorded holds THL's figure, and the week it has nothing for gets one row"
+    )
     assert len(await stored(hass, COUNTY)) == 2, "the new county sensors get theirs"
+
+
+async def test_a_figure_thl_corrects_reaches_the_statistics(
+    recorder_mock,
+    enable_custom_integrations,
+    hass: HomeAssistant,
+    thl: AiohttpClientMocker,
+    freezer: FrozenDateTimeFactory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    freezer.move_to(NOW)
+    entry = thl_entry(hass, (INFLUENZA, "Influenssa"))
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    coordinator = entry.runtime_data.coordinators[next(iter(entry.subentries))]
+
+    with patch.object(history, "statistics_during_period", wraps=statistics_during_period) as asked:
+        await coordinator.async_refresh()
+        await hass.async_block_till_done(wait_background_tasks=True)
+    assert asked.call_count == 0, "nothing changed, so the recorder isn't asked"
+
+    # THL fills in week 36 for East Uusimaa: 4 cases become 6.
+    monkeypatch.setitem(CASE_WEEKS[WEEK_36], MEASURE_CASES, {**WEEK_36_CASES, 1: 6})
+    await coordinator.async_refresh()
+
+    assert await stored(hass, COUNTY) == [(start_of(36), 6.0), (start_of(37), 5.0)]
 
 
 async def test_a_sensor_enabled_later_gets_its_past(
@@ -218,3 +246,95 @@ async def test_weeks_are_shown_from_the_start_of_the_week_after(hass: HomeAssist
 
     assert shown_from(Week(2026, 37, WEEK_37)) == datetime(2026, 9, 13, 21, 0, tzinfo=UTC), "Monday 14 September at midnight in Helsinki"
     assert shown_from(Week(2026, 36, WEEK_36)) == datetime(2026, 9, 6, 21, 0, tzinfo=UTC)
+
+
+async def test_the_hour_being_recorded_when_the_figures_changed_is_written_once_more(
+    recorder_mock,
+    enable_custom_integrations,
+    hass: HomeAssistant,
+    thl: AiohttpClientMocker,
+    freezer: FrozenDateTimeFactory,
+) -> None:
+    freezer.move_to(NOW)
+    entry = thl_entry(hass, (INFLUENZA, "Influenssa"))
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert await stored(hass, COUNTY) == [(start_of(36), 4.0), (start_of(37), 5.0)]
+
+    # The recorder compiles the hour the figures changed in from both of them.
+    async_import_statistics(
+        hass,
+        StatisticMetaData(
+            source="recorder",
+            statistic_id=COUNTY,
+            name=None,
+            unit_of_measurement=None,
+            unit_class="unitless",
+            mean_type=StatisticMeanType.ARITHMETIC,
+            has_sum=False,
+        ),
+        [StatisticData(start=NOW, mean=4.5, min=4.0, max=5.0)],
+    )
+    assert (NOW.timestamp(), 4.5) in await stored(hass, COUNTY)
+
+    freezer.tick(WRITE_AGAIN_AFTER)
+    async_fire_time_changed(hass)
+    assert (NOW.timestamp(), 5.0) in await stored(hass, COUNTY), "written once more after the recorder compiled it"
+
+    with patch.object(history, "statistics_during_period", wraps=statistics_during_period) as asked:
+        freezer.tick(WRITE_AGAIN_AFTER)
+        async_fire_time_changed(hass)
+        await hass.async_block_till_done(wait_background_tasks=True)
+    assert asked.call_count == 0, "only once"
+
+
+async def test_nothing_is_written_again_after_the_entry_is_unloaded(
+    recorder_mock,
+    enable_custom_integrations,
+    hass: HomeAssistant,
+    thl: AiohttpClientMocker,
+    freezer: FrozenDateTimeFactory,
+) -> None:
+    freezer.move_to(NOW)
+    entry = thl_entry(hass, (INFLUENZA, "Influenssa"))
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done(wait_background_tasks=True)
+    assert await hass.config_entries.async_unload(entry.entry_id)
+
+    with patch("custom_components.thl.coordinator.async_write_history") as written:
+        freezer.tick(WRITE_AGAIN_AFTER)
+        async_fire_time_changed(hass)
+        await hass.async_block_till_done(wait_background_tasks=True)
+    assert written.call_count == 0
+
+
+async def test_new_figures_move_the_follow_up_to_after_them(
+    recorder_mock,
+    enable_custom_integrations,
+    hass: HomeAssistant,
+    thl: AiohttpClientMocker,
+    freezer: FrozenDateTimeFactory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    freezer.move_to(NOW)
+    entry = thl_entry(hass, (INFLUENZA, "Influenssa"))
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done(wait_background_tasks=True)
+    coordinator = entry.runtime_data.coordinators[next(iter(entry.subentries))]
+
+    # An hour later THL changes a figure, which is written at once and again three hours after that.
+    freezer.tick(timedelta(hours=1))
+    monkeypatch.setitem(CASE_WEEKS[WEEK_36], MEASURE_CASES, {**WEEK_36_CASES, 1: 6})
+    await coordinator.async_refresh()
+    await hass.async_block_till_done(wait_background_tasks=True)
+
+    with patch("custom_components.thl.coordinator.async_write_history") as written:
+        freezer.move_to(NOW + WRITE_AGAIN_AFTER)
+        async_fire_time_changed(hass)
+        await hass.async_block_till_done(wait_background_tasks=True)
+        assert written.call_count == 0, "the follow-up of the first figures is gone"
+
+        freezer.move_to(NOW + timedelta(hours=1) + WRITE_AGAIN_AFTER)
+        async_fire_time_changed(hass)
+        await hass.async_block_till_done(wait_background_tasks=True)
+        assert written.call_count == 1, "the one after the new figures is written"

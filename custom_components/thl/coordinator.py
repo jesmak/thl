@@ -2,18 +2,19 @@
 
 Each refresh reads the newest week with figures and the weeks before it in one
 request. The newest two give the sensors' states and the change figures; all of
-them are written into the statistics of new sensors, so their graphs have a past.
+them are kept in the sensors' statistics as THL has them, so their graphs have a past.
 """
 
 from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry, ConfigSubentry
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
+from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
@@ -38,7 +39,7 @@ from .const import (
     UPDATE_INTERVAL,
 )
 from .exceptions import ThlError
-from .history import async_import_history, recording
+from .history import WRITE_AGAIN_AFTER, async_write_history, recording
 from .statistics import (
     Area,
     Cube,
@@ -129,7 +130,9 @@ class WeeklyCoordinator(DataUpdateCoordinator[Weekly]):
         self.language: str = entry.data[CONF_LANGUAGE]
         # The sensors added, whose past is written: entity id → unit, area id and figure.
         self.history_targets: dict[str, tuple[str | None, str, str]] = {}
-        self._history_written = False
+        # The figures last written into the statistics.
+        self._history_of: Weekly | None = None
+        self._write_again: CALLBACK_TYPE | None = None
         self._client = ThlClient(hass, self.language)
         self._cache = cache
 
@@ -161,17 +164,37 @@ class WeeklyCoordinator(DataUpdateCoordinator[Weekly]):
     @callback
     def async_update_listeners(self) -> None:
         super().async_update_listeners()
-        # THL couldn't be read when the sensors were added; their past is written once it can.
+        # THL couldn't be read when the sensors were added, or has changed a figure since.
         if self.history_targets:
             self.async_write_history()
 
     @callback
     def async_write_history(self) -> None:
-        """Writes the weeks that have no statistics into those of every sensor added, once a setup, when THL has been read."""
-        if self._history_written or self.data is None or not recording(self.hass):
+        """Gives each week in the statistics of every sensor added THL's figure for it, once a setup and whenever THL changes one."""
+        if self.data is None or self.data == self._history_of or not recording(self.hass):
             return
-        self._history_written = True
-        self.config_entry.async_create_background_task(self.hass, self._write_history(self.data), f"{self.name} history")
+        self._history_of = self.data
+        self._start_writing(self.data)
+        if self._write_again is not None:
+            self._write_again()
+        self._write_again = async_call_later(self.hass, WRITE_AGAIN_AFTER, self._async_write_again)
+
+    @callback
+    def _async_write_again(self, _now: datetime) -> None:
+        """Writes the same figures once more, for the hour the recorder was keeping when they changed."""
+        self._write_again = None
+        if self._history_of is not None and recording(self.hass):
+            self._start_writing(self._history_of)
+
+    @callback
+    def _start_writing(self, data: Weekly) -> None:
+        self.config_entry.async_create_background_task(self.hass, self._write_history(data), f"{self.name} history")
+
+    async def async_shutdown(self) -> None:
+        await super().async_shutdown()
+        if self._write_again is not None:
+            self._write_again()
+            self._write_again = None
 
     async def _write_history(self, data: Weekly) -> None:
         sensors = [
@@ -179,7 +202,7 @@ class WeeklyCoordinator(DataUpdateCoordinator[Weekly]):
             for entity_id, (unit, area_id, key) in self.history_targets.items()
         ]
         try:
-            await async_import_history(self.hass, sensors)
+            await async_write_history(self.hass, sensors)
         except Exception:
             # The sensors work without their past, so a recorder that fails is only logged.
             _LOGGER.exception("Writing the past weeks of %s into the statistics failed", self.subentry.title)
