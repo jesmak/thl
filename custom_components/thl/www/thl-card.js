@@ -1986,8 +1986,10 @@ var ThlCard = class extends i4 {
   }
   static get styles() {
     return i`
+            /* As tall as a sections view's grid rows make its cell, which a card held by them fills. */
             :host {
                 display: block;
+                height: 100%;
             }
 
             ha-card {

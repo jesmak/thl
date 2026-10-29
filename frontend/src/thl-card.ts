@@ -709,8 +709,10 @@ export class ThlCard extends LitElement {
 
     static get styles(): CSSResultGroup {
         return css`
+            /* As tall as a sections view's grid rows make its cell, which a card held by them fills. */
             :host {
                 display: block;
+                height: 100%;
             }
 
             ha-card {
