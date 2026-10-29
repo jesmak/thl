@@ -699,11 +699,76 @@ function changeColor(area) {
   return STEADY;
 }
 
+// src/height.ts
+var HEIGHT_MODES = ["auto", "fixed", "max"];
+var pixels = (value) => value == null || typeof value === "number" && Number.isFinite(value) && value > 0;
+function validHeight(config) {
+  return (config.height_mode == null || HEIGHT_MODES.includes(config.height_mode)) && pixels(config.height) && pixels(config.max_height);
+}
+function heightMode(config) {
+  return config.height_mode ?? (config.height ? "fixed" : config.max_height ? "max" : "auto");
+}
+var ROW_HEIGHT = 56;
+var ROW_GAP = 8;
+function heightStyle(config, layout, minimum = 0) {
+  const rows = config.grid_options ? config.grid_options.rows : config.layout_options?.grid_rows;
+  if (layout === "grid" && typeof rows === "number") {
+    return "height: 100%";
+  }
+  const mode = heightMode(config);
+  if (mode === "fixed" && config.height) {
+    return `height: ${Math.max(config.height, minimum)}px`;
+  }
+  return mode === "max" && config.max_height ? `max-height: ${Math.max(config.max_height, minimum)}px` : "";
+}
+function gridMinRows(minimum) {
+  return Math.max(1, Math.ceil((minimum + ROW_GAP) / (ROW_HEIGHT + ROW_GAP)));
+}
+function heightCardSize(config, content, minimum = 0) {
+  const mode = heightMode(config);
+  if (mode === "fixed" && config.height) {
+    return Math.max(1, Math.round(Math.max(config.height, minimum) / 50));
+  }
+  return mode === "max" && config.max_height ? Math.max(1, Math.min(content, Math.round(Math.max(config.max_height, minimum) / 50))) : content;
+}
+function heightSchema(config, text) {
+  const mode = heightMode(config);
+  const field = (name) => ({
+    name,
+    selector: { number: { min: 100, max: 2e3, step: 10, unit_of_measurement: "px", mode: "box" } }
+  });
+  return [
+    {
+      name: "height_mode",
+      selector: {
+        select: { mode: "dropdown", options: HEIGHT_MODES.map((value) => ({ value, label: text(`editor.height_mode_${value}`) })) }
+      }
+    },
+    ...mode === "fixed" ? [field("height")] : mode === "max" ? [field("max_height")] : []
+  ];
+}
+function heightData(config) {
+  return { ...config, height_mode: heightMode(config) };
+}
+function tidyHeight(config) {
+  const tidied = { ...config };
+  for (const key of ["height", "max_height"]) {
+    if (!tidied[key]) {
+      delete tidied[key];
+    }
+  }
+  if (!tidied.height_mode || heightMode({ ...tidied, height_mode: void 0 }) === tidied.height_mode) {
+    delete tidied.height_mode;
+  }
+  return tidied;
+}
+
 // src/localize/languages/en.json
 var en_default = {
   name: "THL statistics",
   description: "THL's disease statistics from Finland",
   invalid_configuration: "Set the entity of a disease from the thl integration.",
+  invalid_height: "Invalid height. height and max_height must be positive numbers of pixels, and height_mode auto, fixed or max.",
   entity_not_found: "There is no entity {entity}.",
   unavailable: "The disease numbers aren't available.",
   whole_country: "Whole country",
@@ -734,9 +799,18 @@ var en_default = {
   key_share: "share of visits compared with the whole country",
   key_change: "change from the week before",
   show_inset: "Capital region inset",
-  show_inset_helper: "The capital region drawn again larger beside the figures, so its small counties are easier to choose.",
+  show_inset_helper: "The capital region drawn again larger under the figures, so its small counties are easier to choose.",
   show_key: "Colour key",
-  show_key_helper: "What the map's colours mean, under the map."
+  show_key_helper: "What the map's colours mean, under the map.",
+  height_mode: "Height",
+  height_mode_helper: "A height set in the layout tab of a sections view is used instead.",
+  height_mode_auto: "Fits the content",
+  height_mode_fixed: "Fixed",
+  height_mode_max: "Grows up to a limit",
+  height: "Fixed height",
+  height_helper: "The card is always this tall, and the map shrinks to fit inside it.",
+  max_height: "Maximum height",
+  max_height_helper: "The card grows with its content up to this height, and then the map shrinks to fit."
 };
 
 // src/localize/languages/fi.json
@@ -744,6 +818,7 @@ var fi_default = {
   name: "THL tautitilastot",
   description: "THL:n tautitilastot",
   invalid_configuration: "Aseta entiteetiksi thl-integraation tauti.",
+  invalid_height: "Virheellinen korkeus. Korkeuksien (height ja max_height) on oltava positiivisia lukuja pikselein\xE4, ja korkeustilan (height_mode) auto, fixed tai max.",
   entity_not_found: "Entiteetti\xE4 {entity} ei ole.",
   unavailable: "Tautien lukum\xE4\xE4r\xE4t eiv\xE4t ole saatavilla.",
   whole_country: "Koko maa",
@@ -774,9 +849,18 @@ var fi_default = {
   key_share: "k\xE4yntien osuus koko maahan verrattuna",
   key_change: "muutos edellisest\xE4 viikosta",
   show_inset: "P\xE4\xE4kaupunkiseudun suurennos",
-  show_inset_helper: "P\xE4\xE4kaupunkiseutu uudelleen suurempana lukujen vieress\xE4, jotta sen pienet alueet on helpompi valita.",
+  show_inset_helper: "P\xE4\xE4kaupunkiseutu uudelleen suurempana lukujen alla, jotta sen pienet alueet on helpompi valita.",
   show_key: "V\xE4rien selitys",
-  show_key_helper: "Mit\xE4 kartan v\xE4rit tarkoittavat, kartan alla."
+  show_key_helper: "Mit\xE4 kartan v\xE4rit tarkoittavat, kartan alla.",
+  height_mode: "Korkeus",
+  height_mode_helper: "Osioihin jaetun n\xE4kym\xE4n asettelu-v\xE4lilehdell\xE4 asetettu korkeus ohittaa t\xE4m\xE4n.",
+  height_mode_auto: "Sis\xE4ll\xF6n mukaan",
+  height_mode_fixed: "Kiinte\xE4",
+  height_mode_max: "Kasvaa rajaan asti",
+  height: "Kiinte\xE4 korkeus",
+  height_helper: "Kortti on aina n\xE4in korkea, ja kartta pienenee mahtumaan sen sis\xE4\xE4n.",
+  max_height: "Enimm\xE4iskorkeus",
+  max_height_helper: "Kortti kasvaa sis\xE4lt\xF6ns\xE4 mukana t\xE4h\xE4n korkeuteen asti, ja sen j\xE4lkeen kartta pienenee mahtumaan."
 };
 
 // src/localize/localize.ts
@@ -804,7 +888,7 @@ function countyOptions(hass, entity, text) {
   const counties = values.filter((area) => area.area_id !== WHOLE_COUNTRY).map((area) => ({ value: area.area_id, label: area.name })).sort((a3, b3) => a3.label.localeCompare(b3.label));
   return [{ value: "", label: text("whole_country") }, ...counties];
 }
-function schema(hass, entity, text) {
+function schema(hass, config, entity, text) {
   return [
     {
       name: "entity",
@@ -833,7 +917,9 @@ function schema(hass, entity, text) {
     {
       name: "map_width",
       selector: { number: { min: 120, max: 600, step: 5, unit_of_measurement: "px", mode: "box" } }
-    }
+    },
+    // The card's texts have no editor section, so the shared height fields' keys are looked up without one.
+    ...heightSchema(config, (key) => text(key.replace(/^editor\./, "")))
   ];
 }
 var ThlCardEditor = class extends i4 {
@@ -851,8 +937,8 @@ var ThlCardEditor = class extends i4 {
     return b2`
             <ha-form
                 .hass=${this.hass}
-                .data=${{ ...DEFAULTS, ...this.config, entity: this.entities() }}
-                .schema=${schema(this.hass, this.entities()[0] ?? "", (key) => this.text(key))}
+                .data=${{ ...DEFAULTS, ...heightData(this.config), entity: this.entities() }}
+                .schema=${schema(this.hass, this.config, this.entities()[0] ?? "", (key) => this.text(key))}
                 .computeLabel=${(entry) => this.text(entry.name)}
                 .computeHelper=${(entry) => this.helper(entry.name)}
                 @value-changed=${this.valueChanged}
@@ -864,7 +950,7 @@ var ThlCardEditor = class extends i4 {
     return [this.config.entity ?? []].flat().filter(Boolean);
   }
   valueChanged(event) {
-    const config = { ...event.detail.value };
+    const config = tidyHeight(event.detail.value);
     const entities = [config.entity ?? []].flat();
     config.entity = entities.length === 1 && !Array.isArray(this.config.entity) ? entities[0] : entities;
     if (config.map_width === void 0 || config.map_width === null || String(config.map_width) === "") {
@@ -1410,6 +1496,9 @@ var ThlCard = class extends i4 {
     if (entities.length === 0) {
       throw new Error(translate(browserLanguage(), "invalid_configuration"));
     }
+    if (!validHeight(config)) {
+      throw new Error(translate(browserLanguage(), "invalid_height"));
+    }
     if (this.config === void 0 || String(entities) !== String(this.entities())) {
       this.shown = 0;
     }
@@ -1419,11 +1508,11 @@ var ThlCard = class extends i4 {
     this.config = { ...config };
   }
   getCardSize() {
-    return 8;
+    return heightCardSize(this.config ?? {}, 8, this.minimumHeight());
   }
-  /** In a sections view the card is drawn full width, and never squeezed below half a section. */
+  /** In a sections view the card is drawn full width, never squeezed below half a section, nor lower than its minimum. */
   getGridOptions() {
-    return { columns: 12, rows: "auto", min_columns: 6 };
+    return { columns: 12, rows: "auto", min_columns: 6, min_rows: gridMinRows(this.minimumHeight()) };
   }
   connectedCallback() {
     super.connectedCallback();
@@ -1462,24 +1551,27 @@ var ThlCard = class extends i4 {
     const selected = this.selected === void 0 ? void 0 : findArea(areas, this.selected);
     const whole = findArea(areas, WHOLE_COUNTRY);
     const title = selected?.name ?? this.text("whole_country");
+    const height = this.heightStyle();
     return b2`
-            <ha-card>
+            <ha-card class=${height ? "held" : ""} style=${height}>
                 <div class="card">
                     <div class="disease">
                         ${DISEASE_LOGO}
                         <span class="disease-name">${this.name(entity.attributes)}</span>
                     </div>
                     ${this.chips()}
-                    <div class="body">
-                        ${this.map(areas, whole)}
-                        <div class="side">
-                            <div class="figures">
-                                ${isVisits(areas) ? this.visits(title, selected ?? whole) : this.stats(title, selected ?? whole)}
+                    <div class="content">
+                        <div class="body">
+                            ${this.map(areas, whole, height !== "")}
+                            <div class="side">
+                                <div class="figures">
+                                    ${isVisits(areas) ? this.visits(title, selected ?? whole) : this.stats(title, selected ?? whole)}
+                                </div>
+                                ${this.showInset ? b2`<div class="inset-room">${this.inset(areas, whole)}</div>` : A}
                             </div>
-                            ${this.showInset ? this.inset(areas, whole) : A}
                         </div>
+                        ${this.config.show_key === false ? A : this.key(areas)} ${this.trendLine()}
                     </div>
-                    ${this.config.show_key === false ? A : this.key(areas)} ${this.trendLine()}
                 </div>
             </ha-card>
         `;
@@ -1528,27 +1620,30 @@ var ThlCard = class extends i4 {
   get colorBy() {
     return this.config?.color_by ?? "level";
   }
-  map(areas, whole) {
+  /** The map, in a room of its own that a card held to a height shrinks the map to fit, at a width the styles give it. */
+  map(areas, whole, held) {
     const width = this.config?.map_width;
-    const size = width === void 0 ? `aspect-ratio: ${MAP_WIDTH} / ${MAP_HEIGHT};` : `aspect-ratio: ${MAP_WIDTH} / ${MAP_HEIGHT}; width: ${width}px; max-width: 100%;`;
+    const size = width === void 0 || held ? `aspect-ratio: ${MAP_WIDTH} / ${MAP_HEIGHT};` : `aspect-ratio: ${MAP_WIDTH} / ${MAP_HEIGHT}; width: ${width}px; max-width: 100%;`;
     return b2`
-            <div class="map" style="${size}">
-                ${COUNTY_LABELS.filter((label) => !(this.showInset && CAPITAL_REGION.includes(label.id))).map((label) => {
+            <div class=${width === void 0 ? "map-room" : "map-room sized"} style=${width === void 0 ? "" : `--map-width: ${width}px`}>
+                <div class="map" style="${size}">
+                    ${COUNTY_LABELS.filter((label) => !(this.showInset && CAPITAL_REGION.includes(label.id))).map((label) => {
       const at = !this.showInset && WITHOUT_INSET[label.id] || label;
       const left = (at.x / VIEW_WIDTH * 100).toFixed(3);
       const top = (at.y / VIEW_HEIGHT * 100).toFixed(3);
       return b2`<span class="amount" style="left: ${left}%; top: ${top}%;">${this.count(areas, label.id)}</span>`;
     })}
-                <svg viewBox="${MAP_VIEW_BOX}" version="1.1" preserveAspectRatio="xMidYMid meet">
-                    <g style="display:inline" transform="${MAP_GROUP_TRANSFORM}">
-                        ${OUTLINES.filter((outline) => outline.layer === "under").map((outline) => this.outline(outline))}
-                        ${COUNTIES.map((county) => this.county(county, areas, whole, true))} ${this.outlineOf(COUNTIES, true)}
-                    </g>
-                    <g style="display:inline" transform="${MAP_GROUP_TRANSFORM}">
-                        ${OUTLINES.filter((outline) => outline.layer === "over").map((outline) => this.outline(outline))}
-                    </g>
-                    ${this.showInset ? w`<rect class="frame" x="${FRAME_X}" y="${FRAME_Y}" width="${FRAME_WIDTH}" height="${FRAME_HEIGHT}" rx="6" />` : A}
-                </svg>
+                    <svg viewBox="${MAP_VIEW_BOX}" version="1.1" preserveAspectRatio="xMidYMid meet">
+                        <g style="display:inline" transform="${MAP_GROUP_TRANSFORM}">
+                            ${OUTLINES.filter((outline) => outline.layer === "under").map((outline) => this.outline(outline))}
+                            ${COUNTIES.map((county) => this.county(county, areas, whole, true))} ${this.outlineOf(COUNTIES, true)}
+                        </g>
+                        <g style="display:inline" transform="${MAP_GROUP_TRANSFORM}">
+                            ${OUTLINES.filter((outline) => outline.layer === "over").map((outline) => this.outline(outline))}
+                        </g>
+                        ${this.showInset ? w`<rect class="frame" x="${FRAME_X}" y="${FRAME_Y}" width="${FRAME_WIDTH}" height="${FRAME_HEIGHT}" rx="6" />` : A}
+                    </svg>
+                </div>
             </div>
         `;
   }
@@ -1582,7 +1677,7 @@ var ThlCard = class extends i4 {
         />`;
   }
   /**
-   * The capital region again, larger, beside the figures: Helsinki and Vantaa and Kerava are a few pixels each on
+   * The capital region again, larger, under the figures: Helsinki and Vantaa and Kerava are a few pixels each on
    * the map. The keyboard chooses them on the map, so the inset is hidden from it and from screen readers.
    */
   inset(areas, whole) {
@@ -1850,13 +1945,39 @@ var ThlCard = class extends i4 {
     }).format(value);
   }
   message(text) {
-    return b2`<ha-card><div class="message">${text}</div></ha-card>`;
+    return b2`<ha-card style=${this.heightStyle()}><div class="message">${text}</div></ha-card>`;
+  }
+  heightStyle() {
+    return heightStyle(this.config ?? {}, this.layout, this.minimumHeight());
   }
   select(id) {
     this.selected = this.selected === id ? void 0 : id;
   }
   text(key, replacements) {
     return translate(this.language(), key, replacements);
+  }
+  /**
+   * The lowest the card is held to, in pixels: its padding, the disease, the buttons when there are several sensors,
+   * a map 200 px high (or lower, when its width is set to less), the key and the trend, each when it is shown, as
+   * measured on a full section's width. A lower map no longer shows the regions or the capital region's inset. Set
+   * narrower than a full section, the card may be under 290 px wide, in a view of four sections, where the figures go
+   * under the map instead of over its sea, so they are counted too. The columns are read as Home Assistant reads them:
+   * `grid_options.columns` when there are grid options, otherwise the older `layout_options.grid_columns`, a third as
+   * many.
+   */
+  minimumHeight() {
+    const padding = 24;
+    const gap = 12;
+    const disease = 34;
+    const chips = 22;
+    const map = Math.min(200, (this.config?.map_width ?? Infinity) * MAP_HEIGHT / MAP_WIDTH);
+    const key = 36;
+    const trend = 55;
+    const figures = 86;
+    const older = this.config?.layout_options?.grid_columns;
+    const columns = this.config?.grid_options ? this.config.grid_options.columns : typeof older === "number" ? older * 3 : void 0;
+    const narrow = typeof columns === "number" && columns < 12;
+    return padding + disease + (this.entities().length > 1 ? gap + chips : 0) + gap + map + (narrow ? gap + figures : 0) + (this.config?.show_key === false ? 0 : gap + key) + (this.config?.show_trend === false ? 0 : gap + trend);
   }
   language() {
     return this.hass?.locale?.language ?? this.hass?.language ?? browserLanguage();
@@ -1871,14 +1992,75 @@ var ThlCard = class extends i4 {
                 container: thl / inline-size;
             }
 
-            .card {
-                container-type: inline-size;
+            .card,
+            .content {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 gap: 12px;
+            }
+
+            .card {
+                container-type: inline-size;
                 padding: 12px;
                 box-sizing: border-box;
+            }
+
+            .content {
+                width: 100%;
+            }
+
+            /*
+             * Held to a height, by its height mode or a sections view's rows, nothing scrolls, as a map scrolled out of
+             * view is no use. The disease and its buttons stay at the top, the key and the trend whole under the map,
+             * and the map shrinks to the height left between them, never below 200 px. Its room is a size container,
+             * as only a height the map's width can be worked out from lets it keep its shape. Unheld, the room is no
+             * box at all, and the card looks as it always has.
+             */
+            ha-card.held {
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            ha-card.held .card {
+                flex: 1 1 auto;
+                min-height: 0;
+            }
+
+            ha-card.held .card > *,
+            ha-card.held .content > *,
+            ha-card.held .body > * {
+                flex: none;
+            }
+
+            ha-card.held .card > .content,
+            ha-card.held .content > .body {
+                flex: 0 1 auto;
+                min-height: 0;
+            }
+
+            .map-room,
+            .inset-room {
+                display: contents;
+            }
+
+            /* As tall as the map would be unheld, as the room's size can't come from the map inside it. */
+            ha-card.held .body > .map-room {
+                --natural: calc(min(var(--map-width, 300px), 100cqw) * ${MAP_HEIGHT} / ${MAP_WIDTH});
+                display: flex;
+                flex: 0 1 auto;
+                align-self: stretch;
+                align-items: center;
+                justify-content: center;
+                container-type: size;
+                height: var(--natural);
+                min-height: min(200px, var(--natural));
+            }
+
+            ha-card.held .map {
+                width: min(var(--map-width, 300px), 100cqw, 100cqh * ${MAP_WIDTH} / ${MAP_HEIGHT});
             }
 
             /* The disease is named at the top, on one line whatever width the card has. */
@@ -2113,7 +2295,7 @@ var ThlCard = class extends i4 {
                 width: 100%;
             }
 
-            /* The figures, and the inset beside them when there is room, under them when not. */
+            /* The figures, and the inset under them. */
             .side {
                 display: flex;
                 flex-wrap: wrap;
@@ -2205,6 +2387,39 @@ var ThlCard = class extends i4 {
                 color: var(--secondary-text-color);
             }
 
+            /*
+             * Narrower, held to a height, the inset under the figures shrinks with the map, in a size container of its own
+             * as the map's is. Its 2 px are the inset's border. Without the inset nothing under the map can shrink.
+             */
+            @container thl not (min-width: 290px) {
+                ha-card.held .body > .side:has(> .inset-room) {
+                    flex: 0 1 auto;
+                    flex-direction: column;
+                    flex-wrap: nowrap;
+                    justify-content: flex-start;
+                    min-height: 0;
+                }
+
+                ha-card.held .side > .figures {
+                    flex: none;
+                }
+
+                ha-card.held .side > .inset-room {
+                    --natural: calc(112px * ${FRAME_HEIGHT} / ${FRAME_WIDTH} + 2px);
+                    display: flex;
+                    flex: 0 1 auto;
+                    align-self: stretch;
+                    justify-content: center;
+                    container-type: size;
+                    height: var(--natural);
+                    min-height: 0;
+                }
+
+                ha-card.held .inset-room .inset {
+                    width: min(112px, (100cqh - 2px) * ${FRAME_WIDTH} / ${FRAME_HEIGHT});
+                }
+            }
+
             /* From a whole section of four in a view on down to a third of one of two: the map to the right, the figures over
                the sea west of it, so the card isn't taller than it needs to be. Narrower, the figures stay under the map. */
             @container thl (min-width: 290px) {
@@ -2247,6 +2462,47 @@ var ThlCard = class extends i4 {
                     padding: 12px 16px;
                 }
 
+                /* The map keeps to the right, where the figures over the sea west of it leave it room. */
+                ha-card.held .body > .map-room {
+                    --natural: calc(min(68 * min(100cqw, 560px) / 100, 300px) * ${MAP_HEIGHT} / ${MAP_WIDTH});
+                    justify-content: flex-end;
+                }
+
+                ha-card.held .body > .map-room.sized {
+                    --natural: calc(min(var(--map-width), 100cqw, 560px) * ${MAP_HEIGHT} / ${MAP_WIDTH});
+                }
+
+                ha-card.held .map {
+                    width: min(68cqw, 300px, 100cqh * ${MAP_WIDTH} / ${MAP_HEIGHT});
+                }
+
+                ha-card.held .map-room.sized .map {
+                    width: min(var(--map-width), 100cqw, 100cqh * ${MAP_WIDTH} / ${MAP_HEIGHT});
+                }
+
+                /*
+                 * The inset shrinks with the map, in the room the figures leave it in the column beside the map, so it
+                 * never reaches over the key. Its room is a size container for the same reason as the map's.
+                 */
+                ha-card.held .side > .inset-room {
+                    --natural: calc(clamp(84px, 30 * min(100cqw, 560px) / 100, 140px) * ${FRAME_HEIGHT} / ${FRAME_WIDTH});
+                    display: flex;
+                    flex: 0 1 auto;
+                    align-self: stretch;
+                    align-items: flex-end;
+                    container-type: size;
+                    margin-top: auto;
+                    height: var(--natural);
+                    min-height: 0;
+                    pointer-events: none;
+                }
+
+                ha-card.held .inset-room .inset {
+                    margin-top: 0;
+                    pointer-events: auto;
+                    width: min(clamp(84px, 60cqw, 140px), 100cqh * ${FRAME_WIDTH} / ${FRAME_HEIGHT});
+                }
+
                 .disease {
                     font-size: clamp(11px, 5.5cqw, 20px);
                 }
@@ -2277,6 +2533,9 @@ var ThlCard = class extends i4 {
 __decorateClass([
   n4({ attribute: false })
 ], ThlCard.prototype, "hass", 2);
+__decorateClass([
+  n4({ attribute: false })
+], ThlCard.prototype, "layout", 2);
 __decorateClass([
   r5()
 ], ThlCard.prototype, "config", 2);

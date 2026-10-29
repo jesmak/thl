@@ -138,7 +138,7 @@ wellbeing services counties. Each county is coloured by how it compares with the
 changed from the week before. Clicking a county shows its own figures and trend.
 
 One card can switch between several diseases. The capital region, whose counties are too small to point at on the map,
-is drawn again larger beside the figures.
+is drawn again larger under the figures.
 
 The integration serves the card itself and adds it to the dashboards' resources when it starts, so the card is always
 the integration's own version. With the resources set in YAML (`resource_mode: yaml`), it can't add or update
@@ -149,16 +149,19 @@ itself, and the log says which line to add, change or remove.
 The card has a visual editor. Add it from the card picker and choose the disease. The options can also be written by
 hand.
 
-| Name           | Type           | Description                                                                                                 | Default           |
-| -------------- | -------------- | ----------------------------------------------------------------------------------------------------------- | ----------------- |
-| `type`         | string         | **Required.** `custom:thl-card`                                                                             |                   |
-| `entity`       | string or list | **Required.** The whole country's sensor of a disease, or of the flu-like illness visits, or a list of them |                   |
-| `color_by`     | string         | `level` compares each county with the whole country, `change` with its own week before                      | `level`           |
-| `default_area` | string         | The `area_id` of a county chosen whenever the card loads, such as `pirkanmaan_hyvinvointialue`              | the whole country |
-| `show_trend`   | boolean        | A line of the chosen area's past six months under its figures                                               | `true`            |
-| `show_inset`   | boolean        | The capital region drawn again larger beside the figures                                                    | `true`            |
-| `show_key`     | boolean        | A key under the map that says what the colours mean                                                         | `true`            |
-| `map_width`    | number         | A fixed width for the map, in pixels                                                                        | follows the card  |
+| Name           | Type           | Description                                                                                                                                                                                                                                                                                                                                                                                                              | Default                                                                         |
+| -------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| `type`         | string         | **Required.** `custom:thl-card`                                                                                                                                                                                                                                                                                                                                                                                          |                                                                                 |
+| `entity`       | string or list | **Required.** The whole country's sensor of a disease, or of the flu-like illness visits, or a list of them                                                                                                                                                                                                                                                                                                              |                                                                                 |
+| `color_by`     | string         | `level` compares each county with the whole country, `change` with its own week before                                                                                                                                                                                                                                                                                                                                   | `level`                                                                         |
+| `default_area` | string         | The `area_id` of a county chosen whenever the card loads, such as `pirkanmaan_hyvinvointialue`                                                                                                                                                                                                                                                                                                                           | the whole country                                                               |
+| `show_trend`   | boolean        | A line of the chosen area's past six months under its figures                                                                                                                                                                                                                                                                                                                                                            | `true`                                                                          |
+| `show_inset`   | boolean        | The capital region drawn again larger under the figures                                                                                                                                                                                                                                                                                                                                                                  | `true`                                                                          |
+| `show_key`     | boolean        | A key under the map that says what the colours mean                                                                                                                                                                                                                                                                                                                                                                      | `true`                                                                          |
+| `map_width`    | number         | The map's width, in pixels. Held to a height, the map shrinks below it to fit                                                                                                                                                                                                                                                                                                                                            | follows the card                                                                |
+| `height_mode`  | string         | How tall the card is. `auto` fits its content, `fixed` keeps it at `height`, `max` lets it grow up to `max_height`. In `fixed` and `max` nothing scrolls. The disease stays at the top, the key and the trend at the bottom, and the map between them shrinks to fit. The card never gets lower than these need with a map 200 px high, and in a card narrower than a full section, also what the figures need, as they go under the map there. A height in grid rows, set in the layout tab of a sections view, is used instead | `fixed` when `height` is set, `max` when only `max_height` is, otherwise `auto` |
+| `height`       | number         | The card's height in pixels, for `fixed`                                                                                                                                                                                                                                                                                                                                                                                 |                                                                                 |
+| `max_height`   | number         | The card's greatest height in pixels, for `max`                                                                                                                                                                                                                                                                                                                                                                          |                                                                                 |
 
 ### The map
 
@@ -167,7 +170,7 @@ Clicking a county chooses it and outlines it, and clicking it again goes back to
 also be chosen from the keyboard, with Tab and Enter.
 
 Helsinki and Vantaa and Kerava are a few pixels each on the map. The capital region is therefore drawn again about five
-times larger beside the figures, with a dashed frame on the map around what it shows. Its counties and their numbers
+times larger under the figures, with a dashed frame on the map around what it shows. Its counties and their numbers
 are chosen there. With `show_inset: false` it is left out, and their numbers are on the map with the rest, as hard to
 point at as they are small.
 
@@ -225,15 +228,15 @@ loads, and the chosen county stays chosen when switching.
 In a sections view the card is the section's full width by default, and can be made as narrow as half the section. A
 card 290 pixels wide or more, which is a whole section even in a view of four, puts the figures beside the map, over the
 sea west of it, with the capital region below them. A narrower card keeps them under the map, with the capital region
-beside them when there is room and under them when not. In a wider card the map and the figures stay together in the
-middle. The map grows with the card up to a point, and the shapes and the numbers on them scale together.
+under them. In a wider card the map and the figures stay together in the middle. The map grows with the card up to a
+point, and the shapes and the numbers on them scale together.
 
 <p>
 <img src="https://raw.githubusercontent.com/jesmak/thl/main/docs/images/thl-card-narrow-light.png#gh-light-mode-only" width="255" alt="A narrow card with the figures, the capital region, the colour key and the trend under the map">
 <img src="https://raw.githubusercontent.com/jesmak/thl/main/docs/images/thl-card-narrow-dark.png#gh-dark-mode-only" width="255" alt="A narrow card with the figures, the capital region, the colour key and the trend under the map">
 </p>
 
-Set `map_width` to fix the map at one size whatever the card does.
+Set `map_width` to fix the map's width. Held to a height, the map shrinks below it to fit.
 
 ## Examples
 

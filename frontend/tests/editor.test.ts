@@ -76,9 +76,46 @@ describe("the visual editor", () => {
         expect(cardEntities(hass)).not.toContain("sensor.thl_influenssa_lappi");
     });
 
-    it("offers the colours, the trend, the inset, the key and a width for the map", async () => {
+    it("offers the colours, the trend, the inset, the key, a width for the map and the height", async () => {
         const names = form(await editor()).schema.map((entry) => entry.name);
-        expect(names).toEqual(["entity", "color_by", "default_area", "show_trend", "show_inset", "show_key", "map_width"]);
+        expect(names).toEqual(["entity", "color_by", "default_area", "show_trend", "show_inset", "show_key", "map_width", "height_mode"]);
+    });
+
+    it("offers the height that the height mode uses, with the modes named in the viewer's language", async () => {
+        const element = await editor();
+        const auto = form(element);
+        const compute = (auto as unknown as { computeLabel(entry: { name: string }): string }).computeLabel;
+        expect(compute({ name: "height_mode" })).toBe("Korkeus");
+        expect(auto.data).toMatchObject({ height_mode: "auto" });
+        const mode = auto.schema.find((entry) => entry.name === "height_mode");
+        const options = (mode?.selector as { select: { options: Array<{ value: string; label: string }> } }).select.options;
+        expect(options.map((option) => option.label)).toEqual(["Sisällön mukaan", "Kiinteä", "Kasvaa rajaan asti"]);
+        expect(form(await editor({ height: 300 })).schema.map((entry) => entry.name)).toContain("height");
+        expect(form(await editor({ max_height: 300 })).schema.map((entry) => entry.name)).toContain("max_height");
+    });
+
+    it("leaves out a height mode its heights already give", async () => {
+        const element = await editor();
+        const changes: ThlCardConfig[] = [];
+        element.addEventListener("config-changed", (event) => {
+            changes.push((event as CustomEvent<{ config: ThlCardConfig }>).detail.config);
+        });
+        for (const value of [
+            { height_mode: "auto" },
+            { height_mode: "fixed", height: 300 },
+            { height_mode: "max", height: 300, max_height: 500 },
+        ]) {
+            form(element).dispatchEvent(
+                new CustomEvent("value-changed", {
+                    detail: { value: { type: "custom:thl-card", entity: "sensor.thl_influenssa", ...value } },
+                }),
+            );
+        }
+        expect(changes).toEqual([
+            { type: "custom:thl-card", entity: "sensor.thl_influenssa" },
+            { type: "custom:thl-card", entity: "sensor.thl_influenssa", height: 300 },
+            { type: "custom:thl-card", entity: "sensor.thl_influenssa", height_mode: "max", height: 300, max_height: 500 },
+        ]);
     });
 
     it("offers the counties of the chosen sensor as the default, after the whole country", async () => {

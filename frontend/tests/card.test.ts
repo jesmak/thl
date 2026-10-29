@@ -4,6 +4,7 @@ import "../src/thl-card";
 import type { ThlCard } from "../src/thl-card";
 import { FALLING_FAST, NO_CASES, NO_DATA, RISING_FAST } from "../src/areas";
 import type { HomeAssistant } from "../src/hass";
+import { browserLanguage, translate } from "../src/localize/localize";
 import type { Area } from "../src/types";
 
 const ENTITY = "sensor.thl_influenssa";
@@ -68,10 +69,11 @@ function hass(overrides: Partial<{ state: string; values: Area[] }> = {}): HomeA
     };
 }
 
-async function card(state: HomeAssistant, config: Record<string, unknown> = { entity: ENTITY }): Promise<ThlCard> {
+async function card(state: HomeAssistant, config: Record<string, unknown> = { entity: ENTITY }, layout?: string): Promise<ThlCard> {
     const element = document.createElement("thl-card") as ThlCard;
     element.setConfig({ type: "custom:thl-card", ...config } as never);
     element.hass = state;
+    element.layout = layout;
     document.body.append(element);
     await element.updateComplete;
     return element;
@@ -184,7 +186,7 @@ describe("the size of the card", () => {
 describe("the shape of the card", () => {
     it("is never squeezed below half a section", () => {
         const element = document.createElement("thl-card") as ThlCard;
-        expect(element.getGridOptions()).toEqual({ columns: 12, rows: "auto", min_columns: 6 });
+        expect(element.getGridOptions()).toMatchObject({ columns: 12, rows: "auto", min_columns: 6 });
     });
 
     it("groups the figures, so they can sit in a row or a column", async () => {
@@ -196,9 +198,12 @@ describe("the shape of the card", () => {
     it("names the disease above the map, with the figures after it", async () => {
         const root = shadow(await card(hass()));
         const children = [...(root.querySelector(".card")?.children ?? [])].map((child) => child.className);
-        expect(children).toEqual(["disease", "body", "key"]);
+        expect(children).toEqual(["disease", "content"]);
+        const content = [...(root.querySelector(".content")?.children ?? [])].map((child) => child.className);
+        expect(content).toEqual(["body", "key"]);
         const body = [...(root.querySelector(".body")?.children ?? [])].map((child) => child.className);
-        expect(body).toEqual(["map", "side"]);
+        expect(body).toEqual(["map-room", "side"]);
+        expect(root.querySelector(".map-room > .map")).not.toBeNull();
     });
 
     it("puts the figures beside the map by the card's own width, not by its columns", async () => {
@@ -320,6 +325,122 @@ describe("when there is nothing to show", () => {
     it("refuses a configuration without an entity", () => {
         const element = document.createElement("thl-card") as ThlCard;
         expect(() => element.setConfig({ type: "custom:thl-card" } as never)).toThrow();
+    });
+});
+
+describe("the height", () => {
+    it("refuses a height that isn't a positive number of pixels, and an unknown height mode, with an error about the height", () => {
+        const element = document.createElement("thl-card") as ThlCard;
+        const config = (extra: Record<string, unknown>) => ({ type: "custom:thl-card", entity: ENTITY, ...extra }) as never;
+        const error = translate(browserLanguage(), "invalid_height");
+        expect(error).toMatch(/^Invalid height\./);
+        for (const value of ["300px", 0, -10]) {
+            expect(() => element.setConfig(config({ max_height: value }))).toThrow(error);
+            expect(() => element.setConfig(config({ height: value }))).toThrow(error);
+        }
+        expect(() => element.setConfig(config({ height_mode: "tall" }))).toThrow(error);
+        // Left empty in YAML, each is unset.
+        expect(() => element.setConfig(config({ height_mode: null, height: null, max_height: null }))).not.toThrow();
+    });
+
+    it.each([
+        ["its content", undefined, {}, ""],
+        ["a fixed height", undefined, { height_mode: "fixed", height: 400, max_height: 500 }, "height: 400px"],
+        ["a maximum height", undefined, { max_height: 500 }, "max-height: 500px"],
+        ["grid rows in a sections view, over its mode", "grid", { height: 400, grid_options: { rows: 6 } }, "height: 100%"],
+        ["its mode when the grid rows are automatic", "grid", { max_height: 500, grid_options: { rows: "auto" } }, "max-height: 500px"],
+        ["its minimum, for a fixed height below it", undefined, { height: 100 }, "height: 385px"],
+    ])("sizes itself by %s", async (_name, layout, extra, style) => {
+        const element = await card(hass(), { entity: ENTITY, ...extra }, layout);
+        const drawn = shadow(element).querySelector("ha-card")!;
+        expect(drawn.getAttribute("style") ?? "").toBe(style);
+        // Held to a height, the map shrinks to fit between the disease and the key.
+        expect(drawn.classList.contains("held")).toBe(style !== "");
+    });
+
+    it.each([
+        ["the default", {}, 7],
+        ["half a section, where the figures go under the map", { grid_options: { columns: 6 } }, 8],
+        ["two thirds of a section, where the figures go under the map", { grid_options: { columns: 8 } }, 8],
+        ["eleven columns, where the figures go under the map", { grid_options: { columns: 11 } }, 8],
+        ["seven columns, where the figures go under the map", { grid_options: { columns: 7 } }, 8],
+        ["a full section by name", { grid_options: { columns: "full" } }, 7],
+        ["a full section as a number", { grid_options: { columns: 12 } }, 7],
+        ["the older option's half a section, where the figures go under the map", { layout_options: { grid_columns: 2 } }, 8],
+        ["the older option's full section", { layout_options: { grid_columns: 4 } }, 7],
+        [
+            "the older option's half a section beside grid options, which Home Assistant reads instead",
+            { grid_options: { rows: "auto" }, layout_options: { grid_columns: 2 } },
+            7,
+        ],
+        [
+            "the older option's half a section beside grid options left empty in YAML, which Home Assistant passes over",
+            { grid_options: null as unknown as undefined, layout_options: { grid_columns: 2 } },
+            8,
+        ],
+        [
+            "the older option's half a section beside grid options' full section, which Home Assistant reads instead",
+            { grid_options: { columns: 12 }, layout_options: { grid_columns: 2 } },
+            7,
+        ],
+        [
+            "the figures under the map, without the key and the trend",
+            { grid_options: { columns: 6 }, show_key: false, show_trend: false },
+            6,
+        ],
+        ["several sensors", { entity: [ENTITY, "sensor.thl_other"] }, 7],
+        ["no key", { show_key: false }, 6],
+        ["no trend", { show_trend: false }, 6],
+        ["neither the key nor the trend", { show_key: false, show_trend: false }, 5],
+        ["a map narrower than 200 px is high", { map_width: 40, show_key: false, show_trend: false }, 3],
+        // The buttons of several sensors take it over a row's edge.
+        ["a narrow map", { map_width: 100 }, 6],
+        ["a narrow map and several sensors", { map_width: 100, entity: [ENTITY, "sensor.thl_other"] }, 7],
+        [
+            "half a section with several sensors, where the figures go under the map",
+            { grid_options: { columns: 6 }, entity: [ENTITY, "sensor.thl_other"] },
+            9,
+        ],
+        ["half a section with a narrow map, where the figures go under it", { grid_options: { columns: 6 }, map_width: 100 }, 8],
+    ])("keeps to its minimum height in a sections view with %s", (_name, extra, rows) => {
+        const element = document.createElement("thl-card") as ThlCard;
+        element.setConfig({ type: "custom:thl-card", entity: ENTITY, ...extra } as never);
+        expect(element.getGridOptions().min_rows).toBe(rows);
+    });
+
+    // Nothing scrolls: the map shrinks instead, so the disease, the key and the trend are never scrolled away.
+    it("puts the disease above the map and the key under it, the map in a room of its own whose width the styles give", async () => {
+        const root = shadow(await card(hass(), { entity: ENTITY, height: 320, map_width: 260 }));
+        const haCard = root.querySelector("ha-card")!;
+        expect(haCard.classList.contains("held")).toBe(true);
+        expect([...root.querySelector(".card")!.children].map((child) => child.className)).toEqual(["disease", "content"]);
+        expect([...root.querySelector(".content")!.children].map((child) => child.className)).toEqual(["body", "key"]);
+        const room = root.querySelector<HTMLElement>(".body > .map-room")!;
+        expect(room.classList.contains("sized")).toBe(true);
+        expect(room.getAttribute("style")).toBe("--map-width: 260px");
+        // Its width comes from the styles, which shrink it with the room, not from the configuration.
+        expect(room.querySelector(".map")!.getAttribute("style")).not.toContain("width: 260px");
+    });
+
+    it.each([
+        ["its content", {}, 8],
+        ["a fixed height, raised to its minimum", { height: 200 }, 8],
+        ["a fixed height above its minimum", { height: 600 }, 12],
+        ["a maximum height above its content", { max_height: 1000 }, 8],
+        ["a maximum height, raised to its minimum", { max_height: 300 }, 8],
+    ])("sizes itself in a masonry view by %s", (_name, extra, size) => {
+        const element = document.createElement("thl-card") as ThlCard;
+        element.setConfig({ type: "custom:thl-card", entity: ENTITY, ...extra } as never);
+        expect(element.getCardSize()).toBe(size);
+    });
+
+    it.each([
+        ["does not exist", { states: {}, locale: { language: "fi" } }],
+        ["is unavailable", hass({ state: "unavailable" })],
+    ])("holds the message to the height too when the sensor %s", async (_name, state) => {
+        const drawn = shadow(await card(state as HomeAssistant, { entity: ENTITY, height: 400 })).querySelector("ha-card")!;
+        expect(drawn.querySelector(".message")).not.toBeNull();
+        expect(drawn.getAttribute("style")).toBe("height: 400px");
     });
 });
 
@@ -809,10 +930,11 @@ describe("the flu-like illness visits", () => {
 });
 
 describe("the capital region", () => {
-    it("is drawn again larger beside the figures, with its numbers there instead of on the map", async () => {
+    it("is drawn again larger under the figures, with its numbers there instead of on the map", async () => {
         const root = shadow(await card(hass()));
         const inset = root.querySelector(".side .inset");
         expect(inset).not.toBeNull();
+        expect([...root.querySelector(".side")!.children].map((child) => child.className)).toEqual(["figures", "inset-room"]);
         expect(inset?.getAttribute("aria-hidden")).toBe("true");
         expect(inset?.querySelector(".inset-caption")?.textContent).toBe("Pääkaupunkiseutu");
         expect(inset?.querySelectorAll(".amount")).toHaveLength(3);

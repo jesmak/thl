@@ -2,6 +2,7 @@
     "name": "THL statistics",
     "description": "THL's disease statistics from Finland",
     "invalid_configuration": "Set the entity of a disease from the thl integration.",
+    "invalid_height": "Invalid height. height and max_height must be positive numbers of pixels, and height_mode auto, fixed or max.",
     "entity_not_found": "There is no entity {entity}.",
     "unavailable": "The disease numbers aren't available.",
     "whole_country": "Whole country",
@@ -32,7 +33,16 @@
     "key_share": "share of visits compared with the whole country",
     "key_change": "change from the week before",
     "show_inset": "Capital region inset",
-    "show_inset_helper": "The capital region drawn again larger beside the figures, so its small counties are easier to choose.",
+    "show_inset_helper": "The capital region drawn again larger under the figures, so its small counties are easier to choose.",
     "show_key": "Colour key",
-    "show_key_helper": "What the map's colours mean, under the map."
+    "show_key_helper": "What the map's colours mean, under the map.",
+    "height_mode": "Height",
+    "height_mode_helper": "A height set in the layout tab of a sections view is used instead.",
+    "height_mode_auto": "Fits the content",
+    "height_mode_fixed": "Fixed",
+    "height_mode_max": "Grows up to a limit",
+    "height": "Fixed height",
+    "height_helper": "The card is always this tall, and the map shrinks to fit inside it.",
+    "max_height": "Maximum height",
+    "max_height_helper": "The card grows with its content up to this height, and then the map shrinks to fit."
 }

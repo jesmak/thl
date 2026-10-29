@@ -1,13 +1,14 @@
 /**
  * The card's visual editor: picks the sensor, how the counties are coloured,
- * the trend, and if wanted a fixed width for the map. Home Assistant provides
- * ha-form and the selectors.
+ * the trend, if wanted a fixed width for the map, and the card's height. Home
+ * Assistant provides ha-form and the selectors.
  */
 import { LitElement, html, nothing } from "lit";
 import type { TemplateResult } from "lit";
 import { property, state } from "lit/decorators.js";
 
 import type { HassEntity, HomeAssistant } from "./hass";
+import { heightData, heightSchema, tidyHeight } from "./height";
 import { browserLanguage, translate } from "./localize/localize";
 import { WHOLE_COUNTRY } from "./const";
 import type { Area, ThlCardConfig } from "./types";
@@ -40,7 +41,7 @@ function countyOptions(hass: HomeAssistant, entity: string, text: (key: string) 
     return [{ value: "", label: text("whole_country") }, ...counties];
 }
 
-function schema(hass: HomeAssistant, entity: string, text: (key: string) => string) {
+function schema(hass: HomeAssistant, config: ThlCardConfig, entity: string, text: (key: string) => string) {
     return [
         {
             name: "entity",
@@ -70,6 +71,8 @@ function schema(hass: HomeAssistant, entity: string, text: (key: string) => stri
             name: "map_width",
             selector: { number: { min: 120, max: 600, step: 5, unit_of_measurement: "px", mode: "box" } },
         },
+        // The card's texts have no editor section, so the shared height fields' keys are looked up without one.
+        ...heightSchema(config, (key) => text(key.replace(/^editor\./, ""))),
     ];
 }
 
@@ -88,8 +91,8 @@ export class ThlCardEditor extends LitElement {
         return html`
             <ha-form
                 .hass=${this.hass}
-                .data=${{ ...DEFAULTS, ...this.config, entity: this.entities() }}
-                .schema=${schema(this.hass, this.entities()[0] ?? "", (key) => this.text(key))}
+                .data=${{ ...DEFAULTS, ...heightData(this.config), entity: this.entities() }}
+                .schema=${schema(this.hass, this.config, this.entities()[0] ?? "", (key) => this.text(key))}
                 .computeLabel=${(entry: SchemaEntry) => this.text(entry.name)}
                 .computeHelper=${(entry: SchemaEntry) => this.helper(entry.name)}
                 @value-changed=${this.valueChanged}
@@ -103,7 +106,7 @@ export class ThlCardEditor extends LitElement {
     }
 
     private valueChanged(event: CustomEvent<{ value: ThlCardConfig }>): void {
-        const config: ThlCardConfig = { ...event.detail.value };
+        const config: ThlCardConfig = tidyHeight(event.detail.value);
 
         // One sensor stays a plain entity, as the card was configured before it took several, unless it was a list.
         const entities = [config.entity ?? []].flat();

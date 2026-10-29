@@ -2,6 +2,7 @@
     "name": "THL tautitilastot",
     "description": "THL:n tautitilastot",
     "invalid_configuration": "Aseta entiteetiksi thl-integraation tauti.",
+    "invalid_height": "Virheellinen korkeus. Korkeuksien (height ja max_height) on oltava positiivisia lukuja pikseleinä, ja korkeustilan (height_mode) auto, fixed tai max.",
     "entity_not_found": "Entiteettiä {entity} ei ole.",
     "unavailable": "Tautien lukumäärät eivät ole saatavilla.",
     "whole_country": "Koko maa",
@@ -32,7 +33,16 @@
     "key_share": "käyntien osuus koko maahan verrattuna",
     "key_change": "muutos edellisestä viikosta",
     "show_inset": "Pääkaupunkiseudun suurennos",
-    "show_inset_helper": "Pääkaupunkiseutu uudelleen suurempana lukujen vieressä, jotta sen pienet alueet on helpompi valita.",
+    "show_inset_helper": "Pääkaupunkiseutu uudelleen suurempana lukujen alla, jotta sen pienet alueet on helpompi valita.",
     "show_key": "Värien selitys",
-    "show_key_helper": "Mitä kartan värit tarkoittavat, kartan alla."
+    "show_key_helper": "Mitä kartan värit tarkoittavat, kartan alla.",
+    "height_mode": "Korkeus",
+    "height_mode_helper": "Osioihin jaetun näkymän asettelu-välilehdellä asetettu korkeus ohittaa tämän.",
+    "height_mode_auto": "Sisällön mukaan",
+    "height_mode_fixed": "Kiinteä",
+    "height_mode_max": "Kasvaa rajaan asti",
+    "height": "Kiinteä korkeus",
+    "height_helper": "Kortti on aina näin korkea, ja kartta pienenee mahtumaan sen sisään.",
+    "max_height": "Enimmäiskorkeus",
+    "max_height_helper": "Kortti kasvaa sisältönsä mukana tähän korkeuteen asti, ja sen jälkeen kartta pienenee mahtumaan."
 }

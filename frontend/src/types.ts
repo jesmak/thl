@@ -1,12 +1,16 @@
 import type { LovelaceCardConfig } from "./hass";
+import type { HeightConfig } from "./height";
 
 /** `level` compares each county with the whole country; `change` with its own week before. */
 export type ColorBy = "level" | "change";
 
-export interface ThlCardConfig extends LovelaceCardConfig {
+export interface ThlCardConfig extends LovelaceCardConfig, HeightConfig {
     /** The whole country's sensor of a disease, or several, which the card switches between with buttons over the map. */
     entity: string | string[];
-    /** A fixed width for the map in pixels. Left out, the map follows the width of the card. */
+    /**
+     * Fixes the map's width, in pixels. Held to a height, the map shrinks below it to fit. Left out, the map follows the
+     * width of the card.
+     */
     map_width?: number;
     /** How the counties are coloured. Left out, by level. */
     color_by?: ColorBy;
