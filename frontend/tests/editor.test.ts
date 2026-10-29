@@ -94,7 +94,7 @@ describe("the visual editor", () => {
         expect(form(await editor({ max_height: 300 })).schema.map((entry) => entry.name)).toContain("max_height");
     });
 
-    it("leaves out a height mode its heights already give", async () => {
+    it("leaves out a height mode its heights already give, and a height its mode doesn't use", async () => {
         const element = await editor();
         const changes: ThlCardConfig[] = [];
         element.addEventListener("config-changed", (event) => {
@@ -114,7 +114,7 @@ describe("the visual editor", () => {
         expect(changes).toEqual([
             { type: "custom:thl-card", entity: "sensor.thl_influenssa" },
             { type: "custom:thl-card", entity: "sensor.thl_influenssa", height: 300 },
-            { type: "custom:thl-card", entity: "sensor.thl_influenssa", height_mode: "max", height: 300, max_height: 500 },
+            { type: "custom:thl-card", entity: "sensor.thl_influenssa", max_height: 500 },
         ]);
     });
 
