@@ -1,10 +1,10 @@
 import type { LovelaceCardConfig } from "./hass";
-import type { HeightConfig } from "./height";
+import type { RowStepConfig } from "./rows";
 
 /** `level` compares each county with the whole country; `change` with its own week before. */
 export type ColorBy = "level" | "change";
 
-export interface ThlCardConfig extends LovelaceCardConfig, HeightConfig {
+export interface ThlCardConfig extends LovelaceCardConfig, RowStepConfig {
     /** The whole country's sensor of a disease, or several, which the card switches between with buttons over the map. */
     entity: string | string[];
     /**

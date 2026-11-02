@@ -3,6 +3,7 @@
     "description": "THL:n tautitilastot",
     "invalid_configuration": "Aseta entiteetiksi thl-integraation tauti.",
     "invalid_height": "Virheellinen korkeus. Korkeuksien (height ja max_height) on oltava positiivisia lukuja pikseleinä, ja korkeustilan (height_mode) auto, fixed tai max.",
+    "invalid_row_step": "Virheellinen pyöristys. Pyöristyksen (row_step) on oltava full tai half.",
     "entity_not_found": "Entiteettiä {entity} ei ole.",
     "unavailable": "Tautien lukumäärät eivät ole saatavilla.",
     "whole_country": "Koko maa",
@@ -44,5 +45,9 @@
     "height": "Kiinteä korkeus",
     "height_helper": "Kortti on aina näin korkea, ja kartta pienenee mahtumaan sen sisään.",
     "max_height": "Enimmäiskorkeus",
-    "max_height_helper": "Kortti kasvaa sisältönsä mukana tähän korkeuteen asti, ja sen jälkeen kartta pienenee mahtumaan."
+    "max_height_helper": "Kortti kasvaa sisältönsä mukana tähän korkeuteen asti, ja sen jälkeen kartta pienenee mahtumaan.",
+    "row_step": "Pyöristys osioihin jaetussa näkymässä",
+    "row_step_helper": "Automaattisella rivikorkeudella kortin korkeus pyöristetään ylöspäin kokonaisiin riveihin, tai tilan säästämiseksi puolikkaisiin riveihin.",
+    "row_step_full": "Kokonaisiin riveihin",
+    "row_step_half": "Puolikkaisiin riveihin"
 }

@@ -78,7 +78,17 @@ describe("the visual editor", () => {
 
     it("offers the colours, the trend, the inset, the key, a width for the map and the height", async () => {
         const names = form(await editor()).schema.map((entry) => entry.name);
-        expect(names).toEqual(["entity", "color_by", "default_area", "show_trend", "show_inset", "show_key", "map_width", "height_mode"]);
+        expect(names).toEqual([
+            "entity",
+            "color_by",
+            "default_area",
+            "show_trend",
+            "show_inset",
+            "show_key",
+            "map_width",
+            "height_mode",
+            "row_step",
+        ]);
     });
 
     it("offers the height that the height mode uses, with the modes named in the viewer's language", async () => {

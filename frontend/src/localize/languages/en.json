@@ -3,6 +3,7 @@
     "description": "THL's disease statistics from Finland",
     "invalid_configuration": "Set the entity of a disease from the thl integration.",
     "invalid_height": "Invalid height. height and max_height must be positive numbers of pixels, and height_mode auto, fixed or max.",
+    "invalid_row_step": "Invalid rounding. row_step must be full or half.",
     "entity_not_found": "There is no entity {entity}.",
     "unavailable": "The disease numbers aren't available.",
     "whole_country": "Whole country",
@@ -44,5 +45,9 @@
     "height": "Fixed height",
     "height_helper": "The card is always this tall, and the map shrinks to fit inside it.",
     "max_height": "Maximum height",
-    "max_height_helper": "The card grows with its content up to this height, and then the map shrinks to fit."
+    "max_height_helper": "The card grows with its content up to this height, and then the map shrinks to fit.",
+    "row_step": "Rounding in a sections view",
+    "row_step_helper": "With automatic row height, the card's height is rounded up to whole rows, or to half rows to save space.",
+    "row_step_full": "Whole rows",
+    "row_step_half": "Half rows"
 }

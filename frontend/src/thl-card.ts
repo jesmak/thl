@@ -32,6 +32,7 @@ import { DISEASE_LOGO } from "./logos";
 import { COUNTIES, MAP_GROUP_TRANSFORM, MAP_HEIGHT, MAP_VIEW_BOX, MAP_WIDTH, OUTLINES } from "./map/counties";
 import type { CountyShape, Outline } from "./map/counties";
 import { CAPITAL_REGION, COUNTY_LABELS, INSET_COUNTIES, INSET_VIEW_BOX, WITHOUT_INSET } from "./map/labels";
+import { filledHeight, validRowStep } from "./rows";
 import { fetchTrend, fetchYearAgo, withCurrent } from "./trend";
 import type { TrendPoint } from "./trend";
 import type { Area, ColorBy, ThlCardConfig } from "./types";
@@ -93,10 +94,19 @@ export class ThlCard extends LitElement {
     @state() private shown = 0;
     /** The chosen area's figure of the same week a year ago, when the statistics reach that far. */
     @state() private yearAgo?: number;
+    /** The height that fills the card's rows on automatic rows in a sections view, and the room that leaves under the disease. */
+    @state() private filled = 0;
+    @state() private spare = 0;
     /** What the trend shown was fetched for, so it is fetched again only when that changes. */
     private trendKey?: string;
     private yearAgoKey?: string;
     private retry?: number;
+    private frame?: number;
+    /** A drag of the line of buttons by a mouse, while the button is down, and whether the last one moved it. */
+    private dragging?: { pointer: number; x: number; scroll: number; moved: boolean };
+    private dragged = false;
+    private readonly resizes = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(() => this.measureSoon());
+    private observed?: Element;
 
     public static getConfigElement(): HTMLElement {
         return document.createElement("thl-card-editor");
@@ -115,6 +125,9 @@ export class ThlCard extends LitElement {
         if (!validHeight(config)) {
             throw new Error(translate(browserLanguage(), "invalid_height"));
         }
+        if (!validRowStep(config)) {
+            throw new Error(translate(browserLanguage(), "invalid_row_step"));
+        }
         // A changed list of sensors starts again from its first.
         if (this.config === undefined || String(entities) !== String(this.entities())) {
             this.shown = 0;
@@ -130,9 +143,12 @@ export class ThlCard extends LitElement {
         return heightCardSize(this.config ?? {}, 8, this.minimumHeight());
     }
 
-    /** In a sections view the card is drawn full width, never squeezed below half a section, nor lower than its minimum. */
+    /**
+     * In a sections view the card is drawn full width, never below 9 columns, as at 6 the map's numbers crowd each other
+     * on a phone, nor lower than its minimum.
+     */
     public getGridOptions(): Record<string, unknown> {
-        return { columns: 12, rows: "auto", min_columns: 6, min_rows: gridMinRows(this.minimumHeight()) };
+        return { columns: 12, rows: "auto", min_columns: 9, min_rows: gridMinRows(this.minimumHeight()) };
     }
 
     public connectedCallback(): void {
@@ -145,6 +161,9 @@ export class ThlCard extends LitElement {
 
     public disconnectedCallback(): void {
         super.disconnectedCallback();
+        this.resizes?.disconnect();
+        this.observed = undefined;
+        cancelAnimationFrame(this.frame ?? 0);
         // A fetch waiting to be tried again is tried when the card is shown again instead.
         if (this.retry !== undefined) {
             window.clearTimeout(this.retry);
@@ -186,13 +205,14 @@ export class ThlCard extends LitElement {
         const whole = findArea(areas, WHOLE_COUNTRY);
         const title = selected?.name ?? this.text("whole_country");
         const height = this.heightStyle();
+        const name = this.name(entity.attributes);
 
         return html`
-            <ha-card class=${height ? "held" : ""} style=${height}>
+            <ha-card class=${height ? "held" : ""} style=${this.cardStyle()}>
                 <div class="card">
                     <div class="disease">
                         ${DISEASE_LOGO}
-                        <span class="disease-name">${this.name(entity.attributes)}</span>
+                        <span class="disease-name" title=${name}>${name}</span>
                     </div>
                     ${this.chips()}
                     <div class="content">
@@ -212,9 +232,98 @@ export class ThlCard extends LitElement {
         `;
     }
 
-    protected updated(): void {
+    protected updated(changed: PropertyValues): void {
         void this.refreshTrend();
         void this.refreshYearAgo();
+        const card = this.renderRoot.querySelector("ha-card");
+        if (card && card !== this.observed) {
+            this.resizes?.disconnect();
+            this.resizes?.observe(card);
+            this.observed = card;
+        }
+        // The height set here changes nothing that would need it measured again.
+        if (!(changed.size <= 2 && [...changed.keys()].every((key) => key === "filled" || key === "spare"))) {
+            this.measureSoon();
+        }
+    }
+
+    /**
+     * The chosen sensor's button is scrolled along its line until it clears the fades, without moving the page. Measured
+     * from the boxes as drawn, so it works whichever way the text runs. At either end of the line the scroll stops and
+     * that end's fade goes, so the first and the last button show whole too.
+     */
+    private showChosenChip(): void {
+        const line = this.renderRoot.querySelector<HTMLElement>(".chips");
+        const chip = line?.querySelector<HTMLElement>(".chip.on");
+        if (!line || !chip) {
+            return;
+        }
+        const fade = Math.min(CHIP_FADE, line.clientWidth / 4);
+        const room = line.getBoundingClientRect();
+        const box = chip.getBoundingClientRect();
+        const distance =
+            box.left < room.left + fade ? box.left - room.left - fade : box.right > room.right - fade ? box.right - room.right + fade : 0;
+        if (Math.abs(distance) >= 1) {
+            const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+            line.scrollBy({ left: distance, behavior: reduced ? "auto" : "smooth" });
+        }
+    }
+
+    private measureSoon(): void {
+        cancelAnimationFrame(this.frame ?? 0);
+        this.frame = requestAnimationFrame(() => {
+            // The line of buttons fades where it runs on, which a change of the card's width changes too.
+            const line = this.renderRoot.querySelector<HTMLElement>(".chips");
+            if (line) {
+                markChipFades(line);
+            }
+            this.fillRows();
+        });
+    }
+
+    /**
+     * In a sections view whose rows are left automatic, the card takes the whole rows its content needs, or the half rows
+     * with `row_step: half`, so the cards under it stay on the rows. The room left over goes under the disease.
+     */
+    private fillRows(): void {
+        const card = this.renderRoot.querySelector<HTMLElement>("ha-card");
+        const inner = card?.querySelector<HTMLElement>(":scope > .card");
+        if (!card || !inner || !card.clientWidth) {
+            return;
+        }
+        if (this.layout !== "grid" || this.heightStyle()) {
+            this.filled = 0;
+            this.spare = 0;
+            return;
+        }
+        // From the card's top to the end of its own last part, never its own height, which is the min-height set here, and
+        // never an element a theme adds to it.
+        const last = inner.querySelector<HTMLElement>(":scope > .content")?.lastElementChild;
+        if (!last) {
+            return;
+        }
+        let content =
+            last.getBoundingClientRect().bottom -
+            card.getBoundingClientRect().top +
+            px(getComputedStyle(inner).paddingBottom) +
+            px(getComputedStyle(card).borderBottomWidth);
+        // The spare room as drawn now.
+        const disease = inner.querySelector<HTMLElement>(":scope > .disease");
+        if (disease) {
+            content -= px(getComputedStyle(disease).paddingBottom);
+        }
+        const filled = filledHeight(Math.round(content), this.config ?? {});
+        this.filled = filled;
+        this.spare = Math.max(0, Math.floor(filled - content));
+    }
+
+    /** The card's inline style: the height it is held to, or the rows it fills, with their spare room. */
+    private cardStyle(): string {
+        const held = this.heightStyle();
+        if (held || !this.filled) {
+            return held;
+        }
+        return `min-height: ${this.filled}px; --spare: ${this.spare}px`;
     }
 
     /** The configured sensors, one or several. */
@@ -238,19 +347,86 @@ export class ThlCard extends LitElement {
             return nothing;
         }
         return html`
-            <div class="chips">
+            <div
+                class="chips"
+                @scroll=${(event: Event) => markChipFades(event.currentTarget as HTMLElement)}
+                @pointerdown=${(event: PointerEvent) => this.startDrag(event)}
+                @pointermove=${(event: PointerEvent) => this.drag(event)}
+                @pointerup=${(event: PointerEvent) => this.endDrag(event)}
+                @pointercancel=${(event: PointerEvent) => this.endDrag(event)}
+                @click=${{ handleEvent: (event: Event) => this.swallowDragClick(event), capture: true }}
+            >
                 ${entities.map((id, index) => {
                     const attributes = this.hass?.states[id]?.attributes;
                     return html`<button
                         class="chip ${index === this.shown ? "on" : ""}"
                         aria-pressed="${index === this.shown ? "true" : "false"}"
-                        @click=${() => (this.shown = index)}
+                        @click=${() => this.choose(index)}
                     >
                         ${attributes ? this.name(attributes) : id}
                     </button>`;
                 })}
             </div>
         `;
+    }
+
+    /**
+     * A mouse drags the line of buttons sideways, as a finger already does, since with no scrollbar and an ordinary
+     * wheel the buttons out of view could otherwise be reached only with Shift and the wheel. A finger and a pen are left
+     * to the browser's own scrolling.
+     */
+    /** Shows a sensor, and brings its button whole into view, also when it was already the one shown. */
+    private choose(index: number): void {
+        this.shown = index;
+        void this.updateComplete.then(() => this.showChosenChip());
+    }
+
+    private startDrag(event: PointerEvent): void {
+        const line = event.currentTarget as HTMLElement;
+        // A drag that ended with no click to swallow, as one under pointer capture may, mustn't swallow this press's.
+        this.dragged = false;
+        if (event.pointerType !== "mouse" || event.button !== 0 || line.scrollWidth <= line.clientWidth) {
+            return;
+        }
+        this.dragging = { pointer: event.pointerId, x: event.clientX, scroll: line.scrollLeft, moved: false };
+    }
+
+    private drag(event: PointerEvent): void {
+        const dragging = this.dragging;
+        if (dragging?.pointer !== event.pointerId) {
+            return;
+        }
+        const line = event.currentTarget as HTMLElement;
+        const distance = event.clientX - dragging.x;
+        // A few pixels of wobble is still a click.
+        if (!dragging.moved && Math.abs(distance) < DRAG_SLOP) {
+            return;
+        }
+        if (!dragging.moved) {
+            dragging.moved = true;
+            line.setPointerCapture?.(event.pointerId);
+            line.classList.add("dragging");
+        }
+        line.scrollLeft = dragging.scroll - distance;
+    }
+
+    private endDrag(event: PointerEvent): void {
+        if (this.dragging?.pointer !== event.pointerId) {
+            return;
+        }
+        const line = event.currentTarget as HTMLElement;
+        line.classList.remove("dragging");
+        // The click that ends a drag is swallowed, so dragging over a button doesn't also choose it.
+        this.dragged = this.dragging.moved;
+        this.dragging = undefined;
+    }
+
+    private swallowDragClick(event: Event): void {
+        if (this.dragged) {
+            this.dragged = false;
+            event.preventDefault();
+            event.stopPropagation();
+        }
     }
 
     /** The disease, or the flu-like illness visits, which have no disease and go by their sensor's name. */
@@ -374,7 +550,7 @@ export class ThlCard extends LitElement {
                     ${[NO_CASES, FALLING_FAST, FALLING, STEADY, RISING, RISING_FAST].map((color) => html`<span style="background: ${color}"></span>`)}
                 </div>
                 <div class="bounds">${bounds.map((bound) => html`<span>${bound}</span>`)}</div>
-                <span class="key-caption">${this.text(caption)}</span>
+                <span class="key-caption" title=${this.text(caption)}>${this.text(caption)}</span>
             </div>
         `;
     }
@@ -389,28 +565,22 @@ export class ThlCard extends LitElement {
         }
         return html`
             <div class="stats-container">
-                <span class="stats-title">${title}</span>
-                <span class="stats">${this.text("last_week")}: ${this.number(area.amount_last_week ?? 0, 0)}</span>
-                ${
-                    area.incidence_last_week === undefined
-                        ? nothing
-                        : html`<span class="stats"
-                              >${this.text("incidence")}: <span class="unit">${this.incidence(area.incidence_last_week)}</span></span
-                          >`
-                }
-                ${
-                    area.amount_two_weeks_ago === undefined
-                        ? nothing
-                        : html`<span class="stats">${this.text("two_weeks_ago")}: ${this.number(area.amount_two_weeks_ago, 0)}</span>`
-                }
-                ${
-                    area.change_percentage === undefined
-                        ? nothing
-                        : html`<span class="stats">${this.text("change")}: ${this.change(area)}</span>`
-                }
-                ${this.yearAgo === undefined ? nothing : html`<span class="stats">${this.text("last_year")}: ${this.number(this.yearAgo, 0)}</span>`}
+                <span class="stats-title" title=${title}>${title}</span>
+                ${this.figure("last_week", this.number(area.amount_last_week ?? 0, 0))}
+                ${area.incidence_last_week === undefined ? nothing : this.figure("incidence", this.incidence(area.incidence_last_week), true)}
+                ${area.amount_two_weeks_ago === undefined ? nothing : this.figure("two_weeks_ago", this.number(area.amount_two_weeks_ago, 0))}
+                ${area.change_percentage === undefined ? nothing : this.figure("change", this.change(area))}
+                ${this.yearAgo === undefined ? nothing : this.figure("last_year", this.number(this.yearAgo, 0))}
             </div>
         `;
+    }
+
+    /** A line of the figures, with the whole line as its tooltip for when a held card cuts it short. */
+    private figure(label: string, value: string, unit = false): TemplateResult {
+        const text = `${this.text(label)}: ${value}`;
+        return html`<span class="stats" title=${text}
+            >${this.text(label)}: ${unit ? html`<span class="unit">${value}</span>` : value}</span
+        >`;
     }
 
     /** The figures of the flu-like illness visits: their share of all visits, and how many there were. */
@@ -419,24 +589,14 @@ export class ThlCard extends LitElement {
             return nothing;
         }
         const share = (value: number | null | undefined) => (value === null || value === undefined ? "–" : this.percent(value, 3));
+        const visits = `${this.number(area.visits_last_week ?? 0, 0)} / ${this.number(area.all_visits_last_week ?? 0, 0)}`;
         return html`
             <div class="stats-container">
-                <span class="stats-title">${title}</span>
-                <span class="stats">${this.text("last_week")}: ${share(area.share_last_week)}</span>
-                ${
-                    area.visits_last_week === undefined
-                        ? nothing
-                        : html`<span class="stats">
-                              ${this.text("visits")}: ${this.number(area.visits_last_week, 0)} /
-                              ${this.number(area.all_visits_last_week ?? 0, 0)}
-                          </span>`
-                }
-                ${
-                    area.share_two_weeks_ago === undefined
-                        ? nothing
-                        : html`<span class="stats">${this.text("two_weeks_ago")}: ${share(area.share_two_weeks_ago)}</span>`
-                }
-                ${this.yearAgo === undefined ? nothing : html`<span class="stats">${this.text("last_year")}: ${share(this.yearAgo)}</span>`}
+                <span class="stats-title" title=${title}>${title}</span>
+                ${this.figure("last_week", share(area.share_last_week))}
+                ${area.visits_last_week === undefined ? nothing : this.figure("visits", visits)}
+                ${area.share_two_weeks_ago === undefined ? nothing : this.figure("two_weeks_ago", share(area.share_two_weeks_ago))}
+                ${this.yearAgo === undefined ? nothing : this.figure("last_year", share(this.yearAgo))}
             </div>
         `;
     }
@@ -458,6 +618,7 @@ export class ThlCard extends LitElement {
         // The dot and the bubble sit over the drawing, so the stretched line doesn't stretch them.
         const at = `left: ${x(marked).toFixed(2)}%; top: ${((y(values[marked]) / 30) * 100).toFixed(2)}%;`;
         const bubble = `${this.text("week_short")} ${this.number(this.trend[marked].week, 0)}: ${this.number(values[marked], digits)}`;
+        const caption = `${this.text("trend_caption", { weeks: this.number(values.length, 0) })} · ${this.text("highest")} ${this.number(highest, digits)}`;
 
         return html`
             <div class="trend">
@@ -481,10 +642,7 @@ export class ThlCard extends LitElement {
                             : html`<span class="trend-bubble" style="left: ${x(marked).toFixed(2)}%;">${bubble}</span>`
                     }
                 </div>
-                <span class="trend-caption">
-                    ${this.text("trend_caption", { weeks: this.number(values.length, 0) })} · ${this.text("highest")}
-                    ${this.number(highest, digits)}
-                </span>
+                <span class="trend-caption" title=${caption}>${caption}</span>
             </div>
         `;
     }
@@ -667,37 +825,31 @@ export class ThlCard extends LitElement {
     }
 
     /**
-     * The lowest the card is held to, in pixels: its padding, the disease, the buttons when there are several sensors,
-     * a map 200 px high (or lower, when its width is set to less), the key and the trend, each when it is shown, as
-     * measured on a full section's width. A lower map no longer shows the regions or the capital region's inset. Set
-     * narrower than a full section, the card may be under 290 px wide, in a view of four sections, where the figures go
-     * under the map instead of over its sea, so they are counted too. The columns are read as Home Assistant reads them:
-     * `grid_options.columns` when there are grid options, otherwise the older `layout_options.grid_columns`, a third as
-     * many.
+     * The lowest the card is held to, in pixels, worked out from its config alone: its padding, the disease, the line of
+     * buttons when there are several sensors, a map 200 px high (or lower, when its width is set to less), the figures
+     * under it, and the key and the trend, each when it is shown. The narrowest a card of 9 or more columns can be, 214 px
+     * at 9 and 288 px at 12 on a 320 px phone, is under the 290 px where the figures move over the map's sea, so they are
+     * always counted under the map, at their most lines, the title and five figures. The capital region's inset shrinks
+     * to nothing there, leaving only its gap. A lower map no longer shows the regions.
      */
     private minimumHeight(): number {
         const padding = 24;
         const gap = 12;
         const disease = 34;
-        const chips = 22;
+        const chips = 25;
         const map = Math.min(200, ((this.config?.map_width ?? Infinity) * MAP_HEIGHT) / MAP_WIDTH);
-        const key = 36;
-        const trend = 55;
-        const figures = 86;
-        const older = (this.config?.layout_options as { grid_columns?: unknown } | undefined)?.grid_columns;
-        const columns = this.config?.grid_options
-            ? (this.config.grid_options as { columns?: unknown }).columns
-            : typeof older === "number"
-              ? older * 3
-              : undefined;
-        const narrow = typeof columns === "number" && columns < 12;
+        const figures = 104;
+        const key = 40;
+        const trend = 58;
         return (
             padding +
             disease +
             (this.entities().length > 1 ? gap + chips : 0) +
             gap +
             map +
-            (narrow ? gap + figures : 0) +
+            gap +
+            figures +
+            (this.showInset ? gap : 0) +
             (this.config?.show_key === false ? 0 : gap + key) +
             (this.config?.show_trend === false ? 0 : gap + trend)
         );
@@ -731,6 +883,8 @@ export class ThlCard extends LitElement {
                 container-type: inline-size;
                 padding: 12px;
                 box-sizing: border-box;
+                /* The line of buttons' 25 px and the 12 px gap under it. */
+                --chips-room: 37px;
             }
 
             .content {
@@ -773,6 +927,17 @@ export class ThlCard extends LitElement {
                 display: contents;
             }
 
+            /*
+             * Held, the texts under the map keep to one line, cut short with their whole text as a tooltip, so the height
+             * never depends on the language. The figures do too where they are under the map, not over its sea.
+             */
+            ha-card.held :is(.key-caption, .trend-caption) {
+                max-width: 100%;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+
             /* As tall as the map would be unheld, as the room's size can't come from the map inside it. */
             ha-card.held .body > .map-room {
                 --natural: calc(min(var(--map-width, 300px), 100cqw) * ${MAP_HEIGHT} / ${MAP_WIDTH});
@@ -800,6 +965,8 @@ export class ThlCard extends LitElement {
                 gap: 0.5em;
                 max-width: 100%;
                 max-height: 48px;
+                /* The room a whole row leaves over on automatic rows, outside the 48 px the name keeps to. */
+                padding-bottom: var(--spare, 0px);
             }
 
             .disease-logo {
@@ -964,22 +1131,66 @@ export class ThlCard extends LitElement {
                 margin-right: 3px;
             }
 
+            /*
+             * One line however many sensors there are, so the card's height never depends on their names: what doesn't
+             * fit scrolls sideways, with no scrollbar to take room. The 3 px all round are room for the focus ring,
+             * which the scrolling would cut off, given back by the margin.
+             */
             .chips {
+                position: relative;
                 display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
+                justify-content: safe center;
                 gap: 6px;
+                box-sizing: border-box;
+                max-width: calc(100% + 6px);
+                margin: -3px;
+                padding: 3px;
+                overflow-x: auto;
+                scrollbar-width: none;
             }
 
+            /* 25 px tall whatever the theme's font, as the room the line takes is counted in the minimum and under the map's figures. */
             .chip {
+                flex: none;
+                box-sizing: border-box;
+                height: 25px;
+                white-space: nowrap;
                 font: inherit;
                 font-size: 12px;
+                line-height: 17px;
                 padding: 3px 10px;
                 border-radius: 14px;
                 border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
                 background: none;
                 color: var(--primary-text-color);
                 cursor: pointer;
+            }
+
+            /* Fades where buttons run on out of view, 24 px but never more than a quarter of the line. */
+            .chips.fade-left {
+                mask-image: linear-gradient(to right, transparent, #000 min(24px, 25%));
+            }
+
+            .chips.fade-right {
+                mask-image: linear-gradient(to left, transparent, #000 min(24px, 25%));
+            }
+
+            .chips.fade-left.fade-right {
+                mask-image: linear-gradient(to right, transparent, #000 min(24px, 25%), #000 calc(100% - min(24px, 25%)), transparent);
+            }
+
+            /* A line that runs on can be dragged with a mouse. */
+            .chips.draggable {
+                cursor: grab;
+            }
+
+            .chips.draggable .chip {
+                cursor: inherit;
+            }
+
+            .chips.dragging {
+                cursor: grabbing;
+                user-select: none;
             }
 
             .chip.on {
@@ -1119,6 +1330,19 @@ export class ThlCard extends LitElement {
              * as the map's is. Its 2 px are the inset's border. Without the inset nothing under the map can shrink.
              */
             @container thl not (min-width: 290px) {
+                ha-card.held :is(.stats-title, .stats) {
+                    max-width: 100%;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
+
+                ha-card.held .stats-container,
+                ha-card.held .figures {
+                    min-width: 0;
+                    max-width: 100%;
+                }
+
                 ha-card.held .body > .side:has(> .inset-room) {
                     flex: 0 1 auto;
                     flex-direction: column;
@@ -1179,6 +1403,20 @@ export class ThlCard extends LitElement {
                     align-items: flex-start;
                     /* Only the figures take the pointer; the counties under the rest stay clickable. */
                     pointer-events: none;
+                }
+
+                /*
+                 * The line of buttons for several sensors takes 37 px over the map, its 25 and the gap under it. The
+                 * figures move back up by that much, so they sit where they would without the buttons, level with a card
+                 * beside it that has none. Held to a height, the map is also 37 px lower than it would be without them, so
+                 * the 16 % is counted from the height it would have.
+                 */
+                .card:has(> .chips) .side {
+                    top: calc(16% - var(--chips-room));
+                }
+
+                ha-card.held .card:has(> .chips) .side {
+                    top: calc(0.16 * (100% + var(--chips-room)) - var(--chips-room));
                 }
 
                 .side > * {
@@ -1256,6 +1494,31 @@ export class ThlCard extends LitElement {
             }
         `;
     }
+}
+
+function px(value: string): number {
+    return parseFloat(value) || 0;
+}
+
+/** The line of buttons' fade, at most this long and never more than a quarter of the line, as in its styles. */
+const CHIP_FADE = 24;
+
+/** How far a mouse moves before a press on the line of buttons becomes a drag rather than a click. */
+const DRAG_SLOP = 5;
+
+/**
+ * Marks the line of buttons by the sides where buttons run on out of view, on the screen's left and right whichever
+ * way the text runs: in right-to-left text the line starts at the right and scrolls to negative positions. A pixel to
+ * spare keeps rounding from showing a fade. Kept apart from the shared `fade.ts`, which fades only the top and the
+ * bottom, as this is the only line that scrolls sideways.
+ */
+export function markChipFades(line: HTMLElement): void {
+    const hidden = line.scrollWidth - line.clientWidth;
+    const rtl = getComputedStyle(line).direction === "rtl";
+    const left = rtl ? hidden + line.scrollLeft : line.scrollLeft;
+    line.classList.toggle("fade-left", hidden > 1 && left > 1);
+    line.classList.toggle("fade-right", hidden > 1 && hidden - left > 1);
+    line.classList.toggle("draggable", hidden > 1);
 }
 
 // Anyone who installed the card on its own before it came with the integration may still load that copy too, as a

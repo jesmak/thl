@@ -771,6 +771,7 @@ var en_default = {
   description: "THL's disease statistics from Finland",
   invalid_configuration: "Set the entity of a disease from the thl integration.",
   invalid_height: "Invalid height. height and max_height must be positive numbers of pixels, and height_mode auto, fixed or max.",
+  invalid_row_step: "Invalid rounding. row_step must be full or half.",
   entity_not_found: "There is no entity {entity}.",
   unavailable: "The disease numbers aren't available.",
   whole_country: "Whole country",
@@ -812,7 +813,11 @@ var en_default = {
   height: "Fixed height",
   height_helper: "The card is always this tall, and the map shrinks to fit inside it.",
   max_height: "Maximum height",
-  max_height_helper: "The card grows with its content up to this height, and then the map shrinks to fit."
+  max_height_helper: "The card grows with its content up to this height, and then the map shrinks to fit.",
+  row_step: "Rounding in a sections view",
+  row_step_helper: "With automatic row height, the card's height is rounded up to whole rows, or to half rows to save space.",
+  row_step_full: "Whole rows",
+  row_step_half: "Half rows"
 };
 
 // src/localize/languages/fi.json
@@ -821,6 +826,7 @@ var fi_default = {
   description: "THL:n tautitilastot",
   invalid_configuration: "Aseta entiteetiksi thl-integraation tauti.",
   invalid_height: "Virheellinen korkeus. Korkeuksien (height ja max_height) on oltava positiivisia lukuja pikselein\xE4, ja korkeustilan (height_mode) auto, fixed tai max.",
+  invalid_row_step: "Virheellinen py\xF6ristys. Py\xF6ristyksen (row_step) on oltava full tai half.",
   entity_not_found: "Entiteetti\xE4 {entity} ei ole.",
   unavailable: "Tautien lukum\xE4\xE4r\xE4t eiv\xE4t ole saatavilla.",
   whole_country: "Koko maa",
@@ -862,7 +868,11 @@ var fi_default = {
   height: "Kiinte\xE4 korkeus",
   height_helper: "Kortti on aina n\xE4in korkea, ja kartta pienenee mahtumaan sen sis\xE4\xE4n.",
   max_height: "Enimm\xE4iskorkeus",
-  max_height_helper: "Kortti kasvaa sis\xE4lt\xF6ns\xE4 mukana t\xE4h\xE4n korkeuteen asti, ja sen j\xE4lkeen kartta pienenee mahtumaan."
+  max_height_helper: "Kortti kasvaa sis\xE4lt\xF6ns\xE4 mukana t\xE4h\xE4n korkeuteen asti, ja sen j\xE4lkeen kartta pienenee mahtumaan.",
+  row_step: "Py\xF6ristys osioihin jaetussa n\xE4kym\xE4ss\xE4",
+  row_step_helper: "Automaattisella rivikorkeudella kortin korkeus py\xF6ristet\xE4\xE4n yl\xF6sp\xE4in kokonaisiin riveihin, tai tilan s\xE4\xE4st\xE4miseksi puolikkaisiin riveihin.",
+  row_step_full: "Kokonaisiin riveihin",
+  row_step_half: "Puolikkaisiin riveihin"
 };
 
 // src/localize/localize.ts
@@ -878,6 +888,41 @@ function translate(language, key, replacements = {}) {
 }
 function browserLanguage() {
   return document.documentElement.lang || navigator.language || "en";
+}
+
+// src/rows.ts
+var ROW_STEPS = ["full", "half"];
+var ROW_PX = 64;
+var ROW_GAP_PX = 8;
+function validRowStep(config) {
+  return config.row_step === void 0 || config.row_step === null || ROW_STEPS.includes(config.row_step);
+}
+function filledHeight(content, config) {
+  const step = config.row_step === "half" ? ROW_PX / 2 : ROW_PX;
+  return Math.max(1, Math.ceil((content + ROW_GAP_PX) / step)) * step - ROW_GAP_PX;
+}
+function rowStepSchema(config, text) {
+  if (heightMode(config) !== "auto") {
+    return [];
+  }
+  return [
+    {
+      name: "row_step",
+      selector: {
+        select: { mode: "dropdown", options: ROW_STEPS.map((value) => ({ value, label: text(`editor.row_step_${value}`) })) }
+      }
+    }
+  ];
+}
+function rowStepData(config) {
+  return { ...config, row_step: config.row_step ?? "full" };
+}
+function tidyRowStep(config) {
+  const tidied = { ...config };
+  if (tidied.row_step !== "half" || heightMode(tidied) !== "auto") {
+    delete tidied.row_step;
+  }
+  return tidied;
 }
 
 // src/editor.ts
@@ -920,8 +965,9 @@ function schema(hass, config, entity, text) {
       name: "map_width",
       selector: { number: { min: 120, max: 600, step: 5, unit_of_measurement: "px", mode: "box" } }
     },
-    // The card's texts have no editor section, so the shared height fields' keys are looked up without one.
-    ...heightSchema(config, (key) => text(key.replace(/^editor\./, "")))
+    // The card's texts have no editor section, so the shared height and row fields' keys are looked up without one.
+    ...heightSchema(config, (key) => text(key.replace(/^editor\./, ""))),
+    ...rowStepSchema(config, (key) => text(key.replace(/^editor\./, "")))
   ];
 }
 var ThlCardEditor = class extends i4 {
@@ -939,7 +985,7 @@ var ThlCardEditor = class extends i4 {
     return b2`
             <ha-form
                 .hass=${this.hass}
-                .data=${{ ...DEFAULTS, ...heightData(this.config), entity: this.entities() }}
+                .data=${{ ...DEFAULTS, ...rowStepData(heightData(this.config)), entity: this.entities() }}
                 .schema=${schema(this.hass, this.config, this.entities()[0] ?? "", (key) => this.text(key))}
                 .computeLabel=${(entry) => this.text(entry.name)}
                 .computeHelper=${(entry) => this.helper(entry.name)}
@@ -952,7 +998,7 @@ var ThlCardEditor = class extends i4 {
     return [this.config.entity ?? []].flat().filter(Boolean);
   }
   valueChanged(event) {
-    const config = tidyHeight(event.detail.value);
+    const config = tidyRowStep(tidyHeight(event.detail.value));
     const entities = [config.entity ?? []].flat();
     config.entity = entities.length === 1 && !Array.isArray(this.config.entity) ? entities[0] : entities;
     if (config.map_width === void 0 || config.map_width === null || String(config.map_width) === "") {
@@ -1485,6 +1531,10 @@ var ThlCard = class extends i4 {
     super(...arguments);
     this.trend = [];
     this.shown = 0;
+    this.filled = 0;
+    this.spare = 0;
+    this.dragged = false;
+    this.resizes = typeof ResizeObserver === "undefined" ? void 0 : new ResizeObserver(() => this.measureSoon());
   }
   static getConfigElement() {
     return document.createElement("thl-card-editor");
@@ -1501,6 +1551,9 @@ var ThlCard = class extends i4 {
     if (!validHeight(config)) {
       throw new Error(translate(browserLanguage(), "invalid_height"));
     }
+    if (!validRowStep(config)) {
+      throw new Error(translate(browserLanguage(), "invalid_row_step"));
+    }
     if (this.config === void 0 || String(entities) !== String(this.entities())) {
       this.shown = 0;
     }
@@ -1512,9 +1565,12 @@ var ThlCard = class extends i4 {
   getCardSize() {
     return heightCardSize(this.config ?? {}, 8, this.minimumHeight());
   }
-  /** In a sections view the card is drawn full width, never squeezed below half a section, nor lower than its minimum. */
+  /**
+   * In a sections view the card is drawn full width, never below 9 columns, as at 6 the map's numbers crowd each other
+   * on a phone, nor lower than its minimum.
+   */
   getGridOptions() {
-    return { columns: 12, rows: "auto", min_columns: 6, min_rows: gridMinRows(this.minimumHeight()) };
+    return { columns: 12, rows: "auto", min_columns: 9, min_rows: gridMinRows(this.minimumHeight()) };
   }
   connectedCallback() {
     super.connectedCallback();
@@ -1524,6 +1580,9 @@ var ThlCard = class extends i4 {
   }
   disconnectedCallback() {
     super.disconnectedCallback();
+    this.resizes?.disconnect();
+    this.observed = void 0;
+    cancelAnimationFrame(this.frame ?? 0);
     if (this.retry !== void 0) {
       window.clearTimeout(this.retry);
       this.retry = void 0;
@@ -1554,12 +1613,13 @@ var ThlCard = class extends i4 {
     const whole = findArea(areas, WHOLE_COUNTRY);
     const title = selected?.name ?? this.text("whole_country");
     const height = this.heightStyle();
+    const name = this.name(entity.attributes);
     return b2`
-            <ha-card class=${height ? "held" : ""} style=${height}>
+            <ha-card class=${height ? "held" : ""} style=${this.cardStyle()}>
                 <div class="card">
                     <div class="disease">
                         ${DISEASE_LOGO}
-                        <span class="disease-name">${this.name(entity.attributes)}</span>
+                        <span class="disease-name" title=${name}>${name}</span>
                     </div>
                     ${this.chips()}
                     <div class="content">
@@ -1578,9 +1638,84 @@ var ThlCard = class extends i4 {
             </ha-card>
         `;
   }
-  updated() {
+  updated(changed) {
     void this.refreshTrend();
     void this.refreshYearAgo();
+    const card = this.renderRoot.querySelector("ha-card");
+    if (card && card !== this.observed) {
+      this.resizes?.disconnect();
+      this.resizes?.observe(card);
+      this.observed = card;
+    }
+    if (!(changed.size <= 2 && [...changed.keys()].every((key) => key === "filled" || key === "spare"))) {
+      this.measureSoon();
+    }
+  }
+  /**
+   * The chosen sensor's button is scrolled along its line until it clears the fades, without moving the page. Measured
+   * from the boxes as drawn, so it works whichever way the text runs. At either end of the line the scroll stops and
+   * that end's fade goes, so the first and the last button show whole too.
+   */
+  showChosenChip() {
+    const line = this.renderRoot.querySelector(".chips");
+    const chip = line?.querySelector(".chip.on");
+    if (!line || !chip) {
+      return;
+    }
+    const fade = Math.min(CHIP_FADE, line.clientWidth / 4);
+    const room = line.getBoundingClientRect();
+    const box = chip.getBoundingClientRect();
+    const distance = box.left < room.left + fade ? box.left - room.left - fade : box.right > room.right - fade ? box.right - room.right + fade : 0;
+    if (Math.abs(distance) >= 1) {
+      const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      line.scrollBy({ left: distance, behavior: reduced ? "auto" : "smooth" });
+    }
+  }
+  measureSoon() {
+    cancelAnimationFrame(this.frame ?? 0);
+    this.frame = requestAnimationFrame(() => {
+      const line = this.renderRoot.querySelector(".chips");
+      if (line) {
+        markChipFades(line);
+      }
+      this.fillRows();
+    });
+  }
+  /**
+   * In a sections view whose rows are left automatic, the card takes the whole rows its content needs, or the half rows
+   * with `row_step: half`, so the cards under it stay on the rows. The room left over goes under the disease.
+   */
+  fillRows() {
+    const card = this.renderRoot.querySelector("ha-card");
+    const inner = card?.querySelector(":scope > .card");
+    if (!card || !inner || !card.clientWidth) {
+      return;
+    }
+    if (this.layout !== "grid" || this.heightStyle()) {
+      this.filled = 0;
+      this.spare = 0;
+      return;
+    }
+    const last = inner.querySelector(":scope > .content")?.lastElementChild;
+    if (!last) {
+      return;
+    }
+    let content = last.getBoundingClientRect().bottom - card.getBoundingClientRect().top + px(getComputedStyle(inner).paddingBottom) + px(getComputedStyle(card).borderBottomWidth);
+    const disease = inner.querySelector(":scope > .disease");
+    if (disease) {
+      content -= px(getComputedStyle(disease).paddingBottom);
+    }
+    const filled = filledHeight(Math.round(content), this.config ?? {});
+    this.filled = filled;
+    this.spare = Math.max(0, Math.floor(filled - content));
+  }
+  /** The card's inline style: the height it is held to, or the rows it fills, with their spare room. */
+  cardStyle() {
+    const held = this.heightStyle();
+    if (held || !this.filled) {
+      return held;
+    }
+    return `min-height: ${this.filled}px; --spare: ${this.spare}px`;
   }
   /** The configured sensors, one or several. */
   entities() {
@@ -1600,19 +1735,78 @@ var ThlCard = class extends i4 {
       return A;
     }
     return b2`
-            <div class="chips">
+            <div
+                class="chips"
+                @scroll=${(event) => markChipFades(event.currentTarget)}
+                @pointerdown=${(event) => this.startDrag(event)}
+                @pointermove=${(event) => this.drag(event)}
+                @pointerup=${(event) => this.endDrag(event)}
+                @pointercancel=${(event) => this.endDrag(event)}
+                @click=${{ handleEvent: (event) => this.swallowDragClick(event), capture: true }}
+            >
                 ${entities.map((id, index) => {
       const attributes = this.hass?.states[id]?.attributes;
       return b2`<button
                         class="chip ${index === this.shown ? "on" : ""}"
                         aria-pressed="${index === this.shown ? "true" : "false"}"
-                        @click=${() => this.shown = index}
+                        @click=${() => this.choose(index)}
                     >
                         ${attributes ? this.name(attributes) : id}
                     </button>`;
     })}
             </div>
         `;
+  }
+  /**
+   * A mouse drags the line of buttons sideways, as a finger already does, since with no scrollbar and an ordinary
+   * wheel the buttons out of view could otherwise be reached only with Shift and the wheel. A finger and a pen are left
+   * to the browser's own scrolling.
+   */
+  /** Shows a sensor, and brings its button whole into view, also when it was already the one shown. */
+  choose(index) {
+    this.shown = index;
+    void this.updateComplete.then(() => this.showChosenChip());
+  }
+  startDrag(event) {
+    const line = event.currentTarget;
+    this.dragged = false;
+    if (event.pointerType !== "mouse" || event.button !== 0 || line.scrollWidth <= line.clientWidth) {
+      return;
+    }
+    this.dragging = { pointer: event.pointerId, x: event.clientX, scroll: line.scrollLeft, moved: false };
+  }
+  drag(event) {
+    const dragging = this.dragging;
+    if (dragging?.pointer !== event.pointerId) {
+      return;
+    }
+    const line = event.currentTarget;
+    const distance = event.clientX - dragging.x;
+    if (!dragging.moved && Math.abs(distance) < DRAG_SLOP) {
+      return;
+    }
+    if (!dragging.moved) {
+      dragging.moved = true;
+      line.setPointerCapture?.(event.pointerId);
+      line.classList.add("dragging");
+    }
+    line.scrollLeft = dragging.scroll - distance;
+  }
+  endDrag(event) {
+    if (this.dragging?.pointer !== event.pointerId) {
+      return;
+    }
+    const line = event.currentTarget;
+    line.classList.remove("dragging");
+    this.dragged = this.dragging.moved;
+    this.dragging = void 0;
+  }
+  swallowDragClick(event) {
+    if (this.dragged) {
+      this.dragged = false;
+      event.preventDefault();
+      event.stopPropagation();
+    }
   }
   /** The disease, or the flu-like illness visits, which have no disease and go by their sensor's name. */
   name(attributes) {
@@ -1719,7 +1913,7 @@ var ThlCard = class extends i4 {
                     ${[NO_CASES, FALLING_FAST, FALLING, STEADY, RISING, RISING_FAST].map((color) => b2`<span style="background: ${color}"></span>`)}
                 </div>
                 <div class="bounds">${bounds.map((bound) => b2`<span>${bound}</span>`)}</div>
-                <span class="key-caption">${this.text(caption)}</span>
+                <span class="key-caption" title=${this.text(caption)}>${this.text(caption)}</span>
             </div>
         `;
   }
@@ -1732,16 +1926,21 @@ var ThlCard = class extends i4 {
     }
     return b2`
             <div class="stats-container">
-                <span class="stats-title">${title}</span>
-                <span class="stats">${this.text("last_week")}: ${this.number(area.amount_last_week ?? 0, 0)}</span>
-                ${area.incidence_last_week === void 0 ? A : b2`<span class="stats"
-                              >${this.text("incidence")}: <span class="unit">${this.incidence(area.incidence_last_week)}</span></span
-                          >`}
-                ${area.amount_two_weeks_ago === void 0 ? A : b2`<span class="stats">${this.text("two_weeks_ago")}: ${this.number(area.amount_two_weeks_ago, 0)}</span>`}
-                ${area.change_percentage === void 0 ? A : b2`<span class="stats">${this.text("change")}: ${this.change(area)}</span>`}
-                ${this.yearAgo === void 0 ? A : b2`<span class="stats">${this.text("last_year")}: ${this.number(this.yearAgo, 0)}</span>`}
+                <span class="stats-title" title=${title}>${title}</span>
+                ${this.figure("last_week", this.number(area.amount_last_week ?? 0, 0))}
+                ${area.incidence_last_week === void 0 ? A : this.figure("incidence", this.incidence(area.incidence_last_week), true)}
+                ${area.amount_two_weeks_ago === void 0 ? A : this.figure("two_weeks_ago", this.number(area.amount_two_weeks_ago, 0))}
+                ${area.change_percentage === void 0 ? A : this.figure("change", this.change(area))}
+                ${this.yearAgo === void 0 ? A : this.figure("last_year", this.number(this.yearAgo, 0))}
             </div>
         `;
+  }
+  /** A line of the figures, with the whole line as its tooltip for when a held card cuts it short. */
+  figure(label, value, unit = false) {
+    const text = `${this.text(label)}: ${value}`;
+    return b2`<span class="stats" title=${text}
+            >${this.text(label)}: ${unit ? b2`<span class="unit">${value}</span>` : value}</span
+        >`;
   }
   /** The figures of the flu-like illness visits: their share of all visits, and how many there were. */
   visits(title, area) {
@@ -1749,16 +1948,14 @@ var ThlCard = class extends i4 {
       return A;
     }
     const share = (value) => value === null || value === void 0 ? "\u2013" : this.percent(value, 3);
+    const visits = `${this.number(area.visits_last_week ?? 0, 0)} / ${this.number(area.all_visits_last_week ?? 0, 0)}`;
     return b2`
             <div class="stats-container">
-                <span class="stats-title">${title}</span>
-                <span class="stats">${this.text("last_week")}: ${share(area.share_last_week)}</span>
-                ${area.visits_last_week === void 0 ? A : b2`<span class="stats">
-                              ${this.text("visits")}: ${this.number(area.visits_last_week, 0)} /
-                              ${this.number(area.all_visits_last_week ?? 0, 0)}
-                          </span>`}
-                ${area.share_two_weeks_ago === void 0 ? A : b2`<span class="stats">${this.text("two_weeks_ago")}: ${share(area.share_two_weeks_ago)}</span>`}
-                ${this.yearAgo === void 0 ? A : b2`<span class="stats">${this.text("last_year")}: ${share(this.yearAgo)}</span>`}
+                <span class="stats-title" title=${title}>${title}</span>
+                ${this.figure("last_week", share(area.share_last_week))}
+                ${area.visits_last_week === void 0 ? A : this.figure("visits", visits)}
+                ${area.share_two_weeks_ago === void 0 ? A : this.figure("two_weeks_ago", share(area.share_two_weeks_ago))}
+                ${this.yearAgo === void 0 ? A : this.figure("last_year", share(this.yearAgo))}
             </div>
         `;
   }
@@ -1777,6 +1974,7 @@ var ThlCard = class extends i4 {
     const marked = Math.min(this.hovered ?? values.length - 1, values.length - 1);
     const at = `left: ${x2(marked).toFixed(2)}%; top: ${(y3(values[marked]) / 30 * 100).toFixed(2)}%;`;
     const bubble = `${this.text("week_short")} ${this.number(this.trend[marked].week, 0)}: ${this.number(values[marked], digits)}`;
+    const caption = `${this.text("trend_caption", { weeks: this.number(values.length, 0) })} \xB7 ${this.text("highest")} ${this.number(highest, digits)}`;
     return b2`
             <div class="trend">
                 <div
@@ -1795,10 +1993,7 @@ var ThlCard = class extends i4 {
                     <span class="trend-dot ${this.hovered === void 0 ? "" : "hovered"}" style="${at}"></span>
                     ${this.hovered === void 0 ? A : b2`<span class="trend-bubble" style="left: ${x2(marked).toFixed(2)}%;">${bubble}</span>`}
                 </div>
-                <span class="trend-caption">
-                    ${this.text("trend_caption", { weeks: this.number(values.length, 0) })} · ${this.text("highest")}
-                    ${this.number(highest, digits)}
-                </span>
+                <span class="trend-caption" title=${caption}>${caption}</span>
             </div>
         `;
   }
@@ -1959,27 +2154,23 @@ var ThlCard = class extends i4 {
     return translate(this.language(), key, replacements);
   }
   /**
-   * The lowest the card is held to, in pixels: its padding, the disease, the buttons when there are several sensors,
-   * a map 200 px high (or lower, when its width is set to less), the key and the trend, each when it is shown, as
-   * measured on a full section's width. A lower map no longer shows the regions or the capital region's inset. Set
-   * narrower than a full section, the card may be under 290 px wide, in a view of four sections, where the figures go
-   * under the map instead of over its sea, so they are counted too. The columns are read as Home Assistant reads them:
-   * `grid_options.columns` when there are grid options, otherwise the older `layout_options.grid_columns`, a third as
-   * many.
+   * The lowest the card is held to, in pixels, worked out from its config alone: its padding, the disease, the line of
+   * buttons when there are several sensors, a map 200 px high (or lower, when its width is set to less), the figures
+   * under it, and the key and the trend, each when it is shown. The narrowest a card of 9 or more columns can be, 214 px
+   * at 9 and 288 px at 12 on a 320 px phone, is under the 290 px where the figures move over the map's sea, so they are
+   * always counted under the map, at their most lines, the title and five figures. The capital region's inset shrinks
+   * to nothing there, leaving only its gap. A lower map no longer shows the regions.
    */
   minimumHeight() {
     const padding = 24;
     const gap = 12;
     const disease = 34;
-    const chips = 22;
+    const chips = 25;
     const map = Math.min(200, (this.config?.map_width ?? Infinity) * MAP_HEIGHT / MAP_WIDTH);
-    const key = 36;
-    const trend = 55;
-    const figures = 86;
-    const older = this.config?.layout_options?.grid_columns;
-    const columns = this.config?.grid_options ? this.config.grid_options.columns : typeof older === "number" ? older * 3 : void 0;
-    const narrow = typeof columns === "number" && columns < 12;
-    return padding + disease + (this.entities().length > 1 ? gap + chips : 0) + gap + map + (narrow ? gap + figures : 0) + (this.config?.show_key === false ? 0 : gap + key) + (this.config?.show_trend === false ? 0 : gap + trend);
+    const figures = 104;
+    const key = 40;
+    const trend = 58;
+    return padding + disease + (this.entities().length > 1 ? gap + chips : 0) + gap + map + gap + figures + (this.showInset ? gap : 0) + (this.config?.show_key === false ? 0 : gap + key) + (this.config?.show_trend === false ? 0 : gap + trend);
   }
   language() {
     return this.hass?.locale?.language ?? this.hass?.language ?? browserLanguage();
@@ -2008,6 +2199,8 @@ var ThlCard = class extends i4 {
                 container-type: inline-size;
                 padding: 12px;
                 box-sizing: border-box;
+                /* The line of buttons' 25 px and the 12 px gap under it. */
+                --chips-room: 37px;
             }
 
             .content {
@@ -2050,6 +2243,17 @@ var ThlCard = class extends i4 {
                 display: contents;
             }
 
+            /*
+             * Held, the texts under the map keep to one line, cut short with their whole text as a tooltip, so the height
+             * never depends on the language. The figures do too where they are under the map, not over its sea.
+             */
+            ha-card.held :is(.key-caption, .trend-caption) {
+                max-width: 100%;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+
             /* As tall as the map would be unheld, as the room's size can't come from the map inside it. */
             ha-card.held .body > .map-room {
                 --natural: calc(min(var(--map-width, 300px), 100cqw) * ${MAP_HEIGHT} / ${MAP_WIDTH});
@@ -2077,6 +2281,8 @@ var ThlCard = class extends i4 {
                 gap: 0.5em;
                 max-width: 100%;
                 max-height: 48px;
+                /* The room a whole row leaves over on automatic rows, outside the 48 px the name keeps to. */
+                padding-bottom: var(--spare, 0px);
             }
 
             .disease-logo {
@@ -2241,22 +2447,66 @@ var ThlCard = class extends i4 {
                 margin-right: 3px;
             }
 
+            /*
+             * One line however many sensors there are, so the card's height never depends on their names: what doesn't
+             * fit scrolls sideways, with no scrollbar to take room. The 3 px all round are room for the focus ring,
+             * which the scrolling would cut off, given back by the margin.
+             */
             .chips {
+                position: relative;
                 display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
+                justify-content: safe center;
                 gap: 6px;
+                box-sizing: border-box;
+                max-width: calc(100% + 6px);
+                margin: -3px;
+                padding: 3px;
+                overflow-x: auto;
+                scrollbar-width: none;
             }
 
+            /* 25 px tall whatever the theme's font, as the room the line takes is counted in the minimum and under the map's figures. */
             .chip {
+                flex: none;
+                box-sizing: border-box;
+                height: 25px;
+                white-space: nowrap;
                 font: inherit;
                 font-size: 12px;
+                line-height: 17px;
                 padding: 3px 10px;
                 border-radius: 14px;
                 border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
                 background: none;
                 color: var(--primary-text-color);
                 cursor: pointer;
+            }
+
+            /* Fades where buttons run on out of view, 24 px but never more than a quarter of the line. */
+            .chips.fade-left {
+                mask-image: linear-gradient(to right, transparent, #000 min(24px, 25%));
+            }
+
+            .chips.fade-right {
+                mask-image: linear-gradient(to left, transparent, #000 min(24px, 25%));
+            }
+
+            .chips.fade-left.fade-right {
+                mask-image: linear-gradient(to right, transparent, #000 min(24px, 25%), #000 calc(100% - min(24px, 25%)), transparent);
+            }
+
+            /* A line that runs on can be dragged with a mouse. */
+            .chips.draggable {
+                cursor: grab;
+            }
+
+            .chips.draggable .chip {
+                cursor: inherit;
+            }
+
+            .chips.dragging {
+                cursor: grabbing;
+                user-select: none;
             }
 
             .chip.on {
@@ -2396,6 +2646,19 @@ var ThlCard = class extends i4 {
              * as the map's is. Its 2 px are the inset's border. Without the inset nothing under the map can shrink.
              */
             @container thl not (min-width: 290px) {
+                ha-card.held :is(.stats-title, .stats) {
+                    max-width: 100%;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
+
+                ha-card.held .stats-container,
+                ha-card.held .figures {
+                    min-width: 0;
+                    max-width: 100%;
+                }
+
                 ha-card.held .body > .side:has(> .inset-room) {
                     flex: 0 1 auto;
                     flex-direction: column;
@@ -2456,6 +2719,20 @@ var ThlCard = class extends i4 {
                     align-items: flex-start;
                     /* Only the figures take the pointer; the counties under the rest stay clickable. */
                     pointer-events: none;
+                }
+
+                /*
+                 * The line of buttons for several sensors takes 37 px over the map, its 25 and the gap under it. The
+                 * figures move back up by that much, so they sit where they would without the buttons, level with a card
+                 * beside it that has none. Held to a height, the map is also 37 px lower than it would be without them, so
+                 * the 16 % is counted from the height it would have.
+                 */
+                .card:has(> .chips) .side {
+                    top: calc(16% - var(--chips-room));
+                }
+
+                ha-card.held .card:has(> .chips) .side {
+                    top: calc(0.16 * (100% + var(--chips-room)) - var(--chips-room));
                 }
 
                 .side > * {
@@ -2558,6 +2835,25 @@ __decorateClass([
 __decorateClass([
   r5()
 ], ThlCard.prototype, "yearAgo", 2);
+__decorateClass([
+  r5()
+], ThlCard.prototype, "filled", 2);
+__decorateClass([
+  r5()
+], ThlCard.prototype, "spare", 2);
+function px(value) {
+  return parseFloat(value) || 0;
+}
+var CHIP_FADE = 24;
+var DRAG_SLOP = 5;
+function markChipFades(line) {
+  const hidden = line.scrollWidth - line.clientWidth;
+  const rtl = getComputedStyle(line).direction === "rtl";
+  const left = rtl ? hidden + line.scrollLeft : line.scrollLeft;
+  line.classList.toggle("fade-left", hidden > 1 && left > 1);
+  line.classList.toggle("fade-right", hidden > 1 && hidden - left > 1);
+  line.classList.toggle("draggable", hidden > 1);
+}
 if (!customElements.get("thl-card")) {
   console.info(
     `%c  THL-CARD  
@@ -2577,5 +2873,6 @@ if (!customElements.get("thl-card")) {
   customElements.define("thl-card", ThlCard);
 }
 export {
-  ThlCard
+  ThlCard,
+  markChipFades
 };

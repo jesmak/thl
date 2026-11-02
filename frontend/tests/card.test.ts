@@ -184,9 +184,9 @@ describe("the size of the card", () => {
 });
 
 describe("the shape of the card", () => {
-    it("is never squeezed below half a section", () => {
+    it("is never squeezed below 9 columns", () => {
         const element = document.createElement("thl-card") as ThlCard;
-        expect(element.getGridOptions()).toMatchObject({ columns: 12, rows: "auto", min_columns: 6 });
+        expect(element.getGridOptions()).toMatchObject({ columns: 12, rows: "auto", min_columns: 9 });
     });
 
     it("groups the figures, so they can sit in a row or a column", async () => {
@@ -345,11 +345,11 @@ describe("the height", () => {
 
     it.each([
         ["its content", undefined, {}, ""],
-        ["a fixed height", undefined, { height_mode: "fixed", height: 400, max_height: 500 }, "height: 400px"],
-        ["a maximum height", undefined, { max_height: 500 }, "max-height: 500px"],
-        ["grid rows in a sections view, over its mode", "grid", { height: 400, grid_options: { rows: 6 } }, "height: 100%"],
-        ["its mode when the grid rows are automatic", "grid", { max_height: 500, grid_options: { rows: "auto" } }, "max-height: 500px"],
-        ["its minimum, for a fixed height below it", undefined, { height: 100 }, "height: 385px"],
+        ["a fixed height", undefined, { height_mode: "fixed", height: 600, max_height: 700 }, "height: 600px"],
+        ["a maximum height", undefined, { max_height: 700 }, "max-height: 700px"],
+        ["grid rows in a sections view, over its mode", "grid", { height: 600, grid_options: { rows: 6 } }, "height: 100%"],
+        ["its mode when the grid rows are automatic", "grid", { max_height: 700, grid_options: { rows: "auto" } }, "max-height: 700px"],
+        ["its minimum, for a fixed height below it", undefined, { height: 100 }, "height: 520px"],
     ])("sizes itself by %s", async (_name, layout, extra, style) => {
         const element = await card(hass(), { entity: ENTITY, ...extra }, layout);
         const drawn = shadow(element).querySelector("ha-card")!;
@@ -358,50 +358,21 @@ describe("the height", () => {
         expect(drawn.classList.contains("held")).toBe(style !== "");
     });
 
+    // The narrowest each column count can be, 214 px at 9 and 288 px at 12, puts the figures under the map, so they count
+    // at every column count alike.
     it.each([
-        ["the default", {}, 7],
-        ["half a section, where the figures go under the map", { grid_options: { columns: 6 } }, 8],
-        ["two thirds of a section, where the figures go under the map", { grid_options: { columns: 8 } }, 8],
-        ["eleven columns, where the figures go under the map", { grid_options: { columns: 11 } }, 8],
-        ["seven columns, where the figures go under the map", { grid_options: { columns: 7 } }, 8],
-        ["a full section by name", { grid_options: { columns: "full" } }, 7],
-        ["a full section as a number", { grid_options: { columns: 12 } }, 7],
-        ["the older option's half a section, where the figures go under the map", { layout_options: { grid_columns: 2 } }, 8],
-        ["the older option's full section", { layout_options: { grid_columns: 4 } }, 7],
-        [
-            "the older option's half a section beside grid options, which Home Assistant reads instead",
-            { grid_options: { rows: "auto" }, layout_options: { grid_columns: 2 } },
-            7,
-        ],
-        [
-            "the older option's half a section beside grid options left empty in YAML, which Home Assistant passes over",
-            { grid_options: null as unknown as undefined, layout_options: { grid_columns: 2 } },
-            8,
-        ],
-        [
-            "the older option's half a section beside grid options' full section, which Home Assistant reads instead",
-            { grid_options: { columns: 12 }, layout_options: { grid_columns: 2 } },
-            7,
-        ],
-        [
-            "the figures under the map, without the key and the trend",
-            { grid_options: { columns: 6 }, show_key: false, show_trend: false },
-            6,
-        ],
-        ["several sensors", { entity: [ENTITY, "sensor.thl_other"] }, 7],
-        ["no key", { show_key: false }, 6],
-        ["no trend", { show_trend: false }, 6],
-        ["neither the key nor the trend", { show_key: false, show_trend: false }, 5],
-        ["a map narrower than 200 px is high", { map_width: 40, show_key: false, show_trend: false }, 3],
-        // The buttons of several sensors take it over a row's edge.
-        ["a narrow map", { map_width: 100 }, 6],
-        ["a narrow map and several sensors", { map_width: 100, entity: [ENTITY, "sensor.thl_other"] }, 7],
-        [
-            "half a section with several sensors, where the figures go under the map",
-            { grid_options: { columns: 6 }, entity: [ENTITY, "sensor.thl_other"] },
-            9,
-        ],
-        ["half a section with a narrow map, where the figures go under it", { grid_options: { columns: 6 }, map_width: 100 }, 8],
+        ["the default", {}, 9],
+        ["a full section by name", { grid_options: { columns: "full" } }, 9],
+        ["9 columns", { grid_options: { columns: 9 } }, 9],
+        ["the older option's full section", { layout_options: { grid_columns: 4 } }, 9],
+        ["several sensors, on one line of buttons however many", { entity: [ENTITY, "sensor.thl_other", "sensor.thl_third"] }, 9],
+        ["no key", { show_key: false }, 8],
+        ["no trend", { show_trend: false }, 8],
+        ["neither the key nor the trend", { show_key: false, show_trend: false }, 7],
+        ["no inset", { show_inset: false }, 9],
+        ["a map narrower than 200 px is high", { map_width: 40, show_key: false, show_trend: false }, 5],
+        ["a narrow map", { map_width: 100 }, 8],
+        ["a narrow map and several sensors", { map_width: 100, entity: [ENTITY, "sensor.thl_other"] }, 9],
     ])("keeps to its minimum height in a sections view with %s", (_name, extra, rows) => {
         const element = document.createElement("thl-card") as ThlCard;
         element.setConfig({ type: "custom:thl-card", entity: ENTITY, ...extra } as never);
@@ -424,7 +395,7 @@ describe("the height", () => {
 
     it.each([
         ["its content", {}, 8],
-        ["a fixed height, raised to its minimum", { height: 200 }, 8],
+        ["a fixed height, raised to its minimum", { height: 200 }, 10],
         ["a fixed height above its minimum", { height: 600 }, 12],
         ["a maximum height above its content", { max_height: 1000 }, 8],
         ["a maximum height, raised to its minimum", { max_height: 300 }, 8],
@@ -438,9 +409,9 @@ describe("the height", () => {
         ["does not exist", { states: {}, locale: { language: "fi" } }],
         ["is unavailable", hass({ state: "unavailable" })],
     ])("holds the message to the height too when the sensor %s", async (_name, state) => {
-        const drawn = shadow(await card(state as HomeAssistant, { entity: ENTITY, height: 400 })).querySelector("ha-card")!;
+        const drawn = shadow(await card(state as HomeAssistant, { entity: ENTITY, height: 600 })).querySelector("ha-card")!;
         expect(drawn.querySelector(".message")).not.toBeNull();
-        expect(drawn.getAttribute("style")).toBe("height: 400px");
+        expect(drawn.getAttribute("style")).toBe("height: 600px");
     });
 });
 

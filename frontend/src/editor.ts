@@ -11,6 +11,7 @@ import type { HassEntity, HomeAssistant } from "./hass";
 import { heightData, heightSchema, tidyHeight } from "./height";
 import { browserLanguage, translate } from "./localize/localize";
 import { WHOLE_COUNTRY } from "./const";
+import { rowStepData, rowStepSchema, tidyRowStep } from "./rows";
 import type { Area, ThlCardConfig } from "./types";
 
 interface SchemaEntry {
@@ -71,8 +72,9 @@ function schema(hass: HomeAssistant, config: ThlCardConfig, entity: string, text
             name: "map_width",
             selector: { number: { min: 120, max: 600, step: 5, unit_of_measurement: "px", mode: "box" } },
         },
-        // The card's texts have no editor section, so the shared height fields' keys are looked up without one.
+        // The card's texts have no editor section, so the shared height and row fields' keys are looked up without one.
         ...heightSchema(config, (key) => text(key.replace(/^editor\./, ""))),
+        ...rowStepSchema(config, (key) => text(key.replace(/^editor\./, ""))),
     ];
 }
 
@@ -91,7 +93,7 @@ export class ThlCardEditor extends LitElement {
         return html`
             <ha-form
                 .hass=${this.hass}
-                .data=${{ ...DEFAULTS, ...heightData(this.config), entity: this.entities() }}
+                .data=${{ ...DEFAULTS, ...rowStepData(heightData(this.config)), entity: this.entities() }}
                 .schema=${schema(this.hass, this.config, this.entities()[0] ?? "", (key) => this.text(key))}
                 .computeLabel=${(entry: SchemaEntry) => this.text(entry.name)}
                 .computeHelper=${(entry: SchemaEntry) => this.helper(entry.name)}
@@ -106,7 +108,7 @@ export class ThlCardEditor extends LitElement {
     }
 
     private valueChanged(event: CustomEvent<{ value: ThlCardConfig }>): void {
-        const config: ThlCardConfig = tidyHeight(event.detail.value);
+        const config: ThlCardConfig = tidyRowStep(tidyHeight(event.detail.value));
 
         // One sensor stays a plain entity, as the card was configured before it took several, unless it was a list.
         const entities = [config.entity ?? []].flat();
