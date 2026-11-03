@@ -1653,7 +1653,7 @@ var ThlCard = class extends i4 {
   }
   /**
    * The chosen sensor's button is scrolled along its line until it clears the fades, without moving the page. Measured
-   * from the boxes as drawn, so it works whichever way the text runs. At either end of the line the scroll stops and
+   * from the boxes as drawn. At either end of the line the scroll stops and
    * that end's fade goes, so the first and the last button show whole too.
    */
   showChosenChip() {
@@ -2848,8 +2848,7 @@ var CHIP_FADE = 24;
 var DRAG_SLOP = 5;
 function markChipFades(line) {
   const hidden = line.scrollWidth - line.clientWidth;
-  const rtl = getComputedStyle(line).direction === "rtl";
-  const left = rtl ? hidden + line.scrollLeft : line.scrollLeft;
+  const left = line.scrollLeft;
   line.classList.toggle("fade-left", hidden > 1 && left > 1);
   line.classList.toggle("fade-right", hidden > 1 && hidden - left > 1);
   line.classList.toggle("draggable", hidden > 1);

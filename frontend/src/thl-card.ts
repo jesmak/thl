@@ -249,7 +249,7 @@ export class ThlCard extends LitElement {
 
     /**
      * The chosen sensor's button is scrolled along its line until it clears the fades, without moving the page. Measured
-     * from the boxes as drawn, so it works whichever way the text runs. At either end of the line the scroll stops and
+     * from the boxes as drawn. At either end of the line the scroll stops and
      * that end's fade goes, so the first and the last button show whole too.
      */
     private showChosenChip(): void {
@@ -1507,15 +1507,13 @@ const CHIP_FADE = 24;
 const DRAG_SLOP = 5;
 
 /**
- * Marks the line of buttons by the sides where buttons run on out of view, on the screen's left and right whichever
- * way the text runs: in right-to-left text the line starts at the right and scrolls to negative positions. A pixel to
- * spare keeps rounding from showing a fade. Kept apart from the shared `fade.ts`, which fades only the top and the
- * bottom, as this is the only line that scrolls sideways.
+ * Marks the line of buttons by the sides where buttons run on out of view. A pixel to spare keeps rounding from showing
+ * a fade. Kept apart from the shared `fade.ts`, which fades only the top and the bottom, as this is the only line that
+ * scrolls sideways.
  */
 export function markChipFades(line: HTMLElement): void {
     const hidden = line.scrollWidth - line.clientWidth;
-    const rtl = getComputedStyle(line).direction === "rtl";
-    const left = rtl ? hidden + line.scrollLeft : line.scrollLeft;
+    const left = line.scrollLeft;
     line.classList.toggle("fade-left", hidden > 1 && left > 1);
     line.classList.toggle("fade-right", hidden > 1 && hidden - left > 1);
     line.classList.toggle("draggable", hidden > 1);
