@@ -1621,14 +1621,28 @@ var ThlCard = class extends i4 {
       this.measureSoon();
     }
   }
-  /**
-   * The chosen sensor's button is scrolled along its line until it clears the fades, without moving the page. Measured
-   * from the boxes as drawn. At either end of the line the scroll stops and
-   * that end's fade goes, so the first and the last button show whole too.
-   */
+  /** The chosen sensor's button, brought clear of the fades. */
   showChosenChip() {
-    const line = this.renderRoot.querySelector(".chips");
-    const chip = line?.querySelector(".chip.on");
+    this.showChip(this.renderRoot.querySelector(".chips > .chip.on"));
+  }
+  /**
+   * A button reached with the keyboard, brought clear of the fades. The browser scrolls a focused button into view only
+   * when it is wholly out of view, so one half under a fade would stay there. A mouse or a finger chooses a button
+   * instead, which brings it into view as it is shown.
+   */
+  focusChip(event) {
+    const chip = event.target;
+    if (chip.classList?.contains("chip") && chip.matches(":focus-visible")) {
+      this.showChip(chip);
+    }
+  }
+  /**
+   * A button is scrolled along its line until it clears the fades, without moving the page. Measured from the boxes as
+   * drawn. At either end of the line the scroll stops and that end's fade goes, so the first and the last button show
+   * whole too.
+   */
+  showChip(chip) {
+    const line = chip?.parentElement;
     if (!line || !chip) {
       return;
     }
@@ -1707,6 +1721,7 @@ var ThlCard = class extends i4 {
             <div
                 class="chips"
                 @scroll=${(event) => markChipFades(event.currentTarget)}
+                @focusin=${(event) => this.focusChip(event)}
                 @pointerdown=${(event) => this.startDrag(event)}
                 @pointermove=${(event) => this.drag(event)}
                 @pointerup=${(event) => this.endDrag(event)}

@@ -247,14 +247,30 @@ export class ThlCard extends LitElement {
         }
     }
 
-    /**
-     * The chosen sensor's button is scrolled along its line until it clears the fades, without moving the page. Measured
-     * from the boxes as drawn. At either end of the line the scroll stops and
-     * that end's fade goes, so the first and the last button show whole too.
-     */
+    /** The chosen sensor's button, brought clear of the fades. */
     private showChosenChip(): void {
-        const line = this.renderRoot.querySelector<HTMLElement>(".chips");
-        const chip = line?.querySelector<HTMLElement>(".chip.on");
+        this.showChip(this.renderRoot.querySelector<HTMLElement>(".chips > .chip.on"));
+    }
+
+    /**
+     * A button reached with the keyboard, brought clear of the fades. The browser scrolls a focused button into view only
+     * when it is wholly out of view, so one half under a fade would stay there. A mouse or a finger chooses a button
+     * instead, which brings it into view as it is shown.
+     */
+    private focusChip(event: FocusEvent): void {
+        const chip = event.target as HTMLElement;
+        if (chip.classList?.contains("chip") && chip.matches(":focus-visible")) {
+            this.showChip(chip);
+        }
+    }
+
+    /**
+     * A button is scrolled along its line until it clears the fades, without moving the page. Measured from the boxes as
+     * drawn. At either end of the line the scroll stops and that end's fade goes, so the first and the last button show
+     * whole too.
+     */
+    private showChip(chip: HTMLElement | null): void {
+        const line = chip?.parentElement;
         if (!line || !chip) {
             return;
         }
@@ -349,6 +365,7 @@ export class ThlCard extends LitElement {
             <div
                 class="chips"
                 @scroll=${(event: Event) => markChipFades(event.currentTarget as HTMLElement)}
+                @focusin=${(event: FocusEvent) => this.focusChip(event)}
                 @pointerdown=${(event: PointerEvent) => this.startDrag(event)}
                 @pointermove=${(event: PointerEvent) => this.drag(event)}
                 @pointerup=${(event: PointerEvent) => this.endDrag(event)}

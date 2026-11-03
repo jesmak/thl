@@ -246,4 +246,24 @@ describe("a card held to a height", () => {
         // The button already shown, clicked again while under a fade, is brought into view too.
         expect(await click(1, 260, 290)).toEqual([14]);
     });
+
+    it("brings a button reached with the keyboard clear of the fades, but not one focused by a mouse or a finger", async () => {
+        const element = await card({ entity: [ENTITY, OTHER] });
+        const line = one(element, ".chips");
+        const chips = [...line.querySelectorAll<HTMLElement>(".chip")];
+        Object.defineProperty(line, "clientWidth", { value: 200, configurable: true });
+        line.getBoundingClientRect = () => ({ left: 100, right: 300 }) as DOMRect;
+        const scrolled: number[] = [];
+        line.scrollBy = ((options: ScrollToOptions) => scrolled.push(options.left ?? 0)) as typeof line.scrollBy;
+        // Half past the right edge, as Chrome leaves a button it focuses that is partly in view
+        chips[1].getBoundingClientRect = () => ({ left: 250, right: 330 }) as DOMRect;
+        const focus = (keyboard: boolean) => {
+            chips[1].matches = ((selector: string) => selector === ":focus-visible" && keyboard) as (typeof chips)[1]["matches"];
+            scrolled.length = 0;
+            chips[1].dispatchEvent(new FocusEvent("focusin", { bubbles: true, composed: true }));
+            return [...scrolled];
+        };
+        expect(focus(true)).toEqual([54]);
+        expect(focus(false)).toEqual([]);
+    });
 });
