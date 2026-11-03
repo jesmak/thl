@@ -18,7 +18,7 @@
           "disease_id": "Tauti"
         },
         "data_description": {
-          "disease_id": "Sensorit luodaan koko maalle ja jokaiselle hyvinvointialueelle: tapaukset ja ilmaantuvuus 100 000 asukasta kohden."
+          "disease_id": "Koko maalle ja jokaiselle hyvinvointialueelle luodaan sensorit, jotka kertovat tapausten määrän ja ilmaantuvuuden 100 000 asukasta kohden."
         }
       },
       "reconfigure": {
@@ -52,7 +52,7 @@
             "disease_id": "Tauti"
           },
           "data_description": {
-            "disease_id": "Sensorit luodaan koko maalle ja jokaiselle hyvinvointialueelle: tapaukset ja ilmaantuvuus 100 000 asukasta kohden."
+            "disease_id": "Koko maalle ja jokaiselle hyvinvointialueelle luodaan sensorit, jotka kertovat tapausten määrän ja ilmaantuvuuden 100 000 asukasta kohden."
           }
         }
       },

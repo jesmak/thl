@@ -16,7 +16,7 @@ A custom component that follows the weekly numbers of infectious diseases from t
 for Health and Welfare (THL). Each disease is added separately, and gets sensors for its cases and its incidence per
 100 000 people, in the whole country and in every wellbeing services county.
 
-It can also follow **flu-like illness visits** in primary care: the share of all visits made for influenza-like
+It can also follow **flu-like illness visits** in primary care, the share of all visits made for influenza-like
 illness, in the whole country and in every county. These show a flu season starting before the lab-confirmed cases do.
 
 Sensors get the past year written into their statistics, so graphs have a history from the start, and the statistics
@@ -44,8 +44,8 @@ Finland.
 ## Settings
 
 Adding the integration takes two steps: first the language, then the first disease from the list THL reports. Every
-further disease is added from the integration page with **Add disease**; the diseases already being followed are left
-out of the list. The flu-like illness visits are added from the same page with **Add flu-like illness visits**.
+further disease is added from the integration page with **Add disease**, whose list leaves out the diseases already
+being followed. The flu-like illness visits are added from the same page with **Add flu-like illness visits**.
 
 To change the language later, choose **Reconfigure** from the integration's menu. Everything being followed is
 renamed in the new language, and so are the areas in the sensor attributes. The ids in the attributes never change.
@@ -91,7 +91,7 @@ The whole country's cases sensor carries every area in its `values` attribute, w
 | `incidence_entity_id`     | The area's incidence sensor                    |
 
 The figures of the week before are missing when THL hasn't published it. The `values` attribute isn't stored in the
-recorder; each area's own sensors are.
+recorder, but each area's own sensors are.
 
 ### Flu-like illness visits
 
@@ -151,20 +151,20 @@ hand, and `height_mode`, `height` and `max_height` only by hand. In a sections v
 height. They are for where there is no layout tab, such as a masonry or panel view, or a stack or other card the card is
 inside, even in a sections view.
 
-| Name           | Type           | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Default                                                                         |
-| -------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `type`         | string         | **Required.** `custom:thl-card`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |                                                                                 |
-| `entity`       | string or list | **Required.** The whole country's sensor of a disease, or of the flu-like illness visits, or a list of them                                                                                                                                                                                                                                                                                                                                                                                                                                                                |                                                                                 |
-| `color_by`     | string         | `level` compares each county with the whole country, `change` with its own week before                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | `level`                                                                         |
-| `default_area` | string         | The `area_id` of a county chosen whenever the card loads, such as `pirkanmaan_hyvinvointialue`                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | the whole country                                                               |
-| `show_trend`   | boolean        | A line of the chosen area's past six months under its figures                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `true`                                                                          |
-| `show_inset`   | boolean        | The capital region drawn again larger under the figures                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | `true`                                                                          |
-| `show_key`     | boolean        | A key under the map that says what the colours mean                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | `true`                                                                          |
-| `map_width`    | number         | The map's width, in pixels. Held to a height, the map shrinks below it to fit                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | follows the card                                                                |
-| `height_mode`  | string         | How tall the card is. `auto` fits its content, `fixed` keeps it at `height`, `max` lets it grow up to `max_height`. In `fixed` and `max` nothing scrolls. The disease stays at the top, the key and the trend at the bottom, and the map between them shrinks to fit. The card never gets lower than these need with a map 200 px high and the figures under it, as they are in a card under 290 px wide, and the texts under the map keep to one line, with the whole text as a tooltip. A height in grid rows, set in the layout tab of a sections view, is used instead | `fixed` when `height` is set, `max` when only `max_height` is, otherwise `auto` |
-| `height`       | number         | The card's height in pixels, for `fixed`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |                                                                                 |
-| `row_step`     | string         | How the card rounds its height on automatic rows in a sections view, with `height_mode` `auto` or `max`. `full` rounds it up to whole rows, so the cards under it stay on the rows. `half` rounds it up to half rows, which saves space but can leave the cards under it half a row off the rows of the sections beside it                                                                                                                                                                                                                                                 | `full`                                                                          |
-| `max_height`   | number         | The card's greatest height in pixels, for `max`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |                                                                                 |
+| Name           | Type           | Description                                                                                                                                                                                                                                                                                                                | Default                                                                         |
+| -------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `type`         | string         | **Required.** `custom:thl-card`                                                                                                                                                                                                                                                                                            |                                                                                 |
+| `entity`       | string or list | **Required.** The whole country's sensor of a disease, or of the flu-like illness visits, or a list of them                                                                                                                                                                                                                |                                                                                 |
+| `color_by`     | string         | `level` compares each county with the whole country, `change` with its own week before                                                                                                                                                                                                                                     | `level`                                                                         |
+| `default_area` | string         | The `area_id` of a county chosen whenever the card loads, such as `pirkanmaan_hyvinvointialue`                                                                                                                                                                                                                             | the whole country                                                               |
+| `show_trend`   | boolean        | A line of the chosen area's past six months under its figures                                                                                                                                                                                                                                                              | `true`                                                                          |
+| `show_inset`   | boolean        | The capital region drawn again larger under the figures                                                                                                                                                                                                                                                                    | `true`                                                                          |
+| `show_key`     | boolean        | A key under the map that says what the colours mean                                                                                                                                                                                                                                                                        | `true`                                                                          |
+| `map_width`    | number         | The map's width, in pixels. Held to a height, the map shrinks below it to fit                                                                                                                                                                                                                                              | follows the card                                                                |
+| `height_mode`  | string         | How tall the card is. `auto` fits its content, `fixed` keeps it at `height`, `max` lets it grow up to `max_height`. See [Sizes](#sizes)                                                                                                                                                                                    | `fixed` when `height` is set, `max` when only `max_height` is, otherwise `auto` |
+| `height`       | number         | The card's height in pixels, for `fixed`                                                                                                                                                                                                                                                                                   |                                                                                 |
+| `row_step`     | string         | How the card rounds its height on automatic rows in a sections view, with `height_mode` `auto` or `max`. `full` rounds it up to whole rows, so the cards under it stay on the rows. `half` rounds it up to half rows, which saves space but can leave the cards under it half a row off the rows of the sections beside it | `full`                                                                          |
+| `max_height`   | number         | The card's greatest height in pixels, for `max`                                                                                                                                                                                                                                                                            |                                                                                 |
 
 ### The map
 
@@ -243,6 +243,12 @@ point, and the shapes and the numbers on them scale together.
 
 Set `map_width` to fix the map's width. Held to a height, the map shrinks below it to fit.
 
+Held to a height, by `height_mode` `fixed` or `max` or by rows set in the layout tab of a sections view, nothing
+scrolls. The disease stays at the top, the key and the trend at the bottom, and the map between them shrinks to fit.
+The card never gets lower than these need with a map 200 px high and the figures under it, as they are in a card under
+290 px wide, and the texts under the map keep to one line, with the whole text as a tooltip. Rows set in the layout tab
+are used instead of `height_mode`.
+
 ## Examples
 
 ### The diseases on maps
@@ -304,12 +310,12 @@ start. Your dashboards need no changes, as the card's type stays `custom:thl-car
 
 ## Upgrading from 1.x
 
-Nothing needs to be done. Versions before 2.0 made a separate integration entry for each disease; on the first start
+Nothing needs to be done. Versions before 2.0 made a separate integration entry for each disease. On the first start
 they are merged into one entry with a disease inside it for each. Entity IDs and unique IDs stay as they were, so
 history, statistics, dashboards, automations and the THL card keep working. The language of the merged entry is the one
 most of the old entries used.
 
-The county, incidence and flu-like illness sensors are new, and appear with six months of history. The disease sensors
+The county, incidence and flu-like illness sensors are new, and appear with a year of history. The disease sensors
 that already existed keep the history they have, with THL's current figures in its past year.
 
 ## Data
@@ -318,6 +324,9 @@ The data comes from [THL's open data](https://thl.fi/en/statistics-and-data/data
 [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/) licence. The disease numbers come
 from the infectious diseases register, and the primary care visits from the primary health care register (Avohilmo).
 Every entity credits THL in its attribution.
+
+This is an unofficial integration. It isn't made, endorsed or supported by THL, and has no connection to it. The icon
+is THL's logo, used only to show where the data comes from.
 
 The THL card's map of the wellbeing services counties is adapted from
 [Hyvinvointialueet.svg](https://commons.wikimedia.org/wiki/File:Hyvinvointialueet.svg) by Fenn-O-maniC on Wikimedia
@@ -334,8 +343,8 @@ To add a language, copy `en.json` to the new language's code and translate the v
 areas come from THL in Finnish or English.
 
 The THL card's texts are in `frontend/src/localize/languages/`, in the same way. To add a language there, copy
-`en.json` to the new language's code, translate the values, and add the file to `LANGUAGES` in
-`frontend/src/localize/localize.ts`. A text left out falls back to English.
+`en.json` to the new language's code, translate the values, and in `frontend/src/localize/localize.ts` import the
+file and add it to `LANGUAGES`. A text left out falls back to English.
 
 ## Development
 

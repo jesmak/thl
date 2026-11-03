@@ -18,7 +18,7 @@
           "disease_id": "Disease"
         },
         "data_description": {
-          "disease_id": "Sensors are created for the whole country and for each wellbeing services county: cases and incidence per 100 000 people."
+          "disease_id": "Sensors are created for the whole country and for each wellbeing services county, showing the number of cases and the incidence per 100 000 people."
         }
       },
       "reconfigure": {
@@ -52,7 +52,7 @@
             "disease_id": "Disease"
           },
           "data_description": {
-            "disease_id": "Sensors are created for the whole country and for each wellbeing services county: cases and incidence per 100 000 people."
+            "disease_id": "Sensors are created for the whole country and for each wellbeing services county, showing the number of cases and the incidence per 100 000 people."
           }
         }
       },
