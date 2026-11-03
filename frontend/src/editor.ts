@@ -47,7 +47,7 @@ function schema(hass: HomeAssistant, config: ThlCardConfig, entity: string, text
         {
             name: "entity",
             required: true,
-            selector: { entity: { multiple: true, domain: "sensor", integration: "thl", include_entities: cardEntities(hass) } },
+            selector: { entity: { multiple: true, domain: "sensor", include_entities: cardEntities(hass) } },
         },
         {
             name: "color_by",

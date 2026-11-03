@@ -1,4 +1,4 @@
-/** Replaced at build time with the version in package.json. */
+/** Replaced at build time with the integration's version in manifest.json. */
 declare const __CARD_VERSION__: string;
 
 export const CARD_VERSION = __CARD_VERSION__;

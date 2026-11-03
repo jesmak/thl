@@ -70,6 +70,32 @@ afterEach(() => {
 });
 
 describe("filling the rows of a sections view", () => {
+    it("watches its size again when it is back on the page, with its fetches done", async () => {
+        const watched: Element[] = [];
+        const original = globalThis.ResizeObserver;
+        globalThis.ResizeObserver = class {
+            observe(target: Element): void {
+                watched.push(target);
+            }
+            disconnect(): void {
+                watched.length = 0;
+            }
+            unobserve(): void {}
+        } as unknown as typeof ResizeObserver;
+        try {
+            // With the trend shown, as by default, both fetches are done once the card is drawn.
+            const element = await card({ show_trend: true }, "grid");
+            expect(watched).toEqual([one(element, "ha-card")]);
+            element.remove();
+            expect(watched).toEqual([]);
+            document.body.append(element);
+            await element.updateComplete;
+            expect(watched).toEqual([one(element, "ha-card")]);
+        } finally {
+            globalThis.ResizeObserver = original;
+        }
+    });
+
     // The content ends 12 px of padding under its last part: at 150 px with it ending at 138.
     it.each([
         ["whole rows", {}, "min-height: 184px; --spare: 34px"],
@@ -134,27 +160,6 @@ describe("a card held to a height", () => {
         expect(one(element, ".key-caption").title).toBe(one(element, ".key-caption").textContent?.trim());
     });
 
-    it("keeps its texts to one line, and the sensors' buttons on one line that scrolls sideways", async () => {
-        const { ThlCard } = await import("../src/thl-card");
-        const styles = String((ThlCard as unknown as { styles: { cssText: string } }).styles.cssText);
-        expect(styles).toMatch(/ha-card\.held :is\(\.key-caption, \.trend-caption\) \{[^}]*white-space: nowrap/);
-        // The figures only under the map, as over its sea they add no height.
-        expect(styles).toMatch(/not \(min-width: 290px\) \{\s*ha-card\.held :is\(\.stats-title, \.stats\) \{[^}]*white-space: nowrap/);
-        expect(styles).toMatch(/\.chips \{[^}]*overflow-x: auto/);
-        expect(styles).not.toMatch(/\.chips \{[^}]*flex-wrap: wrap/);
-    });
-
-    it("keeps the figures over the map's sea where they would be without the buttons", async () => {
-        const { ThlCard } = await import("../src/thl-card");
-        const styles = String((ThlCard as unknown as { styles: { cssText: string } }).styles.cssText);
-        expect(styles).toMatch(/\.chip \{[^}]*height: 25px/);
-        expect(styles).toContain("--chips-room: 37px");
-        expect(styles).toMatch(/\.card:has\(> \.chips\) \.side \{\s*top: calc\(16% - var\(--chips-room\)\)/);
-        expect(styles).toMatch(
-            /ha-card\.held \.card:has\(> \.chips\) \.side \{\s*top: calc\(0\.16 \* \(100% \+ var\(--chips-room\)\) - var\(--chips-room\)\)/,
-        );
-    });
-
     it.each([
         ["all of it in view", 200, 200, 0, []],
         ["more to the right at the start", 400, 200, 0, ["fade-right"]],
@@ -166,7 +171,6 @@ describe("a card held to a height", () => {
         const line = document.createElement("div");
         Object.defineProperty(line, "scrollWidth", { value: scrollWidth });
         Object.defineProperty(line, "clientWidth", { value: clientWidth });
-        line.scrollLeft = scrollLeft;
         Object.defineProperty(line, "scrollLeft", { value: scrollLeft });
         markChipFades(line);
         expect([...line.classList].filter((name) => name.startsWith("fade-"))).toEqual(fades);

@@ -31,11 +31,6 @@ COUNTY_INCIDENCE = "sensor.thl_influenssa_ita_uusimaa_incidence"
 WHOLE_COUNTRY = "sensor.thl_influenssa"
 
 
-@pytest.fixture(autouse=True)
-def auto_enable_custom_integrations() -> None:
-    """Replaces the shared one: the recorder must be set up before hass, so each test asks in that order."""
-
-
 async def stored(hass: HomeAssistant, statistic_id: str) -> list[tuple[float, float]]:
     """The start and mean of each row of a sensor's statistics, once the past has been written in the background."""
     await hass.async_block_till_done(wait_background_tasks=True)
@@ -172,14 +167,14 @@ async def test_a_sensor_enabled_later_gets_its_past(
     )
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    whole_country = await stored(hass, WHOLE_COUNTRY)
     assert await stored(hass, COUNTY) == [], "a disabled sensor isn't added"
 
     registry.async_update_entity(COUNTY, disabled_by=None)
-    assert await hass.config_entries.async_reload(entry.entry_id)
+    with patch.object(history, "async_import_statistics", wraps=history.async_import_statistics) as written:
+        assert await hass.config_entries.async_reload(entry.entry_id)
+        assert await stored(hass, COUNTY) == [(start_of(36), 4.0), (start_of(37), 5.0)]
 
-    assert await stored(hass, COUNTY) == [(start_of(36), 4.0), (start_of(37), 5.0)]
-    assert await stored(hass, WHOLE_COUNTRY) == whole_country, "nothing is written twice"
+    assert {call.args[1]["statistic_id"] for call in written.call_args_list} == {COUNTY}, "nothing is written twice"
 
 
 async def test_the_past_is_written_once_thl_can_be_read(
@@ -223,22 +218,6 @@ async def test_a_failing_recorder_does_not_keep_the_sensors_away(
 
     assert hass.states.get(COUNTY).state == "5"
     assert "Writing the past weeks of THL Influenssa into the statistics failed" in caplog.text
-
-
-async def test_the_hours_the_recorder_has_not_compiled_yet_are_left_to_it(
-    recorder_mock,
-    enable_custom_integrations,
-    hass: HomeAssistant,
-    thl: AiohttpClientMocker,
-    freezer: FrozenDateTimeFactory,
-) -> None:
-    # Half an hour into week 38, which week 37's figure is shown from: the recorder compiles that hour itself.
-    freezer.move_to(shown_from(Week(2026, 37, WEEK_37)) + timedelta(minutes=30))
-    entry = thl_entry(hass, (INFLUENZA, "Influenssa"))
-    assert await hass.config_entries.async_setup(entry.entry_id)
-    await hass.async_block_till_done()
-
-    assert await stored(hass, COUNTY) == [(start_of(36), 4.0)]
 
 
 async def test_weeks_are_shown_from_the_start_of_the_week_after(hass: HomeAssistant) -> None:

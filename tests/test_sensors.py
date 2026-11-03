@@ -15,6 +15,8 @@ from custom_components.thl.const import MEASURE_ALL_VISITS, MEASURE_ILI_VISITS
 
 from .conftest import DIMENSIONS_FI_URL, ILI_DIMENSIONS_FI_URL, ILI_WEEK_36, ILI_WEEK_37, ILI_WEEKS, INFLUENZA, thl_entry
 
+pytestmark = pytest.mark.usefixtures("enable_custom_integrations")
+
 # A Wednesday of week 38, so the last finished week is 37.
 NOW = datetime(2026, 9, 16, 9, 0, tzinfo=UTC)
 
@@ -90,7 +92,7 @@ async def test_flu_like_illness_visits_as_a_share_of_all_visits(
         "share_last_week": 0.02,
         "visits_last_week": 12,
         "all_visits_last_week": 60000,
-        "share_two_weeks_ago": 0.02,
+        "share_two_weeks_ago": 0.03,
         "entity_id": "sensor.thl_influenssankaltaiset_kaynnit_ita_uusimaa",
     }
 

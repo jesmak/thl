@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
+import pytest
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.config_entries import ConfigEntryDisabler
 from homeassistant.core import HomeAssistant
@@ -20,7 +21,9 @@ from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClien
 from custom_components.thl.const import CONF_DISEASE_ID, CONF_DISEASE_NAME, CONF_LANGUAGE, DOMAIN
 from custom_components.thl.migration import async_migrate_to_subentries
 
-from .conftest import ADENOVIRUS, INFLUENZA
+from .conftest import ADENOVIRUS, INFLUENZA, thl_entry
+
+pytestmark = pytest.mark.usefixtures("enable_custom_integrations")
 
 NOW = datetime(2026, 9, 16, 9, 0, tzinfo=UTC)
 
@@ -137,6 +140,24 @@ async def test_the_language_of_the_new_entry_is_the_one_most_diseases_had(
 
     [entry] = hass.config_entries.async_entries(DOMAIN)
     assert entry.data == {CONF_LANGUAGE: "fi"}
+
+
+async def test_an_entry_left_behind_joins_the_subentry_its_disease_already_has(
+    hass: HomeAssistant, thl: AiohttpClientMocker, freezer: FrozenDateTimeFactory
+) -> None:
+    # A migration cut short: the new entry has the disease's subentry, while the old entry still holds its sensor.
+    freezer.move_to(NOW)
+    entry = thl_entry(hass, (INFLUENZA, "Influenssa"))
+    [subentry] = entry.subentries.values()
+    old_entry(hass, INFLUENZA, "Influenssa")
+
+    await start(hass)
+
+    assert hass.config_entries.async_entries(DOMAIN) == [entry]
+    assert list(entry.subentries) == [subentry.subentry_id], "no second subentry for the same disease"
+    registered = er.async_get(hass).async_get(INFLUENZA_SENSOR)
+    assert (registered.config_entry_id, registered.config_subentry_id) == (entry.entry_id, subentry.subentry_id)
+    assert hass.states.get(INFLUENZA_SENSOR).state == "17"
 
 
 async def test_migrating_a_second_time_changes_nothing(

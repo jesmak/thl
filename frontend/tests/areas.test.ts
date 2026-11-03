@@ -123,10 +123,13 @@ describe("colouring by level", () => {
 
     it.each([
         [0.5, FALLING_FAST],
+        [1, FALLING],
         [1.2, FALLING],
+        [1.6, STEADY],
         [2, STEADY],
         [2.5, STEADY],
         [3, RISING],
+        [4, RISING],
         [5, RISING_FAST],
     ])("a county at %s per 100 000 against the whole country’s 2", (incidence, expected) => {
         expect(fillColor(area({ incidence_last_week: incidence }), "level", whole)).toBe(expected);

@@ -111,17 +111,18 @@ export async function fetchYearAgo(
     if (!hass.callWS) {
         return undefined;
     }
-    // A year is 52 or 53 weeks, and the figure is shown the week after its own, so a few weeks around it are asked for.
+    // A year is 52 or 53 weeks, the figure is shown the week after its own, and THL may be up to three weeks late, so the
+    // weeks around it are asked for.
     const end = weeksBefore(weekStart(now), 50);
     const result = await hass.callWS<Record<string, StatisticRow[]>>({
         type: "recorder/statistics_during_period",
-        start_time: new Date(weeksBefore(weekStart(now), 55)).toISOString(),
+        start_time: new Date(weeksBefore(weekStart(now), 57)).toISOString(),
         end_time: new Date(end).toISOString(),
         statistic_ids: [statisticId],
         period: "day",
         types: ["mean"],
     });
-    return weeklyPoints(result[statisticId] ?? [], 5, end).find((point) => point.week === week)?.value;
+    return weeklyPoints(result[statisticId] ?? [], 7, end).find((point) => point.week === week)?.value;
 }
 
 /** Fetches the finished weeks of one sensor's trend. Nothing when Home Assistant has no statistics for it. */

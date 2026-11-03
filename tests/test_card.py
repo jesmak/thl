@@ -12,7 +12,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.thl.const import CONF_LANGUAGE, DOMAIN
 
-pytestmark = pytest.mark.asyncio
+pytestmark = pytest.mark.usefixtures("enable_custom_integrations")
 
 CARD = "/thl/thl-card.js"
 OLD = f"{CARD}?v=2.1.2"

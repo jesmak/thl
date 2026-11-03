@@ -128,12 +128,28 @@ describe("the trend", () => {
         const hass = { states: {}, callWS } as unknown as HomeAssistant;
         expect(await fetchYearAgo(hass, "sensor.x", 37, NOW)).toBe(24);
         expect(callWS.mock.calls[0][0]).toMatchObject({
-            start_time: new Date(day(55)).toISOString(),
+            start_time: new Date(day(57)).toISOString(),
             end_time: new Date(day(50)).toISOString(),
         });
 
         callWS.mockResolvedValue({});
         expect(await fetchYearAgo(hass, "sensor.x", 37, NOW)).toBeUndefined();
+    });
+
+    it("finds a week's figure a year ago when THL is three weeks late, across a year of 53 weeks", async () => {
+        // In week 41 of 2027 the sensor still shows week 37. Week 37 of 2026 was shown from Monday 14 September 2026,
+        // 56 weeks back, as 2026 has 53 weeks.
+        const rows = [
+            { start: new Date(2026, 8, 7).getTime(), mean: 20 },
+            { start: new Date(2026, 8, 14).getTime(), mean: 24 },
+            { start: new Date(2026, 8, 21).getTime(), mean: 30 },
+        ];
+        // Only the rows in the period asked for, as Home Assistant gives them.
+        const callWS = vi.fn(async ({ start_time, end_time }: { start_time: string; end_time: string }) => ({
+            "sensor.x": rows.filter((row) => row.start >= Date.parse(start_time) && row.start < Date.parse(end_time)),
+        }));
+        const hass = { states: {}, callWS } as unknown as HomeAssistant;
+        expect(await fetchYearAgo(hass, "sensor.x", 37, new Date(2027, 9, 13, 12).getTime())).toBe(24);
     });
 
     it("is empty without Home Assistant’s websocket", async () => {

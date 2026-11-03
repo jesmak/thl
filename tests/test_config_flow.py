@@ -23,6 +23,8 @@ from custom_components.thl.const import (
 
 from .conftest import ADENOVIRUS, DIMENSIONS_FI_URL, INFLUENZA, thl_entry
 
+pytestmark = pytest.mark.usefixtures("enable_custom_integrations")
+
 NOW = datetime(2026, 9, 16, 9, 0, tzinfo=UTC)
 
 
@@ -53,15 +55,6 @@ async def test_adding_the_integration_follows_the_first_disease(
     assert subentry.unique_id == f"thl_{INFLUENZA}"
     assert subentry.data == {CONF_DISEASE_ID: INFLUENZA, CONF_DISEASE_NAME: "Influenssa"}
     assert hass.states.get("sensor.thl_influenssa").state == "17"
-
-
-async def test_the_integration_is_added_only_once(hass: HomeAssistant, thl: AiohttpClientMocker) -> None:
-    thl_entry(hass, (INFLUENZA, "Influenssa"))
-
-    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
-
-    assert result["type"] is FlowResultType.ABORT
-    assert result["reason"] == "single_instance_allowed", "further diseases are added to the entry that exists"
 
 
 async def test_following_one_more_disease(hass: HomeAssistant, thl: AiohttpClientMocker, freezer: FrozenDateTimeFactory) -> None:

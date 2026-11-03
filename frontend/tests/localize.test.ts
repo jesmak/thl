@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
 
+import en from "../src/localize/languages/en.json";
+import fi from "../src/localize/languages/fi.json";
 import { translate } from "../src/localize/localize";
 
 describe("texts", () => {
+    it("have the same keys in every language", () => {
+        expect(Object.keys(fi).sort()).toEqual(Object.keys(en).sort());
+    });
+
     it("are in the viewer’s language", () => {
         expect(translate("fi", "whole_country")).toBe("Koko maa");
         expect(translate("en", "whole_country")).toBe("Whole country");

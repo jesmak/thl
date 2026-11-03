@@ -911,7 +911,7 @@ function schema(hass, config, entity, text) {
     {
       name: "entity",
       required: true,
-      selector: { entity: { multiple: true, domain: "sensor", integration: "thl", include_entities: cardEntities(hass) } }
+      selector: { entity: { multiple: true, domain: "sensor", include_entities: cardEntities(hass) } }
     },
     {
       name: "color_by",
@@ -1447,13 +1447,13 @@ async function fetchYearAgo(hass, statisticId, week, now = Date.now()) {
   const end = weeksBefore(weekStart(now), 50);
   const result = await hass.callWS({
     type: "recorder/statistics_during_period",
-    start_time: new Date(weeksBefore(weekStart(now), 55)).toISOString(),
+    start_time: new Date(weeksBefore(weekStart(now), 57)).toISOString(),
     end_time: new Date(end).toISOString(),
     statistic_ids: [statisticId],
     period: "day",
     types: ["mean"]
   });
-  return weeklyPoints(result[statisticId] ?? [], 5, end).find((point) => point.week === week)?.value;
+  return weeklyPoints(result[statisticId] ?? [], 7, end).find((point) => point.week === week)?.value;
 }
 async function fetchTrend(hass, statisticId, weeks, now = Date.now()) {
   if (!hass.callWS) {
@@ -1544,7 +1544,7 @@ var ThlCard = class extends i4 {
   }
   connectedCallback() {
     super.connectedCallback();
-    if (this.hass && (this.trendKey === void 0 || this.yearAgoKey === void 0)) {
+    if (this.hass) {
       this.requestUpdate();
     }
   }
@@ -1617,7 +1617,7 @@ var ThlCard = class extends i4 {
       this.resizes?.observe(card);
       this.observed = card;
     }
-    if (!(changed.size <= 2 && [...changed.keys()].every((key) => key === "filled" || key === "spare"))) {
+    if (![...changed.keys()].every((key) => key === "filled" || key === "spare")) {
       this.measureSoon();
     }
   }
@@ -1741,16 +1741,16 @@ var ThlCard = class extends i4 {
             </div>
         `;
   }
-  /**
-   * A mouse drags the line of buttons sideways, as a finger already does, since with no scrollbar and an ordinary
-   * wheel the buttons out of view could otherwise be reached only with Shift and the wheel. A finger and a pen are left
-   * to the browser's own scrolling.
-   */
   /** Shows a sensor, and brings its button whole into view, also when it was already the one shown. */
   choose(index) {
     this.shown = index;
     void this.updateComplete.then(() => this.showChosenChip());
   }
+  /**
+   * A mouse drags the line of buttons sideways, as a finger already does, since with no scrollbar and an ordinary
+   * wheel the buttons out of view could otherwise be reached only with Shift and the wheel. A finger and a pen are left
+   * to the browser's own scrolling.
+   */
   startDrag(event) {
     const line = event.currentTarget;
     this.dragged = false;

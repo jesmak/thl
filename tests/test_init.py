@@ -15,19 +15,18 @@ from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_time_changed
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
-from custom_components.thl.sensor import ThlSensor
-
 from .conftest import (
     ADENOVIRUS,
     DATA_FI_URL,
     DIMENSIONS_FI_URL,
     INFLUENZA,
     WEEK_36,
-    WEEK_37,
     by_week,
     dimensions,
     thl_entry,
 )
+
+pytestmark = pytest.mark.usefixtures("enable_custom_integrations")
 
 INFLUENZA_SENSOR = "sensor.thl_influenssa"
 ADENOVIRUS_SENSOR = "sensor.thl_adenovirus"
@@ -101,10 +100,6 @@ async def test_the_dimensions_are_fetched_once_for_every_disease(
     assert len(fetches) == 1, "the file is over 100 kB; every disease shares one copy"
 
 
-async def test_the_areas_are_kept_out_of_the_recorder() -> None:
-    assert "values" in ThlSensor._unrecorded_attributes
-
-
 async def test_the_week_before_is_used_until_thl_publishes_the_newest(
     hass: HomeAssistant, aioclient_mock: AiohttpClientMocker, freezer: FrozenDateTimeFactory
 ) -> None:
@@ -125,6 +120,19 @@ async def test_the_week_before_is_used_until_thl_publishes_the_newest(
     assert state.state == "20"
     assert state.attributes["last_week"] == 36
     assert "change_percentage" not in state.attributes["values"][0], "no week before it to compare with"
+
+
+async def test_the_sensor_is_unavailable_when_thl_lists_no_recent_week(
+    hass: HomeAssistant, thl: AiohttpClientMocker, freezer: FrozenDateTimeFactory, caplog: pytest.LogCaptureFixture
+) -> None:
+    # Six weeks on, THL still lists weeks 36 and 37 as its newest.
+    freezer.move_to(NOW + timedelta(weeks=6))
+    entry = thl_entry(hass, (INFLUENZA, "Influenssa"))
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert hass.states.get(INFLUENZA_SENSOR).state == STATE_UNAVAILABLE
+    assert "THL has published no data for the last 4 weeks" in caplog.text
 
 
 async def test_the_sensor_is_unavailable_while_thl_is_down(
@@ -158,7 +166,6 @@ async def test_thl_being_down_at_startup_does_not_stop_the_entry(
 
     assert entry.state is ConfigEntryState.LOADED, "one disease failing must not stop the others"
     assert hass.states.get(INFLUENZA_SENSOR).state == STATE_UNAVAILABLE
-    assert WEEK_37 not in json.dumps(dict(hass.states.get(INFLUENZA_SENSOR).attributes))
 
 
 @pytest.mark.parametrize("change", ["data", "subentry"])

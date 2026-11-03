@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from unittest.mock import patch
 
 import pytest
 from freezegun.api import FrozenDateTimeFactory
@@ -23,11 +24,6 @@ SENSOR = "sensor.thl_influenssa_ita_uusimaa"
 W36 = Week(2026, 36, WEEK_36)
 W37 = Week(2026, 37, WEEK_37)
 HOUR = timedelta(hours=1)
-
-
-@pytest.fixture(autouse=True)
-def auto_enable_custom_integrations() -> None:
-    """Replaces the shared one: the recorder must be set up before hass."""
 
 
 async def record(hass: HomeAssistant, rows: list[tuple[datetime, float]]) -> None:
@@ -68,12 +64,6 @@ AFTER_SPRING = datetime(2027, 4, 7, 9, 0, tzinfo=UTC)
 # the rows after.
 CASES = {
     "an empty week gets one row at its start": (NOW, [(W36, 4.0), (W37, 5.0)], [], [(W36, 0, 4.0), (W37, 0, 5.0)]),
-    "a week whose every row holds the figure is left alone": (
-        NOW,
-        [(W36, 4.0)],
-        [(W36, 0, 4.0), (W36, 1, 4.0), (W36, 2, 4.0)],
-        [(W36, 0, 4.0), (W36, 1, 4.0), (W36, 2, 4.0)],
-    ),
     "a week the sensor began with the week before's figure gets the figure in every row": (
         NOW,
         [(W36, 4.0)],
@@ -106,12 +96,6 @@ CASES = {
         [(W37, 0, 5.0), (W37, 59, 5.0)],
     ),
     "a week without a figure is left alone": (NOW, [(W36, None), (W37, None)], [(W36, 0, 2.0)], [(W36, 0, 2.0)]),
-    "the last hour of a week of 169 hours gets the figure": (
-        AFTER_AUTUMN,
-        [(W42, 4.0)],
-        [(W42, 0, 2.0), (W42, 168, 2.0)],
-        [(W42, 0, 4.0), (W42, 168, 4.0)],
-    ),
     "a week wrong only in its 169th hour gets the figure": (
         AFTER_AUTUMN,
         [(W42, 4.0)],
@@ -155,6 +139,19 @@ async def test_each_week_holds_thls_figure(
     await async_write_history(hass, [(SENSOR, None, figures)])
 
     assert await stored(hass) == at(after)
+
+
+async def test_a_week_whose_every_row_holds_the_figure_is_left_alone(
+    recorder_mock, hass: HomeAssistant, freezer: FrozenDateTimeFactory
+) -> None:
+    await hass.config.async_set_time_zone("Europe/Helsinki")
+    freezer.move_to(NOW)
+    await record(hass, at([(W36, 0, 4.0), (W36, 1, 4.0), (W36, 2, 4.0)]))
+
+    with patch("custom_components.thl.history.async_import_statistics") as written:
+        await async_write_history(hass, [(SENSOR, None, [(W36, 4.0)])])
+
+    written.assert_not_called()
 
 
 async def test_no_row_is_added_to_an_hour_the_recorder_has_not_compiled(

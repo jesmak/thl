@@ -42,7 +42,7 @@ async def test_fetching_the_dimensions_and_numbers(hass: HomeAssistant, thl: Aio
     assert headers["User-Agent"].startswith("Mozilla/5.0")
 
 
-async def test_errors(hass: HomeAssistant, aioclient_mock: AiohttpClientMocker) -> None:
+async def test_an_error_page_or_a_garbled_answer_raises_a_thl_error(hass: HomeAssistant, aioclient_mock: AiohttpClientMocker) -> None:
     aioclient_mock.get(DIMENSIONS_FI_URL, status=503)
     with pytest.raises(ThlError):
         await ThlClient(hass, "fi").dimensions()
@@ -60,7 +60,9 @@ async def test_errors(hass: HomeAssistant, aioclient_mock: AiohttpClientMocker) 
         (aiohttp.ClientConnectionError("Connection refused"), "THL couldn't be reached: Connection refused"),
     ],
 )
-async def test_an_error_without_a_message_is_named(hass: HomeAssistant, aioclient_mock: AiohttpClientMocker, error, message) -> None:
+async def test_the_reason_for_not_reaching_thl_is_in_the_error(
+    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker, error, message
+) -> None:
     aioclient_mock.get(DIMENSIONS_FI_URL, exc=error)
     with pytest.raises(ThlError) as raised:
         await ThlClient(hass, "fi").dimensions()

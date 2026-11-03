@@ -113,8 +113,6 @@ class WeeklyCoordinator(DataUpdateCoordinator[Weekly]):
     """The newest weeks of one cube, for every area."""
 
     config_entry: ThlConfigEntry
-    # The figures that get a sensor for each area.
-    keys: tuple[str, ...] = ()
     dimensions_url: str = ""
     data_url: str = ""
 
@@ -225,7 +223,6 @@ class WeeklyCoordinator(DataUpdateCoordinator[Weekly]):
 class ThlCoordinator(WeeklyCoordinator):
     """One disease: its cases and incidence per 100 000 people."""
 
-    keys = (CASES, INCIDENCE)
     dimensions_url = DIMENSIONS_URL
     data_url = DATA_URL
 
@@ -255,7 +252,6 @@ class ThlCoordinator(WeeklyCoordinator):
 class IliCoordinator(WeeklyCoordinator):
     """Flu-like illness visits in primary care, as a share of all visits."""
 
-    keys = (SHARE,)
     dimensions_url = ILI_DIMENSIONS_URL
     data_url = ILI_DATA_URL
 

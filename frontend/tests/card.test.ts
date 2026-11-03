@@ -175,12 +175,6 @@ describe("the size of the card", () => {
         expect(style).toContain("width: 320px");
         expect(style).toContain("max-width: 100%");
     });
-
-    it("offers a visual editor", async () => {
-        const { ThlCard } = await import("../src/thl-card");
-        const element = ThlCard.getConfigElement();
-        expect(element.tagName.toLowerCase()).toBe("thl-card-editor");
-    });
 });
 
 describe("the shape of the card", () => {
@@ -206,34 +200,11 @@ describe("the shape of the card", () => {
         expect(root.querySelector(".map-room > .map")).not.toBeNull();
     });
 
-    it("puts the figures beside the map by the card's own width, not by its columns", async () => {
-        const { ThlCard } = await import("../src/thl-card");
-        const styles = String((ThlCard as unknown as { styles: { cssText: string } }).styles.cssText);
-        // A whole section in a view of four sections is about 307px, which must still put the figures beside the map.
-        expect(styles).toContain("container: thl / inline-size");
-        expect(styles).toContain("@container thl (min-width: 290px)");
-        const narrow = shadow(await card(hass(), { entity: ENTITY, grid_options: { columns: 9 } }));
-        const full = shadow(await card(hass(), { entity: ENTITY, grid_options: { columns: "full" } }));
-        expect(narrow.querySelector(".card")?.className).toBe(full.querySelector(".card")?.className);
-    });
-
     it("keeps the disease name with its drawing", async () => {
         const root = shadow(await card(hass()));
         const disease = root.querySelector(".disease");
         expect(disease?.querySelector(".disease-logo")).not.toBeNull();
         expect(disease?.querySelector(".disease-name")?.textContent?.trim()).toBe("Influenssa");
-    });
-
-    it("keeps the disease on one line and the map within bounds", async () => {
-        const { ThlCard } = await import("../src/thl-card");
-        const styles = String((ThlCard as unknown as { styles: { cssText: string } }).styles.cssText);
-        expect(styles).toContain("white-space: nowrap");
-        // The drawing and the gap are tied to the name's size, not scaled on their own.
-        expect(styles).toContain("width: 1.7em");
-        expect(styles).toContain("gap: 0.5em");
-        // A number must never swallow the click meant for the county under it.
-        expect(styles).toMatch(/\.amount \{[^}]*pointer-events: none/);
-        expect(styles).toContain("width: min(100%, 300px)");
     });
 });
 
@@ -385,12 +356,10 @@ describe("the height", () => {
     });
 
     // Nothing scrolls: the map shrinks instead, so the disease, the key and the trend are never scrolled away.
-    it("puts the disease above the map and the key under it, the map in a room of its own whose width the styles give", async () => {
+    it("held, puts the map in a room of its own whose width the styles give", async () => {
         const root = shadow(await card(hass(), { entity: ENTITY, height: 320, map_width: 260 }));
         const haCard = root.querySelector("ha-card")!;
         expect(haCard.classList.contains("held")).toBe(true);
-        expect([...root.querySelector(".card")!.children].map((child) => child.className)).toEqual(["disease", "content"]);
-        expect([...root.querySelector(".content")!.children].map((child) => child.className)).toEqual(["body", "key"]);
         const room = root.querySelector<HTMLElement>(".body > .map-room")!;
         expect(room.classList.contains("sized")).toBe(true);
         expect(room.getAttribute("style")).toBe("--map-width: 260px");

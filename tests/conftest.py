@@ -204,7 +204,7 @@ ALL_AGES = 1200921
 # Week 37: 250 visits for flu-like illness out of 2 000 000 in the country, and one area with none.
 ILI_WEEKS: dict[str, dict[str, dict[int, float | None]]] = {
     ILI_WEEK_36: {
-        MEASURE_ILI_VISITS: {0: 200, 1: 10, 2: 0, 3: 4},
+        MEASURE_ILI_VISITS: {0: 200, 1: 15, 2: 0, 3: 4},
         MEASURE_ALL_VISITS: {0: 1_600_000, 1: 50_000, 2: 40_000, 3: 80_000},
     },
     ILI_WEEK_37: {
@@ -256,11 +256,6 @@ def ili_dimensions(language: str = "fi") -> list[dict[str, Any]]:
 def ili_numbers(weeks: list[str]) -> dict[str, Any]:
     asked = {week: ILI_WEEKS[week] for week in ILI_WEEKS if week in weeks}
     return cube("hva", "weeks40", asked, {}, [ILI_FINLAND, *ILI_AREA_SIDS])
-
-
-@pytest.fixture(autouse=True)
-def auto_enable_custom_integrations(enable_custom_integrations: None) -> None:
-    """Lets Home Assistant load integrations from custom_components/."""
 
 
 def by_week(language: str = "fi") -> Callable[..., Awaitable[AiohttpClientMockResponse]]:

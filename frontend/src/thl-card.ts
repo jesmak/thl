@@ -153,8 +153,9 @@ export class ThlCard extends LitElement {
 
     public connectedCallback(): void {
         super.connectedCallback();
-        // Back on the page, such as after a change of view: a fetch left waiting is tried now.
-        if (this.hass && (this.trendKey === undefined || this.yearAgoKey === undefined)) {
+        // Back on the page, such as after a change of view: the card's size is watched again, and a fetch left waiting is
+        // tried now.
+        if (this.hass) {
             this.requestUpdate();
         }
     }
@@ -242,7 +243,7 @@ export class ThlCard extends LitElement {
             this.observed = card;
         }
         // The height set here changes nothing that would need it measured again.
-        if (!(changed.size <= 2 && [...changed.keys()].every((key) => key === "filled" || key === "spare"))) {
+        if (![...changed.keys()].every((key) => key === "filled" || key === "spare")) {
             this.measureSoon();
         }
     }
@@ -386,17 +387,17 @@ export class ThlCard extends LitElement {
         `;
     }
 
-    /**
-     * A mouse drags the line of buttons sideways, as a finger already does, since with no scrollbar and an ordinary
-     * wheel the buttons out of view could otherwise be reached only with Shift and the wheel. A finger and a pen are left
-     * to the browser's own scrolling.
-     */
     /** Shows a sensor, and brings its button whole into view, also when it was already the one shown. */
     private choose(index: number): void {
         this.shown = index;
         void this.updateComplete.then(() => this.showChosenChip());
     }
 
+    /**
+     * A mouse drags the line of buttons sideways, as a finger already does, since with no scrollbar and an ordinary
+     * wheel the buttons out of view could otherwise be reached only with Shift and the wheel. A finger and a pen are left
+     * to the browser's own scrolling.
+     */
     private startDrag(event: PointerEvent): void {
         const line = event.currentTarget as HTMLElement;
         // A drag that ended with no click to swallow, as one under pointer capture may, mustn't swallow this press's.

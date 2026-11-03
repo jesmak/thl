@@ -66,10 +66,21 @@ describe("the visual editor", () => {
             entity: {
                 multiple: true,
                 domain: "sensor",
-                integration: "thl",
                 include_entities: ["sensor.thl_influenssa", "sensor.thl_influenssankaltaiset_kaynnit"],
             },
         });
+    });
+
+    it("labels every field, in each language", async () => {
+        for (const language of ["en", "fi"]) {
+            const element = await editor();
+            element.hass = { ...hass, locale: { language } };
+            await element.updateComplete;
+            const found = form(element) as ReturnType<typeof form> & { computeLabel: (entry: { name: string }) => string };
+            for (const entry of found.schema as Array<{ name: string }>) {
+                expect(found.computeLabel(entry), `${language} ${entry.name}`).not.toBe(entry.name);
+            }
+        }
     });
 
     it("leaves the county sensors out of the choice", () => {
