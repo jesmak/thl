@@ -76,35 +76,18 @@ describe("the visual editor", () => {
         expect(cardEntities(hass)).not.toContain("sensor.thl_influenssa_lappi");
     });
 
-    it("offers the colours, the trend, the inset, the key, a width for the map and the height", async () => {
+    it("offers the colours, the trend, the inset, the key, a width for the map and the height's rounding", async () => {
         const names = form(await editor()).schema.map((entry) => entry.name);
-        expect(names).toEqual([
-            "entity",
-            "color_by",
-            "default_area",
-            "show_trend",
-            "show_inset",
-            "show_key",
-            "map_width",
-            "height_mode",
-            "row_step",
-        ]);
+        expect(names).toEqual(["entity", "color_by", "default_area", "show_trend", "show_inset", "show_key", "map_width", "row_step"]);
     });
 
-    it("offers the height that the height mode uses, with the modes named in the viewer's language", async () => {
-        const element = await editor();
-        const auto = form(element);
-        const compute = (auto as unknown as { computeLabel(entry: { name: string }): string }).computeLabel;
-        expect(compute({ name: "height_mode" })).toBe("Korkeus");
-        expect(auto.data).toMatchObject({ height_mode: "auto" });
-        const mode = auto.schema.find((entry) => entry.name === "height_mode");
-        const options = (mode?.selector as { select: { options: Array<{ value: string; label: string }> } }).select.options;
-        expect(options.map((option) => option.label)).toEqual(["Sisällön mukaan", "Kiinteä", "Kasvaa rajaan asti"]);
-        expect(form(await editor({ height: 300 })).schema.map((entry) => entry.name)).toContain("height");
-        expect(form(await editor({ max_height: 300 })).schema.map((entry) => entry.name)).toContain("max_height");
+    it("offers no height, set in YAML only, and the rounding unless the card is held to a fixed height", async () => {
+        const names = async (config: Partial<ThlCardConfig>) => form(await editor(config)).schema.map((entry) => String(entry.name));
+        expect((await names({ height: 300 })).filter((name) => name.includes("height") || name === "row_step")).toEqual([]);
+        expect((await names({ max_height: 300 })).filter((name) => name.includes("height") || name === "row_step")).toEqual(["row_step"]);
     });
 
-    it("leaves out a height mode its heights already give, and a height its mode doesn't use", async () => {
+    it("keeps a height mode and heights set in YAML as they are", async () => {
         const element = await editor();
         const changes: ThlCardConfig[] = [];
         element.addEventListener("config-changed", (event) => {
@@ -122,9 +105,9 @@ describe("the visual editor", () => {
             );
         }
         expect(changes).toEqual([
-            { type: "custom:thl-card", entity: "sensor.thl_influenssa" },
-            { type: "custom:thl-card", entity: "sensor.thl_influenssa", height: 300 },
-            { type: "custom:thl-card", entity: "sensor.thl_influenssa", max_height: 500 },
+            { type: "custom:thl-card", entity: "sensor.thl_influenssa", height_mode: "auto" },
+            { type: "custom:thl-card", entity: "sensor.thl_influenssa", height_mode: "fixed", height: 300 },
+            { type: "custom:thl-card", entity: "sensor.thl_influenssa", height_mode: "max", height: 300, max_height: 500 },
         ]);
     });
 

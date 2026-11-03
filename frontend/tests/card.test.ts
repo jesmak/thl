@@ -348,7 +348,12 @@ describe("the height", () => {
         ["a fixed height", undefined, { height_mode: "fixed", height: 600, max_height: 700 }, "height: 600px"],
         ["a maximum height", undefined, { max_height: 700 }, "max-height: 700px"],
         ["grid rows in a sections view, over its mode", "grid", { height: 600, grid_options: { rows: 6 } }, "height: 100%"],
-        ["its mode when the grid rows are automatic", "grid", { max_height: 700, grid_options: { rows: "auto" } }, "max-height: 700px"],
+        [
+            "its mode rounded down to the rows when the grid rows are automatic",
+            "grid",
+            { max_height: 700, grid_options: { rows: "auto" } },
+            "max-height: 696px",
+        ],
         ["its minimum, for a fixed height below it", undefined, { height: 100 }, "height: 520px"],
     ])("sizes itself by %s", async (_name, layout, extra, style) => {
         const element = await card(hass(), { entity: ENTITY, ...extra }, layout);

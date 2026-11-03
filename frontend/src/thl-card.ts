@@ -32,7 +32,7 @@ import { DISEASE_LOGO } from "./logos";
 import { COUNTIES, MAP_GROUP_TRANSFORM, MAP_HEIGHT, MAP_VIEW_BOX, MAP_WIDTH, OUTLINES } from "./map/counties";
 import type { CountyShape, Outline } from "./map/counties";
 import { CAPITAL_REGION, COUNTY_LABELS, INSET_COUNTIES, INSET_VIEW_BOX, WITHOUT_INSET } from "./map/labels";
-import { filledHeight, validRowStep } from "./rows";
+import { fillLimit, filledHeight, filledStyle, validRowStep } from "./rows";
 import { fetchTrend, fetchYearAgo, withCurrent } from "./trend";
 import type { TrendPoint } from "./trend";
 import type { Area, ColorBy, ThlCardConfig } from "./types";
@@ -283,7 +283,8 @@ export class ThlCard extends LitElement {
 
     /**
      * In a sections view whose rows are left automatic, the card takes the whole rows its content needs, or the half rows
-     * with `row_step: half`, so the cards under it stay on the rows. The room left over goes under the disease.
+     * with `row_step: half`, so the cards under it stay on the rows, up to the limit of a card that grows up to one. The
+     * room left over goes under the disease.
      */
     private fillRows(): void {
         const card = this.renderRoot.querySelector<HTMLElement>("ha-card");
@@ -291,7 +292,8 @@ export class ThlCard extends LitElement {
         if (!card || !inner || !card.clientWidth) {
             return;
         }
-        if (this.layout !== "grid" || this.heightStyle()) {
+        const limit = fillLimit(this.config ?? {}, this.layout, this.minimumHeight());
+        if (!limit) {
             this.filled = 0;
             this.spare = 0;
             return;
@@ -312,18 +314,15 @@ export class ThlCard extends LitElement {
         if (disease) {
             content -= px(getComputedStyle(disease).paddingBottom);
         }
-        const filled = filledHeight(Math.round(content), this.config ?? {});
+        const filled = filledHeight(Math.round(content), this.config ?? {}, limit);
         this.filled = filled;
         this.spare = Math.max(0, Math.floor(filled - content));
     }
 
-    /** The card's inline style: the height it is held to, or the rows it fills, with their spare room. */
+    /** The card's inline style: the height it is held to, or the rows it fills up to any limit, with their spare room. */
     private cardStyle(): string {
-        const held = this.heightStyle();
-        if (held || !this.filled) {
-            return held;
-        }
-        return `min-height: ${this.filled}px; --spare: ${this.spare}px`;
+        const style = filledStyle(this.config ?? {}, this.layout, this.minimumHeight(), this.filled);
+        return this.filled ? `${style}; --spare: ${this.spare}px` : style;
     }
 
     /** The configured sensors, one or several. */

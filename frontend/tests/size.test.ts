@@ -101,6 +101,14 @@ describe("filling the rows of a sections view", () => {
         expect(await filled(await card(config, layout), 138)).toBe(expected);
     });
 
+    // 700 px rounded down to the rows is 696, over the card's least height.
+    it.each([
+        ["under it, on the rows its content needs", 138, "max-height: 696px; min-height: 184px; --spare: 34px"],
+        ["over it, on the limit rounded down to the rows", 900, "max-height: 696px; min-height: 696px; --spare: 0px"],
+    ])("grows up to a limit on automatic rows %s", async (_name, end, expected) => {
+        expect(await filled(await card({ max_height: 700 }, "grid"), end)).toBe(expected);
+    });
+
     it("refuses a step that isn't whole or half rows", () => {
         const element = document.createElement("thl-card") as ThlCard;
         const config = (row_step: unknown) => ({ type: "custom:thl-card", entity: ENTITY, row_step }) as never;
