@@ -29,10 +29,9 @@ Finland.
 
 ### With HACS
 
-1. Add this repository to HACS custom repositories with type **Integration**
-2. Search for THL disease statistics in HACS and download it
-3. Restart Home Assistant
-4. Add the integration in Settings › Devices & services, and choose a disease
+1. Search for THL disease statistics in HACS and download it
+2. Restart Home Assistant
+3. Add the integration in Settings › Devices & services, and choose a disease
 
 ### Manual
 
@@ -405,6 +404,6 @@ under CC BY 4.0.
 [releases-shield]: https://img.shields.io/github/release/jesmak/thl.svg?style=for-the-badge
 [release-date-shield]: https://img.shields.io/github/release-date/jesmak/thl?style=for-the-badge
 [releases]: https://github.com/jesmak/thl/releases
-[hacs-shield]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge
-[hacs]: https://hacs.xyz/docs/faq/custom_repositories/
+[hacs-shield]: https://img.shields.io/badge/HACS-Default-green.svg?style=for-the-badge
+[hacs]: https://my.home-assistant.io/redirect/hacs_repository/?owner=jesmak&repository=thl&category=integration
 [license-shield]: https://img.shields.io/github/license/jesmak/thl.svg?style=for-the-badge
