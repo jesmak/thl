@@ -3,7 +3,7 @@
 Home Assistant integration for the weekly infectious disease numbers published by the Finnish Institute for Health and
 Welfare (THL).
 
-[![GitHub Release][releases-shield]][releases] [![GitHub Release Date][release-date-shield]][releases] [![HACS][hacs-shield]][hacs] [![License][license-shield]](LICENSE)
+[![GitHub Release][releases-shield]][releases] [![GitHub Release Date][release-date-shield]][releases] [![Marketplace][marketplace-shield]][marketplace] [![License][license-shield]](LICENSE)
 
 <img src="https://raw.githubusercontent.com/jesmak/thl/main/docs/images/dashboard-light.png#gh-light-mode-only" width="1000" alt="A dashboard with four maps of Finland's wellbeing services counties, coloured by incidence: COVID-19, influenza, flu-like illness visits and norovirus in February, each with Pirkanmaa's figures and its trend over 26 weeks">
 <img src="https://raw.githubusercontent.com/jesmak/thl/main/docs/images/dashboard-dark.png#gh-dark-mode-only" width="1000" alt="A dashboard with four maps of Finland's wellbeing services counties, coloured by incidence: COVID-19, influenza, flu-like illness visits and norovirus in February, each with Pirkanmaa's figures and its trend over 26 weeks">
@@ -27,11 +27,12 @@ Finland.
 
 ## Installation
 
-### With HACS
+### With the Marketplace
 
-1. Search for THL disease statistics in HACS and download it
-2. Restart Home Assistant
-3. Add the integration in Settings › Devices & services, and choose a disease
+1. Open Settings › Marketplace and search for THL disease statistics
+2. Open it and choose Install
+3. Restart Home Assistant
+4. Add the integration in Settings › Devices & services, and choose a disease
 
 ### Manual
 
@@ -303,8 +304,8 @@ series:
 ## Upgrading from the separate THL card
 
 The THL card used to be a repository of its own, THL card. It now comes with the integration, and the separate
-repository has been removed. If you installed it, remove it in HACS, and check that its resource
-(`/hacsfiles/thl-card/…`) is gone from Settings › Dashboards › Resources. Until it is, the log warns about it at every
+repository has been removed. If you installed it, remove it in the Marketplace, and check that its resource
+(`/local/community/thl-card/…`) is gone from Settings › Dashboards › Resources. Until it is, the log warns about it at every
 start. Your dashboards need no changes, as the card's type stays `custom:thl-card`.
 
 ## Upgrading from 1.x
@@ -404,6 +405,6 @@ under CC BY 4.0.
 [releases-shield]: https://img.shields.io/github/release/jesmak/thl.svg?style=for-the-badge
 [release-date-shield]: https://img.shields.io/github/release-date/jesmak/thl?style=for-the-badge
 [releases]: https://github.com/jesmak/thl/releases
-[hacs-shield]: https://img.shields.io/badge/HACS-Default-green.svg?style=for-the-badge
-[hacs]: https://my.home-assistant.io/redirect/hacs_repository/?owner=jesmak&repository=thl&category=integration
+[marketplace-shield]: https://img.shields.io/badge/Marketplace-Default-green.svg?style=for-the-badge
+[marketplace]: https://my.home-assistant.io/redirect/marketplace_repository/?owner=jesmak&repository=thl&category=integration
 [license-shield]: https://img.shields.io/github/license/jesmak/thl.svg?style=for-the-badge
