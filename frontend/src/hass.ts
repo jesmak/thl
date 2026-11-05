@@ -13,6 +13,8 @@ export interface HomeAssistant {
     locale?: { language?: string; number_format?: string };
     /** Home Assistant's websocket API, which the trend reads statistics from. */
     callWS?<T>(message: Record<string, unknown>): Promise<T>;
+    /** An entity's name composed from the parts asked for, present in Home Assistant 2025.10 and later. */
+    formatEntityName?(state: HassEntity, parts: { type: "entity" | "device" | "area" | "floor" }[]): string;
 }
 
 export interface LovelaceCardConfig {

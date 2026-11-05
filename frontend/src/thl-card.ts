@@ -25,14 +25,14 @@ import {
 } from "./areas";
 import { cardEntities } from "./editor";
 import { CARD_VERSION, WHOLE_COUNTRY } from "./const";
-import type { HomeAssistant } from "./hass";
+import type { HassEntity, HomeAssistant } from "./hass";
 import { gridMinRows, heightCardSize, heightStyle, validHeight } from "./height";
 import { browserLanguage, translate } from "./localize/localize";
 import { DISEASE_LOGO } from "./logos";
 import { COUNTIES, MAP_GROUP_TRANSFORM, MAP_HEIGHT, MAP_VIEW_BOX, MAP_WIDTH, OUTLINES } from "./map/counties";
 import type { CountyShape, Outline } from "./map/counties";
 import { CAPITAL_REGION, COUNTY_LABELS, INSET_COUNTIES, INSET_VIEW_BOX, WITHOUT_INSET } from "./map/labels";
-import { fillLimit, filledHeight, filledStyle, validRowStep } from "./rows";
+import { drawnScale, fillLimit, filledHeight, filledStyle, spareRoom, validRowStep } from "./rows";
 import { fetchTrend, fetchYearAgo, withCurrent } from "./trend";
 import type { TrendPoint } from "./trend";
 import type { Area, ColorBy, ThlCardConfig } from "./types";
@@ -206,7 +206,7 @@ export class ThlCard extends LitElement {
         const whole = findArea(areas, WHOLE_COUNTRY);
         const title = selected?.name ?? this.text("whole_country");
         const height = this.heightStyle();
-        const name = this.name(entity.attributes);
+        const name = this.name(entity);
 
         return html`
             <ha-card class=${height ? "held" : ""} style=${this.cardStyle()}>
@@ -321,9 +321,9 @@ export class ThlCard extends LitElement {
         if (!last) {
             return;
         }
+        // The drawn distance unscaled, as the padding and border added to it are the layout's.
         let content =
-            last.getBoundingClientRect().bottom -
-            card.getBoundingClientRect().top +
+            (last.getBoundingClientRect().bottom - card.getBoundingClientRect().top) / drawnScale(card) +
             px(getComputedStyle(inner).paddingBottom) +
             px(getComputedStyle(card).borderBottomWidth);
         // The spare room as drawn now.
@@ -331,9 +331,9 @@ export class ThlCard extends LitElement {
         if (disease) {
             content -= px(getComputedStyle(disease).paddingBottom);
         }
-        const filled = filledHeight(Math.round(content), this.config ?? {}, limit);
+        const filled = filledHeight(content, this.config ?? {}, limit);
         this.filled = filled;
-        this.spare = Math.max(0, Math.floor(filled - content));
+        this.spare = spareRoom(filled, content);
     }
 
     /** The card's inline style: the height it is held to, or the rows it fills up to any limit, with their spare room. */
@@ -374,13 +374,13 @@ export class ThlCard extends LitElement {
                 @click=${{ handleEvent: (event: Event) => this.swallowDragClick(event), capture: true }}
             >
                 ${entities.map((id, index) => {
-                    const attributes = this.hass?.states[id]?.attributes;
+                    const state = this.hass?.states[id];
                     return html`<button
                         class="chip ${index === this.shown ? "on" : ""}"
                         aria-pressed="${index === this.shown ? "true" : "false"}"
                         @click=${() => this.choose(index)}
                     >
-                        ${attributes ? this.name(attributes) : id}
+                        ${state ? this.name(state) : id}
                     </button>`;
                 })}
             </div>
@@ -446,10 +446,14 @@ export class ThlCard extends LitElement {
         }
     }
 
-    /** The disease, or the flu-like illness visits, which have no disease and go by their sensor's name. */
-    private name(attributes: Record<string, unknown>): string {
-        const disease = attributes.disease_name as string | undefined;
-        return disease ?? String(attributes.friendly_name ?? "").replace(/^THL\s+/, "");
+    /**
+     * The disease, or for a sensor without it, such as one that is unavailable, the sensor's name as Home Assistant
+     * composes it, less the "THL " the integration starts its devices' names with.
+     */
+    private name(state: HassEntity): string {
+        const disease = state.attributes.disease_name as string | undefined;
+        const name = this.hass?.formatEntityName?.(state, [{ type: "device" }, { type: "entity" }]) || state.attributes.friendly_name;
+        return disease ?? String(name ?? "").replace(/^THL\s+/, "");
     }
 
     private get colorBy(): ColorBy {

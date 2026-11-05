@@ -845,9 +845,20 @@ describe("the flu-like illness visits", () => {
         });
     });
 
-    it("are named after their sensor", async () => {
+    it("are named by the name the sensor gives them", async () => {
+        const state = visits();
+        const sensor = state.states["sensor.thl_influenssankaltaiset_kaynnit"]!;
+        sensor.attributes = { ...sensor.attributes, disease_name: "Flu-like illness visits" };
+        const root = shadow(await card(state, { entity: "sensor.thl_influenssankaltaiset_kaynnit" }));
+        expect(root.querySelector(".disease-name")?.textContent?.trim()).toBe("Flu-like illness visits");
+    });
+
+    it("are named without one as Home Assistant composes the sensor's name, less the THL its device's name starts with", async () => {
         const root = shadow(await card(visits(), { entity: "sensor.thl_influenssankaltaiset_kaynnit" }));
         expect(root.querySelector(".disease-name")?.textContent?.trim()).toBe("Influenssankaltaiset käynnit");
+        const composed = { ...visits(), formatEntityName: () => "THL Visits renamed" };
+        const renamed = shadow(await card(composed, { entity: "sensor.thl_influenssankaltaiset_kaynnit" }));
+        expect(renamed.querySelector(".disease-name")?.textContent?.trim()).toBe("Visits renamed");
     });
 
     it("show the share of visits and how many there were", async () => {

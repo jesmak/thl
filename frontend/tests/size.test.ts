@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import "../src/thl-card";
 import type { ThlCard } from "../src/thl-card";
@@ -45,22 +45,32 @@ function one(element: Element, selector: string): HTMLElement {
     return element.shadowRoot!.querySelector<HTMLElement>(selector)!;
 }
 
-// happy-dom lays nothing out, so each part is given the box it would have, measured from the card's top.
-function box(target: Element, top: number, bottom: number): void {
-    target.getBoundingClientRect = () => ({ top, bottom, height: bottom - top, width: 300 }) as DOMRect;
+// happy-dom lays nothing out, so each part is given the box it would have, measured from the card's top, drawn at `scale`.
+function box(target: Element, top: number, bottom: number, scale = 1): void {
+    target.getBoundingClientRect = () =>
+        ({ top: top * scale, bottom: bottom * scale, height: (bottom - top) * scale, width: 300 * scale }) as DOMRect;
 }
 
 function style(element: ThlCard): string {
     return one(element, "ha-card").getAttribute("style") ?? "";
 }
 
-/** Lays the card out with its last part ending at `end`, fills its rows and returns its style. */
-async function filled(element: ThlCard, end: number): Promise<string> {
+/**
+ * Lays the card out with its last part ending at `end`, drawn at `scale` as a dialog opening draws it, fills its rows and
+ * returns its style.
+ */
+async function filled(element: ThlCard, end: number, scale = 1): Promise<string> {
     const haCard = one(element, "ha-card");
     Object.defineProperty(haCard, "clientWidth", { value: 300, configurable: true });
-    box(haCard, 0, 56);
-    box(one(element, ".content").lastElementChild!, end - 32, end);
+    box(haCard, 0, 56, scale);
+    box(one(element, ".content").lastElementChild!, end - 32, end, scale);
+    // The width it is laid out at, which a scale doesn't change.
+    const computed = window.getComputedStyle;
+    vi.spyOn(window, "getComputedStyle").mockImplementation((target, pseudo) =>
+        target === haCard ? ({ ...computed(target, pseudo), width: "300px" } as CSSStyleDeclaration) : computed(target, pseudo),
+    );
     (element as unknown as { fillRows(): void }).fillRows();
+    vi.restoreAllMocks();
     await element.updateComplete;
     return style(element);
 }
@@ -102,6 +112,14 @@ describe("filling the rows of a sections view", () => {
         ["half rows", { row_step: "half" }, "min-height: 152px; --spare: 2px"],
     ])("on automatic rows, ends on %s", async (_name, config, expected) => {
         expect(await filled(await card(config, "grid"), 138)).toBe(expected);
+    });
+
+    // The content is 120.4 px, a fraction over two rows, and then 216 px drawn at 0.8, as a dialog opening draws the card.
+    it.each([
+        ["takes the next row for a content a fraction of a pixel over one", 108.4, 1, "min-height: 184px; --spare: 63px"],
+        ["measures a card drawn scaled, in the layout's pixels", 204, 0.8, "min-height: 248px; --spare: 32px"],
+    ])("%s", async (_name, end, scale, expected) => {
+        expect(await filled(await card({}, "grid"), end, scale)).toBe(expected);
     });
 
     it("puts the spare room under the disease, and doesn't count it again once drawn", async () => {

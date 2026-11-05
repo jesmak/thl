@@ -847,8 +847,17 @@ function validRowStep(config) {
   return config.row_step === void 0 || config.row_step === null || ROW_STEPS.includes(config.row_step);
 }
 var step = (config) => config.row_step === "half" ? ROW_PX / 2 : ROW_PX;
+var SLACK_PX = 0.01;
+function drawnScale(card) {
+  const layout = Number.parseFloat(getComputedStyle(card).width) || 0;
+  const drawn = card.getBoundingClientRect().width;
+  return layout > 0 && drawn > 0 ? drawn / layout : 1;
+}
 function filledHeight(content, config, limit = Infinity) {
-  return Math.min(Math.max(1, Math.ceil((content + ROW_GAP_PX) / step(config))) * step(config) - ROW_GAP_PX, limit);
+  return Math.min(Math.max(1, Math.ceil((content - SLACK_PX + ROW_GAP_PX) / step(config))) * step(config) - ROW_GAP_PX, limit);
+}
+function spareRoom(filled, content) {
+  return Math.max(0, Math.floor(filled - content + SLACK_PX));
 }
 function fillLimit(config, layout, minimum = 0) {
   const rows = config.grid_options ? config.grid_options.rows : config.layout_options?.grid_rows;
@@ -1583,7 +1592,7 @@ var ThlCard = class extends i4 {
     const whole = findArea(areas, WHOLE_COUNTRY);
     const title = selected?.name ?? this.text("whole_country");
     const height = this.heightStyle();
-    const name = this.name(entity.attributes);
+    const name = this.name(entity);
     return b2`
             <ha-card class=${height ? "held" : ""} style=${this.cardStyle()}>
                 <div class="card">
@@ -1686,14 +1695,14 @@ var ThlCard = class extends i4 {
     if (!last) {
       return;
     }
-    let content = last.getBoundingClientRect().bottom - card.getBoundingClientRect().top + px(getComputedStyle(inner).paddingBottom) + px(getComputedStyle(card).borderBottomWidth);
+    let content = (last.getBoundingClientRect().bottom - card.getBoundingClientRect().top) / drawnScale(card) + px(getComputedStyle(inner).paddingBottom) + px(getComputedStyle(card).borderBottomWidth);
     const disease = inner.querySelector(":scope > .disease");
     if (disease) {
       content -= px(getComputedStyle(disease).paddingBottom);
     }
-    const filled = filledHeight(Math.round(content), this.config ?? {}, limit);
+    const filled = filledHeight(content, this.config ?? {}, limit);
     this.filled = filled;
-    this.spare = Math.max(0, Math.floor(filled - content));
+    this.spare = spareRoom(filled, content);
   }
   /** The card's inline style: the height it is held to, or the rows it fills up to any limit, with their spare room. */
   cardStyle() {
@@ -1729,13 +1738,13 @@ var ThlCard = class extends i4 {
                 @click=${{ handleEvent: (event) => this.swallowDragClick(event), capture: true }}
             >
                 ${entities.map((id, index) => {
-      const attributes = this.hass?.states[id]?.attributes;
+      const state = this.hass?.states[id];
       return b2`<button
                         class="chip ${index === this.shown ? "on" : ""}"
                         aria-pressed="${index === this.shown ? "true" : "false"}"
                         @click=${() => this.choose(index)}
                     >
-                        ${attributes ? this.name(attributes) : id}
+                        ${state ? this.name(state) : id}
                     </button>`;
     })}
             </div>
@@ -1792,10 +1801,14 @@ var ThlCard = class extends i4 {
       event.stopPropagation();
     }
   }
-  /** The disease, or the flu-like illness visits, which have no disease and go by their sensor's name. */
-  name(attributes) {
-    const disease = attributes.disease_name;
-    return disease ?? String(attributes.friendly_name ?? "").replace(/^THL\s+/, "");
+  /**
+   * The disease, or for a sensor without it, such as one that is unavailable, the sensor's name as Home Assistant
+   * composes it, less the "THL " the integration starts its devices' names with.
+   */
+  name(state) {
+    const disease = state.attributes.disease_name;
+    const name = this.hass?.formatEntityName?.(state, [{ type: "device" }, { type: "entity" }]) || state.attributes.friendly_name;
+    return disease ?? String(name ?? "").replace(/^THL\s+/, "");
   }
   get colorBy() {
     return this.config?.color_by ?? "level";
