@@ -3,7 +3,7 @@
 Home Assistant integration for the weekly infectious disease numbers published by the Finnish Institute for Health and
 Welfare (THL).
 
-[![GitHub Release][releases-shield]][releases] [![GitHub Release Date][release-date-shield]][releases] [![Marketplace][marketplace-shield]][marketplace] [![License][license-shield]](LICENSE)
+[![GitHub Release][releases-shield]][releases] [![GitHub Release Date][release-date-shield]][releases] [![Downloads][downloads-shield]][releases] [![Marketplace][marketplace-shield]][marketplace] [![License][license-shield]](LICENSE)
 
 <img src="https://raw.githubusercontent.com/jesmak/thl/main/docs/images/dashboard-light.png#gh-light-mode-only" width="1000" alt="A dashboard with four maps of Finland's wellbeing services counties, coloured by incidence: COVID-19, influenza, flu-like illness visits and norovirus in February, each with Pirkanmaa's figures and its trend over 26 weeks">
 <img src="https://raw.githubusercontent.com/jesmak/thl/main/docs/images/dashboard-dark.png#gh-dark-mode-only" width="1000" alt="A dashboard with four maps of Finland's wellbeing services counties, coloured by incidence: COVID-19, influenza, flu-like illness visits and norovirus in February, each with Pirkanmaa's figures and its trend over 26 weeks">
@@ -405,6 +405,7 @@ under CC BY 4.0.
 [releases-shield]: https://img.shields.io/github/release/jesmak/thl.svg?style=for-the-badge
 [release-date-shield]: https://img.shields.io/github/release-date/jesmak/thl?style=for-the-badge
 [releases]: https://github.com/jesmak/thl/releases
+[downloads-shield]: https://img.shields.io/github/downloads/jesmak/thl/total.svg?style=for-the-badge
 [marketplace-shield]: https://img.shields.io/badge/Marketplace-Default-green.svg?style=for-the-badge
 [marketplace]: https://my.home-assistant.io/redirect/marketplace_repository/?owner=jesmak&repository=thl&category=integration
 [license-shield]: https://img.shields.io/github/license/jesmak/thl.svg?style=for-the-badge
