@@ -885,6 +885,8 @@ export class ThlCard extends LitElement {
             }
 
             ha-card {
+                /* ha-card's own transition covers every property, so a change in the rows filled would animate. */
+                transition: none;
                 container: thl / inline-size;
             }
 
