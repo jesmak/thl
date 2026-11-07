@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import aiohttp
 import pytest
 from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
 from custom_components.thl.api import DimensionsCache, ThlClient
-from custom_components.thl.const import DATA_URL, DIMENSIONS_RETRY, DIMENSIONS_TTL, ILI_DIMENSIONS_URL
+from custom_components.thl.const import DATA_URL, DIMENSIONS_RETRY, DIMENSIONS_TTL, ILI_DIMENSIONS_URL, USER_AGENT
 from custom_components.thl.exceptions import ThlError
 
 from .conftest import (
@@ -39,7 +42,7 @@ async def test_fetching_the_dimensions_and_numbers(hass: HomeAssistant, thl: Aio
     _method, url, _data, headers = thl.mock_calls[-1]
     assert str(url).startswith(DATA_FI_URL)
     assert list(url.query.items()) == params, "several weeks and measures in one request"
-    assert headers["User-Agent"].startswith("Mozilla/5.0")
+    assert headers["User-Agent"] == USER_AGENT
 
 
 async def test_an_error_page_or_a_garbled_answer_raises_a_thl_error(hass: HomeAssistant, aioclient_mock: AiohttpClientMocker) -> None:
@@ -105,3 +108,8 @@ async def test_each_cube_has_its_own_copy(hass: HomeAssistant, thl: AiohttpClien
     assert await cache.get(client, now=1.0) == DIMENSIONS
     assert await cache.get(client, ILI_DIMENSIONS_URL, now=1.0) != DIMENSIONS
     assert [str(call[1]) for call in thl.mock_calls] == [DIMENSIONS_FI_URL, ILI_DIMENSIONS_FI_URL]
+
+
+def test_user_agent_names_the_manifest_version() -> None:
+    manifest = json.loads((Path(__file__).parent.parent / "custom_components" / "thl" / "manifest.json").read_text(encoding="utf-8"))
+    assert USER_AGENT.startswith(f"THL/{manifest['version']} ")
