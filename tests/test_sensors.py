@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 
 import pytest
@@ -13,7 +14,22 @@ from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClien
 
 from custom_components.thl.const import MEASURE_ALL_VISITS, MEASURE_ILI_VISITS
 
-from .conftest import DIMENSIONS_FI_URL, ILI_DIMENSIONS_FI_URL, ILI_WEEK_36, ILI_WEEK_37, ILI_WEEKS, INFLUENZA, thl_entry
+from .conftest import (
+    AREA_SIDS,
+    CASE_WEEKS,
+    DATA_FI_URL,
+    DIMENSIONS_FI_URL,
+    DIMENSIONS_JSONP,
+    FINLAND,
+    ILI_DIMENSIONS_FI_URL,
+    ILI_WEEK_36,
+    ILI_WEEK_37,
+    ILI_WEEKS,
+    INFLUENZA,
+    WEEK_37,
+    cube,
+    thl_entry,
+)
 
 pytestmark = pytest.mark.usefixtures("enable_custom_integrations")
 
@@ -74,6 +90,19 @@ async def test_county_sensors_are_made_while_thl_is_down(
 
     assert hass.states.get("sensor.thl_influenssa_ita_uusimaa").state == STATE_UNAVAILABLE
     assert hass.states.get("sensor.thl_influenssa_ita_uusimaa_incidence").state == STATE_UNAVAILABLE
+
+
+async def test_numbers_in_dimensions_not_asked_for_make_the_sensors_unavailable_without_a_traceback(
+    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker, freezer: FrozenDateTimeFactory, caplog: pytest.LogCaptureFixture
+) -> None:
+    aioclient_mock.get(DIMENSIONS_FI_URL, text=DIMENSIONS_JSONP)
+    renamed = cube("alue", "yearweek", {WEEK_37: CASE_WEEKS[WEEK_37]}, {}, [FINLAND, *AREA_SIDS])
+    aioclient_mock.get(DATA_FI_URL, text=json.dumps(renamed))
+    await set_up(hass, freezer)
+
+    assert hass.states.get("sensor.thl_influenssa").state == STATE_UNAVAILABLE
+    assert "dimension that wasn't asked for" in caplog.text
+    assert "Unexpected error" not in caplog.text
 
 
 async def test_flu_like_illness_visits_as_a_share_of_all_visits(

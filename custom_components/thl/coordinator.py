@@ -145,19 +145,17 @@ class WeeklyCoordinator(DataUpdateCoordinator[Weekly]):
             if not recent:
                 raise UpdateFailed(f"THL has published no data for the last {MAX_WEEK_FALLBACK} weeks")
             cube = Cube(await self._client.data(self.data_url, self._params(dimensions, of_areas[0], weeks)))
+            # Reading the figures raises ThlError too, when the cube's dimensions aren't the ones asked for.
+            latest = next((week for week in recent if self._has_figures(cube, of_areas[0], week)), None)
+            if latest is None:
+                raise UpdateFailed(f"THL has published no data for the last {MAX_WEEK_FALLBACK} weeks")
+            # The history kept is counted back from the newest week with figures.
+            kept = [week for week in weeks if week.monday <= latest.monday and latest.monday - week.monday < HISTORY_WEEKS * WEEK]
+            # Oldest first.
+            figures = [WeekFigures(week, {area.area_id: self._figures(cube, area, week) for area in of_areas}) for week in reversed(kept)]
         except ThlError as err:
             raise UpdateFailed(str(err)) from err
-        latest = next((week for week in recent if self._has_figures(cube, of_areas[0], week)), None)
-        if latest is None:
-            raise UpdateFailed(f"THL has published no data for the last {MAX_WEEK_FALLBACK} weeks")
-        # The history kept is counted back from the newest week with figures.
-        kept = [week for week in weeks if week.monday <= latest.monday and latest.monday - week.monday < HISTORY_WEEKS * WEEK]
-
-        # Oldest first.
-        return Weekly(
-            of_areas,
-            [WeekFigures(week, {area.area_id: self._figures(cube, area, week) for area in of_areas}) for week in reversed(kept)],
-        )
+        return Weekly(of_areas, figures)
 
     @callback
     def async_update_listeners(self) -> None:
