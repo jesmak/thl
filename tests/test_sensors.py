@@ -10,7 +10,7 @@ from freezegun.api import FrozenDateTimeFactory
 from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
-from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
+from pytest_homeassistant.test_util.aiohttp import AiohttpClientMocker
 
 from custom_components.thl.const import MEASURE_ALL_VISITS, MEASURE_ILI_VISITS
 
@@ -30,8 +30,6 @@ from .conftest import (
     cube,
     thl_entry,
 )
-
-pytestmark = pytest.mark.usefixtures("enable_custom_integrations")
 
 # A Wednesday of week 38, so the last finished week is 37.
 NOW = datetime(2026, 9, 16, 9, 0, tzinfo=UTC)

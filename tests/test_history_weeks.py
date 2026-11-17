@@ -11,7 +11,7 @@ from homeassistant.components.recorder import get_instance
 from homeassistant.components.recorder.models import StatisticData, StatisticMeanType, StatisticMetaData
 from homeassistant.components.recorder.statistics import async_import_statistics, get_metadata, statistics_during_period
 from homeassistant.core import HomeAssistant
-from pytest_homeassistant_custom_component.components.recorder.common import async_wait_recording_done
+from pytest_homeassistant.components.recorder.common import async_wait_recording_done
 
 from custom_components.thl.history import async_write_history, shown_from
 from custom_components.thl.statistics import Week

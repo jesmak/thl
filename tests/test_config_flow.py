@@ -10,7 +10,7 @@ from freezegun.api import FrozenDateTimeFactory
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
-from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
+from pytest_homeassistant.test_util.aiohttp import AiohttpClientMocker
 
 from custom_components.thl.const import (
     CONF_DISEASE_ID,
@@ -22,8 +22,6 @@ from custom_components.thl.const import (
 )
 
 from .conftest import ADENOVIRUS, DIMENSIONS_FI_URL, INFLUENZA, thl_entry
-
-pytestmark = pytest.mark.usefixtures("enable_custom_integrations")
 
 NOW = datetime(2026, 9, 16, 9, 0, tzinfo=UTC)
 

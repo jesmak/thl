@@ -8,7 +8,7 @@ from pathlib import Path
 import aiohttp
 import pytest
 from homeassistant.core import HomeAssistant
-from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
+from pytest_homeassistant.test_util.aiohttp import AiohttpClientMocker
 
 from custom_components.thl.api import DimensionsCache, ThlClient
 from custom_components.thl.const import DATA_URL, DIMENSIONS_RETRY, DIMENSIONS_TTL, ILI_DIMENSIONS_URL, USER_AGENT

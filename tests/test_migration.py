@@ -8,22 +8,19 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-import pytest
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.config_entries import ConfigEntryDisabler
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.setup import async_setup_component
-from pytest_homeassistant_custom_component.common import MockConfigEntry
-from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
+from pytest_homeassistant.common import MockConfigEntry
+from pytest_homeassistant.test_util.aiohttp import AiohttpClientMocker
 
 from custom_components.thl.const import CONF_DISEASE_ID, CONF_DISEASE_NAME, CONF_LANGUAGE, DOMAIN
 from custom_components.thl.migration import async_migrate_to_subentries
 
 from .conftest import ADENOVIRUS, INFLUENZA, thl_entry
-
-pytestmark = pytest.mark.usefixtures("enable_custom_integrations")
 
 NOW = datetime(2026, 9, 16, 9, 0, tzinfo=UTC)
 

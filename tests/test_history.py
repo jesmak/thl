@@ -13,9 +13,9 @@ from homeassistant.components.recorder.statistics import async_import_statistics
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
-from pytest_homeassistant_custom_component.common import async_fire_time_changed
-from pytest_homeassistant_custom_component.components.recorder.common import async_wait_recording_done
-from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
+from pytest_homeassistant.common import async_fire_time_changed
+from pytest_homeassistant.components.recorder.common import async_wait_recording_done
+from pytest_homeassistant.test_util.aiohttp import AiohttpClientMocker
 
 from custom_components.thl import history
 from custom_components.thl.const import MEASURE_CASES
@@ -55,7 +55,6 @@ def start_of(week: int) -> float:
 
 async def test_a_new_sensor_gets_the_past_weeks(
     recorder_mock,
-    enable_custom_integrations,
     hass: HomeAssistant,
     thl: AiohttpClientMocker,
     freezer: FrozenDateTimeFactory,
@@ -73,7 +72,6 @@ async def test_a_new_sensor_gets_the_past_weeks(
 
 async def test_the_recorder_is_asked_once_for_each_subentry(
     recorder_mock,
-    enable_custom_integrations,
     hass: HomeAssistant,
     thl: AiohttpClientMocker,
     freezer: FrozenDateTimeFactory,
@@ -89,7 +87,6 @@ async def test_the_recorder_is_asked_once_for_each_subentry(
 
 async def test_a_running_sensor_gets_thls_figures_for_what_it_recorded_and_for_the_weeks_it_has_nothing_for(
     recorder_mock,
-    enable_custom_integrations,
     hass: HomeAssistant,
     thl: AiohttpClientMocker,
     freezer: FrozenDateTimeFactory,
@@ -122,7 +119,6 @@ async def test_a_running_sensor_gets_thls_figures_for_what_it_recorded_and_for_t
 
 async def test_a_figure_thl_corrects_reaches_the_statistics(
     recorder_mock,
-    enable_custom_integrations,
     hass: HomeAssistant,
     thl: AiohttpClientMocker,
     freezer: FrozenDateTimeFactory,
@@ -148,7 +144,6 @@ async def test_a_figure_thl_corrects_reaches_the_statistics(
 
 async def test_a_sensor_enabled_later_gets_its_past(
     recorder_mock,
-    enable_custom_integrations,
     hass: HomeAssistant,
     thl: AiohttpClientMocker,
     freezer: FrozenDateTimeFactory,
@@ -179,7 +174,6 @@ async def test_a_sensor_enabled_later_gets_its_past(
 
 async def test_the_past_is_written_once_thl_can_be_read(
     recorder_mock,
-    enable_custom_integrations,
     hass: HomeAssistant,
     aioclient_mock: AiohttpClientMocker,
     thl: AiohttpClientMocker,
@@ -204,7 +198,6 @@ async def test_the_past_is_written_once_thl_can_be_read(
 
 async def test_a_failing_recorder_does_not_keep_the_sensors_away(
     recorder_mock,
-    enable_custom_integrations,
     hass: HomeAssistant,
     thl: AiohttpClientMocker,
     freezer: FrozenDateTimeFactory,
@@ -229,7 +222,6 @@ async def test_weeks_are_shown_from_the_start_of_the_week_after(hass: HomeAssist
 
 async def test_the_hour_being_recorded_when_the_figures_changed_is_written_once_more(
     recorder_mock,
-    enable_custom_integrations,
     hass: HomeAssistant,
     thl: AiohttpClientMocker,
     freezer: FrozenDateTimeFactory,
@@ -269,7 +261,6 @@ async def test_the_hour_being_recorded_when_the_figures_changed_is_written_once_
 
 async def test_nothing_is_written_again_after_the_entry_is_unloaded(
     recorder_mock,
-    enable_custom_integrations,
     hass: HomeAssistant,
     thl: AiohttpClientMocker,
     freezer: FrozenDateTimeFactory,
@@ -289,7 +280,6 @@ async def test_nothing_is_written_again_after_the_entry_is_unloaded(
 
 async def test_new_figures_move_the_follow_up_to_after_them(
     recorder_mock,
-    enable_custom_integrations,
     hass: HomeAssistant,
     thl: AiohttpClientMocker,
     freezer: FrozenDateTimeFactory,
