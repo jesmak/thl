@@ -17,6 +17,8 @@ describe("texts", () => {
     it("take the language without its region", () => {
         expect(translate("fi-FI", "last_week")).toBe("Viime viikko");
         expect(translate("en_GB", "last_week")).toBe("Last week");
+        expect(translate("fi_FI", "last_week")).toBe("Viime viikko");
+        expect(translate("xx-YY", "last_week")).toBe("Last week");
     });
 
     it("fall back to English for a language that has no translation", () => {

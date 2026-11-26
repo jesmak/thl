@@ -342,9 +342,10 @@ The texts are in `custom_components/thl/translations/`, one JSON file per langua
 To add a language, copy `en.json` to the new language's code and translate the values. The names of the diseases and
 areas come from THL in Finnish or English.
 
-The THL card's texts are in `frontend/src/localize/languages/`, in the same way. To add a language there, copy
-`en.json` to the new language's code, translate the values, and in `frontend/src/localize/localize.ts` import the
-file and add it to `LANGUAGES`. A text left out falls back to English.
+The THL card's texts are in `frontend/src/localize/languages/`, in the same way. The card finds a new file by itself
+and uses it when Home Assistant is set to that language. A text left out falls back to English. A file may name a
+region, such as `pt-br.json`. It is used for `pt-BR`, falling back to a file for the language alone (`pt.json`), and
+then to English.
 
 ## Development
 

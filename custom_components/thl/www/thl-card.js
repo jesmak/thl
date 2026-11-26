@@ -792,15 +792,41 @@ var fi_default = {
 };
 
 // src/localize/localize.ts
-var LANGUAGES = { en: en_default, fi: fi_default };
+var FILES = { "./languages/en.json": en_default, "./languages/fi.json": fi_default };
+var LANGUAGES = Object.fromEntries(
+  Object.entries(FILES).map(([path, table]) => [path.replace(/^.*\/|\.json$/g, "").toLowerCase(), table])
+);
+var LANGUAGE_CODES = Object.keys(LANGUAGES).sort();
 function translate(language, key, replacements = {}) {
-  const tag = (language ?? "en").trim().toLowerCase().replace(/_/g, "-");
-  const table = LANGUAGES[tag] ?? LANGUAGES[tag.split("-")[0]] ?? LANGUAGES.en;
-  let text = table[key] ?? LANGUAGES.en[key] ?? key;
+  let text = own(language, key) ?? read(LANGUAGES.en, key) ?? key;
   for (const [name, value] of Object.entries(replacements)) {
     text = text.replace(`{${name}}`, value);
   }
   return text;
+}
+function own(language, key) {
+  for (const code of languageCodes(language)) {
+    const text = read(LANGUAGES[code], key);
+    if (text !== void 0) {
+      return text;
+    }
+  }
+  return void 0;
+}
+function languageCodes(language) {
+  const tag = (language ?? "en").trim().toLowerCase().replace(/_/g, "-");
+  const base = tag.split("-")[0];
+  return tag === base ? [base] : [tag, base];
+}
+function read(table, key) {
+  let value = table;
+  for (const part of key.split(".")) {
+    if (value === null || typeof value !== "object") {
+      return void 0;
+    }
+    value = value[part];
+  }
+  return typeof value === "string" ? value : void 0;
 }
 function browserLanguage() {
   return document.documentElement.lang || navigator.language || "en";
