@@ -1,4 +1,4 @@
-/*! thl-card 2.3.1 | MIT License | Includes a map adapted from Hyvinvointialueet.svg by Fenn-O-maniC, CC BY-SA 4.0, see https://github.com/jesmak/thl/blob/main/LICENSE-map */
+/*! thl-card 2.3.2 | MIT License | Includes a map adapted from Hyvinvointialueet.svg by Fenn-O-maniC, CC BY-SA 4.0, see https://github.com/jesmak/thl/blob/main/LICENSE-map */
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __decorateClass = (decorators, target, key, kind) => {
@@ -600,7 +600,7 @@ function r5(r6) {
 var o6 = (o7) => o7 ?? A;
 
 // src/const.ts
-var CARD_VERSION = "2.3.1";
+var CARD_VERSION = "2.3.2";
 var WHOLE_COUNTRY = "finland";
 
 // src/areas.ts
@@ -794,8 +794,8 @@ var fi_default = {
 // src/localize/localize.ts
 var LANGUAGES = { en: en_default, fi: fi_default };
 function translate(language, key, replacements = {}) {
-  const code = (language ?? "en").split(/[-_]/)[0].toLowerCase();
-  const table = LANGUAGES[code] ?? LANGUAGES.en;
+  const tag = (language ?? "en").trim().toLowerCase().replace(/_/g, "-");
+  const table = LANGUAGES[tag] ?? LANGUAGES[tag.split("-")[0]] ?? LANGUAGES.en;
   let text = table[key] ?? LANGUAGES.en[key] ?? key;
   for (const [name, value] of Object.entries(replacements)) {
     text = text.replace(`{${name}}`, value);

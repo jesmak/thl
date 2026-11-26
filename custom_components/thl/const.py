@@ -13,7 +13,7 @@ DATA_URL: Final = "https://sampo.thl.fi/pivot/prod/{language}/ttr/casesweek/fact
 # Flu-like illness visits in primary care, from the same service.
 ILI_DIMENSIONS_URL: Final = "https://sampo.thl.fi/pivot/prod/{language}/infestat/infl/fact_infestat_infl.dimensions.json"
 ILI_DATA_URL: Final = "https://sampo.thl.fi/pivot/prod/{language}/infestat/infl/fact_infestat_infl.json"
-USER_AGENT: Final = "THL/2.3.1 (https://github.com/jesmak/thl; Home Assistant integration)"
+USER_AGENT: Final = "THL/2.3.2 (https://github.com/jesmak/thl; Home Assistant integration)"
 
 # Languages of the disease and area names. THL's data is published in both.
 LANGUAGES: Final = ["en", "fi"]
