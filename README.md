@@ -388,6 +388,12 @@ from `manifest.json`. To have git refuse a commit whose built card doesn't match
 | `card.py`, `www/`              | Serving the THL card and adding it to the dashboards' resources               |
 | `frontend/`                    | The THL card's source, tests and build                                        |
 
+## Contributing
+
+Pull requests are welcome. Open them against the `dev` branch, where the work for the next release is collected.
+`main` holds the latest release and moves only when a new one is made, so this README always describes the released
+version.
+
 ## Support
 
 Hey dude! Help me out for a couple of :beers: or a :coffee:!
